@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             trackTitleTextView.text = "No artist found"
                             artistNameTextView.text = ""
-                            albumCoverImageView.setImageResource(R.drawable.baseline_music_note_24)
+                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
                         }
                     }
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                             runOnUiThread {
                                 trackTitleTextView.text = "No releases found"
                                 artistNameTextView.text = ""
-                                albumCoverImageView.setImageResource(R.drawable.baseline_music_note_24)
+                                albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                                 releaseDateTextView.text = ""
                             }
                         }
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             trackTitleTextView.text = "No releases found"
                             artistNameTextView.text = ""
-                            albumCoverImageView.setImageResource(R.drawable.baseline_music_note_24)
+                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
                         }
                     }
