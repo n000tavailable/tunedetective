@@ -2,15 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#181818"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#181818"
     tools:context=".MainActivity">
 
     <EditText
         android:id="@+id/artistEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:background="#181818"
         android:hint="Enter artist name"
         android:imeOptions="actionDone"
@@ -18,8 +19,7 @@
         android:maxLines="1"
         android:minHeight="48dp"
         android:textColor="#FFFFFF"
-        android:textColorHint="#78909C"
-        android:autofillHints="" />
+        android:textColorHint="#78909C" />
 
     <Button
         android:id="@+id/searchButton"
@@ -34,6 +34,40 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:orientation="horizontal">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="#181818"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_profile_image" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/artistNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Track Title"
+                android:textColor="#fff"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal">
+
 
         <ImageView
             android:id="@+id/albumCoverImageView"
@@ -50,20 +84,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:textStyle="bold"
-                android:textSize="20dp"
                 android:id="@+id/trackTitleTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Track Title"
-                android:textColor="#fff" />
-
-            <TextView
-                android:id="@+id/artistNameTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Artist Name"
-                android:textColor="#A8A8A8" />
+                android:textColor="#fff"
+                android:textSize="20dp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/releaseDateTextView"
@@ -85,11 +112,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:text="Version: 0.1"
-            android:textColor="#A8A8A8"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            android:text="Version: 0.1"
+            android:textColor="#A8A8A8" />
 
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/searchHistoryTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="#A8A8A8" />
 
 </LinearLayout>
