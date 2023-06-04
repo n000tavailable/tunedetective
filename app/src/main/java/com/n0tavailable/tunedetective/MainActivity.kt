@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -12,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import okhttp3.Call
 import okhttp3.Callback
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
 
         // Display a welcome message based on the time of day
@@ -70,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
+            hideKeyboard()
             searchArtist(artistName)
         }
 
@@ -232,13 +235,15 @@ class MainActivity : AppCompatActivity() {
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
             .load(url)
+            .apply(RequestOptions().transform(RoundedCorners(50)))
             .into(albumCoverImageView)
     }
 
     private fun loadArtistImage(url: String) {
         Glide.with(this)
             .load(url)
-            .apply(RequestOptions.bitmapTransform(CircleCrop()))
+            .apply(RequestOptions.circleCropTransform())
+
             .into(artistImageView)
     }
 
@@ -248,5 +253,13 @@ class MainActivity : AppCompatActivity() {
 
         fullscreenDialog.setContentView(imageView)
         fullscreenDialog.show()
+    }
+
+    private fun hideKeyboard() {
+        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        val currentFocusView = currentFocus
+        if (currentFocusView != null) {
+            inputMethodManager.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
+        }
     }
 }
