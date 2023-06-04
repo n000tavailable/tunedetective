@@ -1,7 +1,9 @@
 package com.n0tavailable.tunedetective
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
@@ -26,12 +28,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun addSearchQuery(query: String) {
         val db = this.writableDatabase
+
+        // Check if the query already exists in the database
+        val queryExists = isQueryExists(db, query)
+        if (queryExists) {
+            // Query already exists, do not insert
+            db.close()
+            return
+        }
+
         val values = ContentValues()
         values.put(COLUMN_QUERY, query)
         db.insert(TABLE_SEARCH_HISTORY, null, values)
         db.close()
     }
 
+    private fun isQueryExists(db: SQLiteDatabase, query: String): Boolean {
+        val selectQuery = "SELECT $COLUMN_QUERY FROM $TABLE_SEARCH_HISTORY WHERE $COLUMN_QUERY = ?"
+        val cursor: Cursor? = db.rawQuery(selectQuery, arrayOf(query))
+        val queryExists = cursor != null && cursor.count > 0
+        cursor?.close()
+        return queryExists
+    }
+
+    @SuppressLint("Range")
     fun getAllSearchQueries(): List<String> {
         val searchQueries = mutableListOf<String>()
         val db = this.readableDatabase
