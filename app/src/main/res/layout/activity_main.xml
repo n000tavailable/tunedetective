@@ -92,11 +92,4 @@
 
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/searchHistoryTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#A8A8A8"
-        android:layout_marginTop="16dp" />
-
 </LinearLayout>
