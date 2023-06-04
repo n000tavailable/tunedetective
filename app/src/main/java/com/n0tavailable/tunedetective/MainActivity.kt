@@ -3,9 +3,11 @@ package com.n0tavailable.tunedetective
 import android.app.Dialog
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var releaseDateTextView: TextView
     private lateinit var artistImageView: ImageView
     private lateinit var fullscreenDialog: Dialog
+    private lateinit var albumCoverLayout: LinearLayout
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,14 +48,20 @@ class MainActivity : AppCompatActivity() {
             else -> "Good evening!"
         }
 
+        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessage
+
         searchButton = findViewById(R.id.searchButton)
         artistEditText = findViewById(R.id.artistEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
         artistImageView = findViewById(R.id.artistImageView)
-        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessage
+        albumCoverLayout = findViewById(R.id.albumCoverLayout)
 
+        albumCoverLayout.visibility = View.GONE
+        trackTitleTextView.visibility = View.GONE
+        releaseDateTextView.visibility = View.GONE
+        artistImageView.visibility = View.GONE
 
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
@@ -203,6 +213,10 @@ class MainActivity : AppCompatActivity() {
                     val artistName = jsonResponse.getJSONObject("artist").getString("name")
 
                     runOnUiThread {
+                        albumCoverLayout.visibility = View.VISIBLE
+                        trackTitleTextView.visibility = View.VISIBLE
+                        releaseDateTextView.visibility = View.VISIBLE
+                        artistImageView.visibility = View.VISIBLE
                         trackTitleTextView.text = albumTitle
                         loadAlbumCoverImage(albumCoverUrl)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
