@@ -1,7 +1,9 @@
 package com.n0tavailable.tunedetective
 
+import android.app.Dialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var artistNameTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
-    private lateinit var profileImageView: ImageView
+    private lateinit var fullscreenDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,20 +41,25 @@ class MainActivity : AppCompatActivity() {
         artistNameTextView = findViewById(R.id.artistNameTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
-        //   profileImageView = findViewById(R.id.profileImageView)
+
+        fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
-            Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show() // Toast
+            Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             searchArtist(artistName)
+        }
+
+        albumCoverImageView.setOnClickListener {
+            val drawable = albumCoverImageView.drawable
+            if (drawable != null) {
+                showFullscreenImage(drawable)
+            }
         }
     }
 
-
-
     private fun searchArtist(artistName: String) {
-        val apiKey = "" // DEEZER_API_KEY
-
+        val apiKey = ""
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://api.deezer.com/search/artist?q=$artistName")
@@ -74,8 +81,7 @@ class MainActivity : AppCompatActivity() {
                     if (artistArray.length() > 0) {
                         val artist = artistArray.getJSONObject(0)
                         val artistId = artist.getString("id")
-                        val artistImageUrl = artist.getString("picture_big")
-                        getLatestRelease(artistId, artistImageUrl)
+                        getLatestRelease(artistId)
                     } else {
                         runOnUiThread {
                             trackTitleTextView.text = "No artist found"
@@ -91,8 +97,8 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getLatestRelease(artistId: String, artistImageUrl: String) {
-        val apiKey = "" // DEEZER_API_KEY
+    private fun getLatestRelease(artistId: String) {
+        val apiKey = ""
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://api.deezer.com/artist/$artistId/albums")
@@ -128,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                         if (latestRelease != null) {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
-                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate, artistImageUrl)
+                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate)
                         } else {
                             runOnUiThread {
                                 trackTitleTextView.text = "No releases found"
@@ -152,8 +158,8 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
-        val apiKey = "" // DEEZER_API_KEY
+    private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?) {
+        val apiKey = ""
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
 
@@ -161,7 +167,7 @@ class MainActivity : AppCompatActivity() {
             val date = sdfInput.parse(releaseDate)
             sdfOutput.format(date)
         } catch (e: Exception) {
-            releaseDate // If the date cannot be converted, use the original date
+            releaseDate
         }
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -182,14 +188,12 @@ class MainActivity : AppCompatActivity() {
                     val albumTitle = jsonResponse.getString("title")
                     val artistName = jsonResponse.getJSONObject("artist").getString("name")
                     val albumCoverBitmap = getBitmapFromUrl(albumCoverUrl)
-                    val artistImageBitmap = getBitmapFromUrl(artistImageUrl)
 
                     runOnUiThread {
                         trackTitleTextView.text = albumTitle
                         artistNameTextView.text = artistName
                         albumCoverImageView.setImageBitmap(albumCoverBitmap)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
-                        profileImageView.setImageBitmap(artistImageBitmap)
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
@@ -209,5 +213,22 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
             null
         }
+    }
+
+    private fun showFullscreenImage(drawable: Drawable?) {
+        fullscreenDialog.setContentView(R.layout.dialog_fullscreen_image)
+        val fullscreenImageView = fullscreenDialog.findViewById<ImageView>(R.id.fullscreenImageView)
+        val closeButton = fullscreenDialog.findViewById<Button>(R.id.closeButton)
+
+        drawable?.let {
+            fullscreenImageView.setImageDrawable(it)
+        }
+
+
+        closeButton.setOnClickListener {
+            fullscreenDialog.dismiss()
+        }
+
+        fullscreenDialog.show()
     }
 }
