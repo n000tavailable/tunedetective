@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         artistNameTextView = findViewById(R.id.artistNameTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
-        profileImageView = findViewById(R.id.profileImageView)
+        //   profileImageView = findViewById(R.id.profileImageView)
 
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
