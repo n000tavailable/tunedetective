@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessage
 
+        // Initialize views
         searchButton = findViewById(R.id.searchButton)
         artistEditText = findViewById(R.id.artistEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         artistImageView = findViewById(R.id.artistImageView)
         albumCoverLayout = findViewById(R.id.albumCoverLayout)
 
+        // Set initial visibility of views
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
@@ -67,8 +69,10 @@ class MainActivity : AppCompatActivity() {
 
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
+        // Set background resource for album cover image view
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
+        // Set click listener for search button
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
@@ -76,6 +80,7 @@ class MainActivity : AppCompatActivity() {
             searchArtist(artistName)
         }
 
+        // Set click listener for album cover image view to show fullscreen image
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
             if (drawable != null) {
@@ -84,6 +89,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Search for an artist using Deezer API
     private fun searchArtist(artistName: String) {
         val apiKey = ""
         val client = OkHttpClient()
@@ -124,6 +130,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // Get the latest release by an artist using Deezer API
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
         val apiKey = ""
         val client = OkHttpClient()
@@ -185,6 +192,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // Get details of an album using Deezer API
     private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
         val apiKey = ""
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -232,6 +240,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // Load album cover image using Glide library
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
             .load(url)
@@ -239,14 +248,15 @@ class MainActivity : AppCompatActivity() {
             .into(albumCoverImageView)
     }
 
+    // Load artist image using Glide library
     private fun loadArtistImage(url: String) {
         Glide.with(this)
             .load(url)
             .apply(RequestOptions.circleCropTransform())
-
             .into(artistImageView)
     }
 
+    // Show a fullscreen image in a dialog
     private fun showFullscreenImage(drawable: Drawable) {
         val imageView = ImageView(this)
         imageView.setImageDrawable(drawable)
@@ -255,6 +265,7 @@ class MainActivity : AppCompatActivity() {
         fullscreenDialog.show()
     }
 
+    // Hide the keyboard
     private fun hideKeyboard() {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         val currentFocusView = currentFocus
