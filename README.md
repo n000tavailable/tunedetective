@@ -21,7 +21,7 @@ Note: The app is using the Deezer-API.
 
 
 # Download
-https://github.com/n000tavailable/tunedetective/releases/tag/v.01
+https://github.com/n000tavailable/tunedetective/releases/
 
 
 
