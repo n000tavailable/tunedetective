@@ -12,12 +12,10 @@ So, now with Tune Detective it's possible to search for your
 favourite artists and get the latest releases with just one
 simple search!
 
-Note: The app is using the Deezer-API.
-
 
 # Screenshots
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/a40ebf69-10ac-408a-b9a2-27bbbe3846e3" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/c7d47043-5540-4f03-85be-d51b7b7733b0" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/eae4ed10-2a70-4fe9-8591-d2df293edd83" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/c34204f2-d507-4319-b0be-b09ba2efb400" width="350">
 
 
 # Download
