@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var artistNameTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
+    private lateinit var databaseHelper: DatabaseHelper // Database Helper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +40,24 @@ class MainActivity : AppCompatActivity() {
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
 
+        // Initialize Database Helper
+        databaseHelper = DatabaseHelper(this)
+
+        // Retrieve and display saved search queries
+        val savedSearches = databaseHelper.getAllSearchQueries()
+        displaySearchQueries(savedSearches)
+
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show() // Toast
             searchArtist(artistName)
+
+            // Save the search query to the database
+            databaseHelper.addSearchQuery(artistName)
+
+            // Retrieve and display updated search queries
+            val updatedSearches = databaseHelper.getAllSearchQueries()
+            displaySearchQueries(updatedSearches)
         }
     }
 
@@ -204,4 +219,11 @@ class MainActivity : AppCompatActivity() {
             null
         }
     }
+
+    private fun displaySearchQueries(searchQueries: List<String>) {
+        // Display search queries in a TextView or any other appropriate UI element
+        val searchHistoryTextView: TextView = findViewById(R.id.searchHistoryTextView)
+        searchHistoryTextView.text = searchQueries.joinToString("\n")
+    }
 }
+
