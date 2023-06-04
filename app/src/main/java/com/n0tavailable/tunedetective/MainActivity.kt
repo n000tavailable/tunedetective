@@ -58,7 +58,10 @@ class MainActivity : AppCompatActivity() {
             else -> "Good evening!"
         }
 
-        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessage
+        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
+        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime"
+
+        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         // Initialize views
         searchButton = findViewById(R.id.searchButton)
