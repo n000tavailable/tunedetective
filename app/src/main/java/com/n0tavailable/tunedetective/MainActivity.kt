@@ -11,11 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -30,7 +26,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
     private lateinit var fullscreenDialog: Dialog
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -224,9 +219,9 @@ class MainActivity : AppCompatActivity() {
             fullscreenImageView.setImageDrawable(it)
         }
 
-
         closeButton.setOnClickListener {
             fullscreenDialog.dismiss()
+
         }
 
         fullscreenDialog.show()
