@@ -11,6 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.request.RequestOptions
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -25,7 +28,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var artistNameTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
+    private lateinit var artistImageView: ImageView
     private lateinit var fullscreenDialog: Dialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -33,11 +38,13 @@ class MainActivity : AppCompatActivity() {
         searchButton = findViewById(R.id.searchButton)
         artistEditText = findViewById(R.id.artistEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
-        artistNameTextView = findViewById(R.id.artistNameTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
+        artistImageView = findViewById(R.id.artistImageView)
 
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+
+        albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
@@ -76,13 +83,14 @@ class MainActivity : AppCompatActivity() {
                     if (artistArray.length() > 0) {
                         val artist = artistArray.getJSONObject(0)
                         val artistId = artist.getString("id")
-                        getLatestRelease(artistId)
+                        val artistImageUrl = artist.getString("picture_big")
+                        getLatestRelease(artistId, artistImageUrl)
                     } else {
                         runOnUiThread {
                             trackTitleTextView.text = "No artist found"
-                            artistNameTextView.text = ""
                             albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
+                            artistImageView.setImageResource(R.drawable.round_music_note_24)
                         }
                     }
                 } else {
@@ -92,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getLatestRelease(artistId: String) {
+    private fun getLatestRelease(artistId: String, artistImageUrl: String) {
         val apiKey = ""
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -129,21 +137,21 @@ class MainActivity : AppCompatActivity() {
                         if (latestRelease != null) {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
-                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate)
+                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate, artistImageUrl)
                         } else {
                             runOnUiThread {
                                 trackTitleTextView.text = "No releases found"
-                                artistNameTextView.text = ""
                                 albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                                 releaseDateTextView.text = ""
+                                artistImageView.setImageResource(R.drawable.round_music_note_24)
                             }
                         }
                     } else {
                         runOnUiThread {
                             trackTitleTextView.text = "No releases found"
-                            artistNameTextView.text = ""
                             albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
+                            artistImageView.setImageResource(R.drawable.round_music_note_24)
                         }
                     }
                 } else {
@@ -153,7 +161,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?) {
+    private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
         val apiKey = ""
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
@@ -182,13 +190,12 @@ class MainActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(responseData)
                     val albumTitle = jsonResponse.getString("title")
                     val artistName = jsonResponse.getJSONObject("artist").getString("name")
-                    val albumCoverBitmap = getBitmapFromUrl(albumCoverUrl)
 
                     runOnUiThread {
                         trackTitleTextView.text = albumTitle
-                        artistNameTextView.text = artistName
-                        albumCoverImageView.setImageBitmap(albumCoverBitmap)
+                        loadAlbumCoverImage(albumCoverUrl)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
+                        loadArtistImage(artistImageUrl)
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
@@ -197,33 +204,24 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getBitmapFromUrl(url: String): Bitmap? {
-        return try {
-            val client = OkHttpClient()
-            val request = Request.Builder().url(url).build()
-            val response = client.newCall(request).execute()
-            val inputStream: InputStream? = response.body?.byteStream()
-            BitmapFactory.decodeStream(inputStream)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
-        }
+    private fun loadAlbumCoverImage(url: String) {
+        Glide.with(this)
+            .load(url)
+            .into(albumCoverImageView)
     }
 
-    private fun showFullscreenImage(drawable: Drawable?) {
-        fullscreenDialog.setContentView(R.layout.dialog_fullscreen_image)
-        val fullscreenImageView = fullscreenDialog.findViewById<ImageView>(R.id.fullscreenImageView)
-        val closeButton = fullscreenDialog.findViewById<Button>(R.id.closeButton)
+    private fun loadArtistImage(url: String) {
+        Glide.with(this)
+            .load(url)
+            .apply(RequestOptions.bitmapTransform(CircleCrop()))
+            .into(artistImageView)
+    }
 
-        drawable?.let {
-            fullscreenImageView.setImageDrawable(it)
-        }
+    private fun showFullscreenImage(drawable: Drawable) {
+        val imageView = ImageView(this)
+        imageView.setImageDrawable(drawable)
 
-        closeButton.setOnClickListener {
-            fullscreenDialog.dismiss()
-
-        }
-
+        fullscreenDialog.setContentView(imageView)
         fullscreenDialog.show()
     }
 }
