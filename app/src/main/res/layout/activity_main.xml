@@ -7,6 +7,15 @@
     android:background="#181818"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/welcomeMessageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
     <EditText
         android:id="@+id/artistEditText"
         android:layout_width="match_parent"

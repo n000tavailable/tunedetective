@@ -1,8 +1,6 @@
 package com.n0tavailable.tunedetective
 
 import android.app.Dialog
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.Button
@@ -14,18 +12,21 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
-import java.io.InputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
     private lateinit var artistEditText: EditText
     private lateinit var trackTitleTextView: TextView
-    private lateinit var artistNameTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
     private lateinit var artistImageView: ImageView
@@ -35,12 +36,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Display a welcome message based on the time of day
+        val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+            in 0..5 -> "Good night!"
+            in 6..11 -> "Good morning!"
+            in 12..17 -> "Good afternoon!"
+            else -> "Good evening!"
+        }
+
         searchButton = findViewById(R.id.searchButton)
         artistEditText = findViewById(R.id.artistEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
         artistImageView = findViewById(R.id.artistImageView)
+        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessage
+
 
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
