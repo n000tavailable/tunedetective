@@ -25,6 +25,8 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import android.app.ProgressDialog
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
@@ -35,10 +37,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var artistImageView: ImageView
     private lateinit var fullscreenDialog: Dialog
     private lateinit var albumCoverLayout: LinearLayout
+    private lateinit var progressDialog: ProgressDialog
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Loading data...")
+        progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
 
@@ -98,13 +106,19 @@ class MainActivity : AppCompatActivity() {
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
+        progressDialog.show()
+
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
+                progressDialog.dismiss()
             }
 
             override fun onResponse(call: Call, response: Response) {
                 val responseData = response.body?.string()
+
+                progressDialog.dismiss()
+
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
