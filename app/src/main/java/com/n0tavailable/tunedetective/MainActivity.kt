@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Start timer (every xx seconds)
-        timer.schedule(timerTask, 0, 60000)
+        timer.schedule(timerTask, 0, 1000)
     }
 
 
