@@ -1,6 +1,7 @@
 package com.n0tavailable.tunedetective
 
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
@@ -25,9 +26,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import android.app.ProgressDialog
-import android.content.Intent
-import android.net.Uri
 
 
 class MainActivity : AppCompatActivity() {
@@ -106,7 +104,7 @@ class MainActivity : AppCompatActivity() {
 
     // Search for an artist using Deezer API
     private fun searchArtist(artistName: String) {
-        val apiKey = ""
+        val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://api.deezer.com/search/artist?q=$artistName")
@@ -153,7 +151,7 @@ class MainActivity : AppCompatActivity() {
 
     // Get the latest release by an artist using Deezer API
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
-        val apiKey = ""
+        val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://api.deezer.com/artist/$artistId/albums")
@@ -216,7 +214,7 @@ class MainActivity : AppCompatActivity() {
     // Get details of an album using Deezer API
     // Get details of an album using Deezer API
     private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
-        val apiKey = ""
+        val apiKey = APIKeys.DEEZER_API_KEY
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
 
@@ -270,7 +268,7 @@ class MainActivity : AppCompatActivity() {
 
     // Get the tracklist using Deezer API
     private fun getTrackList(tracklistUrl: String) {
-        val apiKey = ""
+        val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(tracklistUrl)
