@@ -111,11 +111,12 @@ class MainActivity : AppCompatActivity() {
             in 0..5 -> "Good night!"
             in 6..11 -> "Good morning!"
             in 12..17 -> "Good afternoon!"
-            else -> "Good evening!"
+            in 18..23 -> "Good evening!"
+            else -> "Hello!"
         }
 
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
-        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime."
+        val welcomeMessageWithTime = "$welcomeMessage \nIt's $currentTime."
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
     }

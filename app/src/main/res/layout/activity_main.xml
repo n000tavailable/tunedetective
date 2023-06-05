@@ -12,8 +12,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
         android:textStyle="bold"
+        android:textAlignment="center"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp" />
@@ -39,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:textSize="20dp"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
             android:text="Track Title"
             android:textColor="#fff"
             android:textAlignment="center"
@@ -51,6 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Release Date"
+            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
             android:textColor="#A8A8A8"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp" />
