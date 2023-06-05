@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var trackTitleTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
-    private lateinit var artistImageView: ImageView
     private lateinit var fullscreenDialog: Dialog
     private lateinit var albumCoverLayout: LinearLayout
     private lateinit var progressDialog: ProgressDialog
@@ -71,15 +70,12 @@ class MainActivity : AppCompatActivity() {
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
-        artistImageView = findViewById(R.id.artistImageView)
         albumCoverLayout = findViewById(R.id.albumCoverLayout)
 
         // Set initial visibility of views
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
-        artistImageView.visibility = View.GONE
-
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
         // Set background resource for album cover image view
@@ -139,7 +135,6 @@ class MainActivity : AppCompatActivity() {
                             trackTitleTextView.text = "No artist found"
                             albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
-                            artistImageView.setImageResource(R.drawable.round_music_note_24)
                         }
                     }
                 } else {
@@ -193,7 +188,6 @@ class MainActivity : AppCompatActivity() {
                                 trackTitleTextView.text = "No releases found"
                                 albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                                 releaseDateTextView.text = ""
-                                artistImageView.setImageResource(R.drawable.round_music_note_24)
                             }
                         }
                     } else {
@@ -201,7 +195,6 @@ class MainActivity : AppCompatActivity() {
                             trackTitleTextView.text = "No releases found"
                             albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
                             releaseDateTextView.text = ""
-                            artistImageView.setImageResource(R.drawable.round_music_note_24)
                         }
                     }
                 } else {
@@ -248,11 +241,9 @@ class MainActivity : AppCompatActivity() {
                         albumCoverLayout.visibility = View.VISIBLE
                         trackTitleTextView.visibility = View.VISIBLE
                         releaseDateTextView.visibility = View.VISIBLE
-                        artistImageView.visibility = View.VISIBLE
                         trackTitleTextView.text = albumTitle
                         loadAlbumCoverImage(albumCoverUrl)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
-                        loadArtistImage(artistImageUrl)
 
                         // Add click listener to open the tracklist URL
                         displayTracks.setOnClickListener {
@@ -334,13 +325,7 @@ class MainActivity : AppCompatActivity() {
             .into(albumCoverImageView)
     }
 
-    // Load artist image using Glide library
-    private fun loadArtistImage(url: String) {
-        Glide.with(this)
-            .load(url)
-            .apply(RequestOptions.circleCropTransform())
-            .into(artistImageView)
-    }
+
 
     // Show a fullscreen image in a dialog
     private fun showFullscreenImage(drawable: Drawable) {

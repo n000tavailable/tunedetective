@@ -59,6 +59,7 @@
             android:layout_marginTop="8dp" />
 
         <ImageView
+            android:visibility="gone"
             android:id="@+id/artistImageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
