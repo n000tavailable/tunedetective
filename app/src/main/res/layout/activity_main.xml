@@ -2,70 +2,70 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#181818"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#181818"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/welcomeMessageTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
-        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
-        android:textStyle="bold"
-        android:textAlignment="center"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:id="@+id/albumCoverLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/albumCoverImageView"
             android:layout_width="240dp"
             android:layout_height="240dp"
+            android:layout_gravity="center_horizontal"
             android:scaleType="centerCrop"
-            android:src="@drawable/round_music_note_24"
-            android:layout_gravity="center_horizontal" />
+            android:src="@drawable/round_music_note_24" />
 
         <TextView
             android:id="@+id/trackTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-            android:text="Track Title"
-            android:textColor="#fff"
-            android:textAlignment="center"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:text="Track Title"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+            android:textColor="#fff"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/releaseDateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
             android:text="Release Date"
             android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-            android:textColor="#A8A8A8"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp" />
+            android:textColor="#A8A8A8" />
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/artistImageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
             android:background="@drawable/default_profile_image"
             android:scaleType="centerCrop"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp" />
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/displayTracks"
@@ -92,16 +92,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:autofillHints=""
             android:background="#181818"
             android:hint="Enter artist name"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:imeOptions="actionDone"
             android:inputType="text"
             android:maxLines="1"
             android:minHeight="48dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:textColor="#FFFFFF"
-            android:textColorHint="#78909C"
-            android:autofillHints="" />
+            android:textColorHint="#78909C" />
 
         <Button
             android:id="@+id/searchButton"
