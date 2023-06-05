@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#181818"
+    android:background="#121212"
     android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:autofillHints=""
-            android:background="#181818"
+            android:background="#121212"
             android:hint="Enter artist name"
             android:imeOptions="actionDone"
             android:inputType="text"
