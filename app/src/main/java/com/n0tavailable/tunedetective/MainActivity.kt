@@ -37,7 +37,6 @@ import java.util.TimerTask
 
 
 class MainActivity : AppCompatActivity() {
-    private var mediaPlayer: MediaPlayer? = null
     private lateinit var searchButton: Button
     private lateinit var displayTracks: Button
     private lateinit var artistEditText: EditText
@@ -48,6 +47,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var albumCoverLayout: LinearLayout
     private lateinit var progressDialog: ProgressDialog
     private lateinit var timer: Timer
+
+    private var mediaPlayer: MediaPlayer? = null
+
 
 
     override fun onDestroy() {
