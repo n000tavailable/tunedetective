@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
-        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime."
+        val welcomeMessageWithTime = "$welcomeMessage"
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
-        val welcomeMessageWithTime = "$welcomeMessage \nIt's $currentTime."
+        val welcomeMessageWithTime = "$welcomeMessage"
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
     }
