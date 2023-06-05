@@ -26,7 +26,6 @@
         android:orientation="vertical">
 
         <ImageView
-            android:background="@drawable/rounded_image_view"
             android:id="@+id/albumCoverImageView"
             android:layout_width="240dp"
             android:layout_height="240dp"
