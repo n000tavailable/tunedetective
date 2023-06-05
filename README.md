@@ -14,9 +14,9 @@ simple search!
 
 
 # Screenshots
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/4a000db6-25d2-4913-a4d7-efc2c2d446c1" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/91b78bdc-71c6-4ecf-ad08-7f5766cd3550" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/87c89c22-9260-4f34-8985-936791eab606" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/6dfa6ce8-d71e-4ccf-a7a7-746bed01a1cd" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/bd9122fc-b932-4b2a-977b-9fa91ec8a239" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/37b071d1-c97f-4555-8ad5-34ecf71a3ac0" width="350">
 
 
 # Download
@@ -30,6 +30,8 @@ https://github.com/n000tavailable/tunedetective/releases/
 # Features
 - Find latest Releases (Song, EP, Album) with just one simple search
 - Clicking on the cover will enlarge it
+- Tracklist of any release (EPs, Albums)
+- Preview of tracklist (play short snippet of a track)
 
 
 # Permissions
