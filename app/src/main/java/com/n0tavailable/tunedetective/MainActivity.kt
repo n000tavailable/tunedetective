@@ -120,12 +120,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
     }
 
-    // Funktion zum Starten des Timers
+    // Function to start the timer
     private fun startTimer() {
-        // Timer initialisieren
+        // Initialize timer
         timer = Timer()
 
-        // Timer-Task erstellen
+        // Create timer task
         val timerTask = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Timer starten (alle 60 Sekunden)
+        // Start timer (every xx seconds)
         timer.schedule(timerTask, 0, 60000)
     }
 
