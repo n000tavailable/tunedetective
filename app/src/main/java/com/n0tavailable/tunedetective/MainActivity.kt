@@ -26,6 +26,8 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +40,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullscreenDialog: Dialog
     private lateinit var albumCoverLayout: LinearLayout
     private lateinit var progressDialog: ProgressDialog
+    private lateinit var timer: Timer
+
 
 
 
@@ -49,6 +53,9 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+        startTimer()
+
 
         // Display a welcome message based on the time of day
         val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
@@ -97,6 +104,40 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    // Function to update the time
+    private fun updateWelcomeMessageWithTime() {
+        val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+            in 0..5 -> "Good night!"
+            in 6..11 -> "Good morning!"
+            in 12..17 -> "Good afternoon!"
+            else -> "Good evening!"
+        }
+
+        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
+        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime."
+
+        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
+    }
+
+    // Funktion zum Starten des Timers
+    private fun startTimer() {
+        // Timer initialisieren
+        timer = Timer()
+
+        // Timer-Task erstellen
+        val timerTask = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    updateWelcomeMessageWithTime()
+                }
+            }
+        }
+
+        // Timer starten (alle 60 Sekunden)
+        timer.schedule(timerTask, 0, 60000)
+    }
+
 
     // Search for an artist using Deezer API
     private fun searchArtist(artistName: String) {
