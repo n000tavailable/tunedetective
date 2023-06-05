@@ -71,8 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:text="Tracks"
-            android:textColor="#FFFFFF" />
+            android:text="Tracks" />
 
     </LinearLayout>
 
@@ -105,8 +104,7 @@
             android:id="@+id/searchButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search"
-            android:textColor="#FFFFFF" />
+            android:text="Search" />
     </LinearLayout>
 
     <TextView
