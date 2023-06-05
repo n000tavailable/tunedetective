@@ -14,12 +14,16 @@ simple search!
 
 
 # Screenshots
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/eae4ed10-2a70-4fe9-8591-d2df293edd83" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/c34204f2-d507-4319-b0be-b09ba2efb400" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/4a000db6-25d2-4913-a4d7-efc2c2d446c1" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/91b78bdc-71c6-4ecf-ad08-7f5766cd3550" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/87c89c22-9260-4f34-8985-936791eab606" width="350">
 
 
 # Download
 https://github.com/n000tavailable/tunedetective/releases/
+
+![GitHub all releases](https://img.shields.io/github/downloads/n000tavailable/tunedetective/total)
+
 
 
 
