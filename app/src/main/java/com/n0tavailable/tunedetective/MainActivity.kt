@@ -71,8 +71,6 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        startTimer()
-
 
         // Display a welcome message based on the time of day
         val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
@@ -122,39 +120,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Function to update the time
-    private fun updateWelcomeMessageWithTime() {
-        val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-            in 0..5 -> "Good night!"
-            in 6..11 -> "Good morning!"
-            in 12..17 -> "Good afternoon!"
-            in 18..23 -> "Good evening!"
-            else -> "Hello!"
-        }
 
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
-        val welcomeMessageWithTime = "$welcomeMessage"
-
-        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
-    }
-
-    // Function to start the timer
-    private fun startTimer() {
-        // Initialize timer
-        timer = Timer()
-
-        // Create timer task
-        val timerTask = object : TimerTask() {
-            override fun run() {
-                runOnUiThread {
-                    updateWelcomeMessageWithTime()
-                }
-            }
-        }
-
-        // Start timer (every xx seconds)
-        timer.schedule(timerTask, 0, 1000)
-    }
 
 
     // Search for an artist using Deezer API
