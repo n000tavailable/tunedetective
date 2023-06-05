@@ -37,6 +37,7 @@ import java.util.TimerTask
 
 
 class MainActivity : AppCompatActivity() {
+    private var mediaPlayer: MediaPlayer? = null
     private lateinit var searchButton: Button
     private lateinit var displayTracks: Button
     private lateinit var artistEditText: EditText
@@ -49,7 +50,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timer: Timer
 
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopPlayback()
+    }
 
+    private fun stopPlayback() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -348,6 +357,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Show the tracklist in a dialog
+// Show the tracklist in a dialog
     private fun showTrackListDialog(trackList: List<Track>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
@@ -363,10 +373,19 @@ class MainActivity : AppCompatActivity() {
 
         closeButton.setOnClickListener {
             dialog.dismiss()
+            adapter.stopPlayback()
+        }
+
+        dialog.setOnDismissListener {
+            adapter.stopPlayback()
         }
 
         dialog.show()
     }
+
+
+
+
     // Load album cover image using Glide library
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
@@ -404,6 +423,12 @@ class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapte
     private var mediaPlayer: MediaPlayer? = null
     private var currentlyPlayingPosition: Int = -1
 
+    fun stopPlayback() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+        currentlyPlayingPosition = -1
+    }
+
     inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
     }
@@ -421,9 +446,11 @@ class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapte
             if (currentlyPlayingPosition == position) {
                 // Track is currently playing, so pause it
                 mediaPlayer?.pause()
+                mediaPlayer?.release()
+                mediaPlayer = null
                 currentlyPlayingPosition = -1
             } else {
-                // Track is not playing, so play it
+                // Track is not playing or a different track is playing, so play it
                 mediaPlayer?.release()
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(track.previewUrl)
