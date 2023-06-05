@@ -5,21 +5,14 @@
     android:orientation="vertical"
     android:padding="10dp">
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/trackListRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <TextView
-            android:id="@+id/trackListTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:textAlignment="center"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="#FFF" />
-
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textAlignment="center"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="#FFF" />
 
     <Button
         android:id="@+id/closeButton"

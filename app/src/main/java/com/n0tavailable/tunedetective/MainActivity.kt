@@ -1,10 +1,14 @@
 package com.n0tavailable.tunedetective
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.graphics.drawable.Drawable
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -13,6 +17,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
@@ -308,6 +314,7 @@ class MainActivity : AppCompatActivity() {
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
+
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
@@ -319,13 +326,16 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val tracksArray = jsonResponse.getJSONArray("data")
-                    val trackList = mutableListOf<String>()
+                    val trackList = mutableListOf<Track>()
 
                     for (i in 0 until tracksArray.length()) {
                         val track = tracksArray.getJSONObject(i)
                         val trackTitle = track.getString("title")
-                        trackList.add(trackTitle)
+                        val previewUrl = track.getString("preview")
+                        trackList.add(Track(trackTitle, previewUrl))
                     }
+
+
 
                     runOnUiThread {
                         showTrackListDialog(trackList)
@@ -338,19 +348,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Show the tracklist in a dialog
-    private fun showTrackListDialog(trackList: List<String>) {
+    private fun showTrackListDialog(trackList: List<Track>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
 
-        val trackListTextView = dialog.findViewById<TextView>(R.id.trackListTextView)
+        val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
 
-        val stringBuilder = StringBuilder()
-        for ((index, track) in trackList.withIndex()) {
-            val trackNumber = index + 1
-            stringBuilder.append("$trackNumber. $track\n")
-        }
-        trackListTextView.text = stringBuilder.toString()
+        val layoutManager = LinearLayoutManager(this)
+        val adapter = TrackListAdapter(trackList)
+
+        trackListRecyclerView.layoutManager = layoutManager
+        trackListRecyclerView.adapter = adapter
 
         closeButton.setOnClickListener {
             dialog.dismiss()
@@ -358,7 +367,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
     // Load album cover image using Glide library
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
@@ -385,5 +393,55 @@ class MainActivity : AppCompatActivity() {
         if (currentFocusView != null) {
             inputMethodManager.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
         }
+    }
+}
+
+class Track(val title: String, val previewUrl: String)
+
+
+class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapter<TrackListAdapter.TrackViewHolder>() {
+
+    private var mediaPlayer: MediaPlayer? = null
+    private var currentlyPlayingPosition: Int = -1
+
+    inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
+        return TrackViewHolder(itemView)
+    }
+
+    override fun onBindViewHolder(holder: TrackViewHolder, @SuppressLint("RecyclerView") position: Int) {
+        val track = trackList[position]
+        holder.titleTextView.text = track.title
+
+        holder.itemView.setOnClickListener {
+            if (currentlyPlayingPosition == position) {
+                // Track is currently playing, so pause it
+                mediaPlayer?.pause()
+                currentlyPlayingPosition = -1
+            } else {
+                // Track is not playing, so play it
+                mediaPlayer?.release()
+                mediaPlayer = MediaPlayer().apply {
+                    setDataSource(track.previewUrl)
+                    prepareAsync()
+                    setOnPreparedListener {
+                        start()
+                        currentlyPlayingPosition = position
+                    }
+                    setOnCompletionListener {
+                        release()
+                        currentlyPlayingPosition = -1
+                    }
+                }
+            }
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return trackList.size
     }
 }
