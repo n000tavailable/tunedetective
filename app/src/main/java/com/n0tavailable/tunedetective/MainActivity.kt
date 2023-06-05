@@ -26,10 +26,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import android.app.ProgressDialog
+import android.content.Intent
+import android.net.Uri
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
+    private lateinit var displayTracks: Button
     private lateinit var artistEditText: EditText
     private lateinit var trackTitleTextView: TextView
     private lateinit var albumCoverImageView: ImageView
@@ -59,12 +62,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
-        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime"
+        val welcomeMessageWithTime = "$welcomeMessage It's $currentTime."
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         // Initialize views
         searchButton = findViewById(R.id.searchButton)
+        displayTracks = findViewById(R.id.displayTracks)
         artistEditText = findViewById(R.id.artistEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
@@ -210,6 +214,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Get details of an album using Deezer API
+    // Get details of an album using Deezer API
     private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
         val apiKey = ""
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -239,6 +244,7 @@ class MainActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(responseData)
                     val albumTitle = jsonResponse.getString("title")
                     val artistName = jsonResponse.getJSONObject("artist").getString("name")
+                    val tracklistUrl = jsonResponse.getString("tracklist")
 
                     runOnUiThread {
                         albumCoverLayout.visibility = View.VISIBLE
@@ -249,12 +255,77 @@ class MainActivity : AppCompatActivity() {
                         loadAlbumCoverImage(albumCoverUrl)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
                         loadArtistImage(artistImageUrl)
+
+                        // Add click listener to open the tracklist URL
+                        displayTracks.setOnClickListener {
+                            getTrackList(tracklistUrl)
+                        }
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
                 }
             }
         })
+    }
+
+    // Get the tracklist using Deezer API
+    private fun getTrackList(tracklistUrl: String) {
+        val apiKey = ""
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(tracklistUrl)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val tracksArray = jsonResponse.getJSONArray("data")
+                    val trackList = mutableListOf<String>()
+
+                    for (i in 0 until tracksArray.length()) {
+                        val track = tracksArray.getJSONObject(i)
+                        val trackTitle = track.getString("title")
+                        trackList.add(trackTitle)
+                    }
+
+                    runOnUiThread {
+                        showTrackListDialog(trackList)
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    // Show the tracklist in a dialog
+    private fun showTrackListDialog(trackList: List<String>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_tracklist)
+
+        val trackListTextView = dialog.findViewById<TextView>(R.id.trackListTextView)
+        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+
+        val stringBuilder = StringBuilder()
+        for ((index, track) in trackList.withIndex()) {
+            val trackNumber = index + 1
+            stringBuilder.append("$trackNumber. $track\n")
+        }
+        trackListTextView.text = stringBuilder.toString()
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     // Load album cover image using Glide library
