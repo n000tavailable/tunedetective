@@ -11,7 +11,8 @@
         android:text="Search History"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:textAllCaps="true" />
 
     <TextView
         android:id="@+id/historyTextView"

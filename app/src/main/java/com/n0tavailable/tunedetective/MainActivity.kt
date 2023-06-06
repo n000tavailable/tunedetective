@@ -23,6 +23,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.text.capitalize
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -95,7 +96,7 @@ class MainActivity : AppCompatActivity() {
             val historyTextView = dialogView.findViewById<TextView>(R.id.historyTextView)
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
-            historyTextView.text = historyText
+            historyTextView.text = historyText.uppercase()
 
             val alertDialogBuilder = AlertDialog.Builder(this)
             alertDialogBuilder.setView(dialogView)
