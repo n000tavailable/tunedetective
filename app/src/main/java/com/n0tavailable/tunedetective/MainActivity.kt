@@ -73,6 +73,9 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
+
+        searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this) // Hinzufügen der Instanziierung der SearchHistoryDatabaseHelper-Klasse
+
         // Display a welcome message based on the time of day
         val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
             in 0..5 -> "Good night!"
@@ -117,13 +120,19 @@ class MainActivity : AppCompatActivity() {
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
         // Set click listener for search button
-        // Set click listener for search button
+
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
+
+            // Überprüfen, ob die Suchanfrage bereits in der Datenbank vorhanden ist
+            if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
+                // Suchanfrage zur Datenbank hinzufügen, wenn sie nicht vorhanden ist
+                searchHistoryDatabaseHelper.insertSearchQuery(artistName)
+            }
+
             searchArtist(artistName)
-            searchHistoryDatabaseHelper.insertSearchQuery(artistName) // Hinzufügen der Suchanfrage zur Datenbank
         }
 
         // Set click listener for album cover image view to show fullscreen image
@@ -515,5 +524,14 @@ class SearchHistoryDatabaseHelper(context: Context) :
         db.close()
 
         return searchQueries
+    }
+
+    fun isSearchQueryExists(searchQuery: String): Boolean {
+        val db = readableDatabase
+        val query = "SELECT * FROM $TABLE_NAME WHERE $COLUMN_SEARCH_QUERY = ?"
+        val cursor = db.rawQuery(query, arrayOf(searchQuery))
+        val exists = cursor.count > 0
+        cursor.close()
+        return exists
     }
 }
