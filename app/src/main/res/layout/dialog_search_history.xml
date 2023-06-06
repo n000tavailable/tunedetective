@@ -12,16 +12,16 @@
         android:textStyle="bold"
         android:textSize="18sp"
         android:padding="16dp"
+        android:textColor="#FFF"
+        android:textAlignment="center"
         android:textAllCaps="true" />
 
-    <TextView
-        android:id="@+id/historyTextView"
+    <ListView
+        android:textColor="#FFF"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No history found"
-        android:textStyle="bold"
-        android:textAlignment="center"
-        android:padding="30dp" />
+        android:id="@+id/historyListView" />
+
 
     <Button
         android:id="@+id/closeButton"
@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:text="Tapping on a search history element will open it"
         android:textStyle="bold"
+        android:textColor="#FFF"
         android:textAlignment="center"
         android:padding="16dp" />
 

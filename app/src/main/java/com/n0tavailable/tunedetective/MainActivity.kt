@@ -15,10 +15,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -87,15 +89,15 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
         // Set click listener for "Show Search History" button
+        // Inside the `showSearchHistoryButton.setOnClickListener` block
         showSearchHistoryButton.setOnClickListener {
             val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(10)
-            val historyText = searchHistory.joinToString("\n")
-
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
-            val historyTextView = dialogView.findViewById<TextView>(R.id.historyTextView)
+            val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
-            historyTextView.text = historyText.uppercase()
+            val historyAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
+            historyListView.adapter = historyAdapter
 
             val alertDialogBuilder = AlertDialog.Builder(this)
             alertDialogBuilder.setView(dialogView)
@@ -103,13 +105,20 @@ class MainActivity : AppCompatActivity() {
             val alertDialog = alertDialogBuilder.create()
             alertDialog.show()
 
+            // Set click listener for search history items
+            historyListView.setOnItemClickListener { parent, view, position, id ->
+                val selectedArtist = searchHistory[position]
+                searchArtist(selectedArtist)
+                alertDialog.dismiss()
+
+            }
+
             closeButton.setOnClickListener {
                 alertDialog.dismiss()
             }
         }
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
-
 
         // Initialize views
         searchButton = findViewById(R.id.searchButton)
@@ -128,6 +137,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set background resource for album cover image view
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
+
 
         // Set click listener for search button
 
@@ -365,7 +375,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Show the tracklist in a dialog
 // Show the tracklist in a dialog
     private fun showTrackListDialog(trackList: List<Track>) {
         val dialog = Dialog(this)
