@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.drawable.Drawable
@@ -76,9 +75,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
 
-        searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this) // Hinzufügen der Instanziierung der SearchHistoryDatabaseHelper-Klasse
+        searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        // Display a welcome message based on the time of day
         val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
             in 0..5 -> "Good night!"
             in 6..11 -> "Good morning!"
@@ -88,8 +86,7 @@ class MainActivity : AppCompatActivity() {
         val welcomeMessageWithTime = "$welcomeMessage"
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
-        // Set click listener for "Show Search History" button
-        // Inside the `showSearchHistoryButton.setOnClickListener` block
+
         showSearchHistoryButton.setOnClickListener {
             val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(10)
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
@@ -105,12 +102,18 @@ class MainActivity : AppCompatActivity() {
             val alertDialog = alertDialogBuilder.create()
             alertDialog.show()
 
-            // Set click listener for search history items
             historyListView.setOnItemClickListener { parent, view, position, id ->
                 val selectedArtist = searchHistory[position]
                 searchArtist(selectedArtist)
                 alertDialog.dismiss()
+            }
 
+            historyListView.setOnItemLongClickListener { parent, view, position, id ->
+                val selectedArtist = searchHistory[position]
+                searchHistoryDatabaseHelper.deleteSearchQuery(selectedArtist)
+                historyAdapter.remove(selectedArtist)
+                historyAdapter.notifyDataSetChanged()
+                true
             }
 
             closeButton.setOnClickListener {
@@ -120,7 +123,6 @@ class MainActivity : AppCompatActivity() {
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        // Initialize views
         searchButton = findViewById(R.id.searchButton)
         displayTracks = findViewById(R.id.displayTracks)
         artistEditText = findViewById(R.id.artistEditText)
@@ -129,33 +131,31 @@ class MainActivity : AppCompatActivity() {
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
         albumCoverLayout = findViewById(R.id.albumCoverLayout)
 
-        // Set initial visibility of views
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
-        // Set background resource for album cover image view
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
 
-        // Set click listener for search button
 
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
+            if (artistName.isEmpty()) {
+                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
 
-            // Überprüfen, ob die Suchanfrage bereits in der Datenbank vorhanden ist
             if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
-                // Suchanfrage zur Datenbank hinzufügen, wenn sie nicht vorhanden ist
                 searchHistoryDatabaseHelper.insertSearchQuery(artistName)
             }
 
             searchArtist(artistName)
         }
 
-        // Set click listener for album cover image view to show fullscreen image
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
             if (drawable != null) {
@@ -165,7 +165,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    // Search for an artist using Deezer API
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
@@ -211,7 +210,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Get the latest release by an artist using Deezer API
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
@@ -276,7 +274,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Get details of an album using Deezer API
     private fun getAlbumDetails(
         albumId: String,
         albumCoverUrl: String,
@@ -321,7 +318,6 @@ class MainActivity : AppCompatActivity() {
                         loadAlbumCoverImage(albumCoverUrl)
                         releaseDateTextView.text = "Release Date: $formattedReleaseDate"
 
-                        // Add click listener to open the tracklist URL
                         displayTracks.setOnClickListener {
                             getTrackList(tracklistUrl)
                         }
@@ -333,7 +329,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Get the tracklist using Deezer API
     private fun getTrackList(tracklistUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
@@ -375,7 +370,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-// Show the tracklist in a dialog
     private fun showTrackListDialog(trackList: List<Track>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
@@ -401,8 +395,6 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
-    // Load album cover image using Glide library
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
             .load(url)
@@ -410,8 +402,6 @@ class MainActivity : AppCompatActivity() {
             .into(albumCoverImageView)
     }
 
-
-    // Show a fullscreen image in a dialog
     private fun showFullscreenImage(drawable: Drawable) {
         val imageView = ImageView(this)
         imageView.setImageDrawable(drawable)
@@ -420,7 +410,6 @@ class MainActivity : AppCompatActivity() {
         fullscreenDialog.show()
     }
 
-    // Hide the keyboard
     private fun hideKeyboard() {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         val currentFocusView = currentFocus
@@ -464,13 +453,11 @@ class TrackListAdapter(private val trackList: List<Track>) :
 
         holder.itemView.setOnClickListener {
             if (currentlyPlayingPosition == position) {
-                // Track is currently playing, so pause it
                 mediaPlayer?.pause()
                 mediaPlayer?.release()
                 mediaPlayer = null
                 currentlyPlayingPosition = -1
             } else {
-                // Track is not playing or a different track is playing, so play it
                 mediaPlayer?.release()
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(track.previewUrl)
@@ -515,9 +502,8 @@ class SearchHistoryDatabaseHelper(context: Context) :
         onCreate(db)
     }
 
-    // Funktion zum Einfügen einer Suchanfrage in die Datenbank
     fun insertSearchQuery(query: String) {
-        val formattedQuery = query.toLowerCase(Locale.getDefault()) // Umwandeln der Suchanfrage in Kleinbuchstaben
+        val formattedQuery = query.toLowerCase(Locale.getDefault())
         val db = writableDatabase
         val values = ContentValues()
         values.put(COLUMN_QUERY, formattedQuery)
@@ -525,9 +511,8 @@ class SearchHistoryDatabaseHelper(context: Context) :
         db.close()
     }
 
-    // Funktion zum Überprüfen, ob eine bestimmte Suchanfrage bereits in der Datenbank vorhanden ist
     fun isSearchQueryExists(query: String): Boolean {
-        val formattedQuery = query.toLowerCase(Locale.getDefault()) // Umwandeln der Suchanfrage in Kleinbuchstaben
+        val formattedQuery = query.toLowerCase(Locale.getDefault())
         val db = readableDatabase
         val selection = "$COLUMN_QUERY = ?"
         val selectionArgs = arrayOf(formattedQuery)
@@ -538,7 +523,6 @@ class SearchHistoryDatabaseHelper(context: Context) :
         return count > 0
     }
 
-    // Funktion zum Abrufen der neuesten Suchanfragen aus der Datenbank
     @SuppressLint("Range")
     fun getLatestSearchQueries(limit: Int): List<String> {
         val db = readableDatabase
@@ -559,4 +543,11 @@ class SearchHistoryDatabaseHelper(context: Context) :
         db.close()
         return queries
     }
+    fun deleteSearchQuery(query: String) {
+        val formattedQuery = query.toLowerCase(Locale.getDefault())
+        val db = writableDatabase
+        db.delete(TABLE_NAME, "$COLUMN_QUERY=?", arrayOf(formattedQuery))
+        db.close()
+    }
+
 }
