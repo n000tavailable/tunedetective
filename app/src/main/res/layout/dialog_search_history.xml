@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:text=
         "Tapping on a search history element will open it.
-        Holding it will delete it"
+        Holding it will delete it."
         android:textStyle="bold"
         android:textColor="#FFF"
         android:textAlignment="center"
