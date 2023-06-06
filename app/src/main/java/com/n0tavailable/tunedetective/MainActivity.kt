@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             val historyTextView = dialogView.findViewById<TextView>(R.id.historyTextView)
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
-            historyTextView.text = historyText
+            historyTextView.text = historyText.uppercase()
 
             val alertDialogBuilder = AlertDialog.Builder(this)
             alertDialogBuilder.setView(dialogView)
@@ -266,7 +266,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    // Get details of an album using Deezer API
     // Get details of an album using Deezer API
     private fun getAlbumDetails(
         albumId: String,
