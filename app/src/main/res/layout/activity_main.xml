@@ -73,6 +73,14 @@
             android:layout_marginTop="16dp"
             android:text="Tracks" />
 
+        <Button
+            android:id="@+id/showSearchHistoryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show Search History"
+            android:layout_marginTop="16dp"
+            />
+
     </LinearLayout>
 
     <LinearLayout

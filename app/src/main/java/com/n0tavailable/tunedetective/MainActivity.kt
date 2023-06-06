@@ -3,6 +3,11 @@ package com.n0tavailable.tunedetective
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.ProgressDialog
+import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -16,6 +21,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,9 +38,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
@@ -46,10 +49,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fullscreenDialog: Dialog
     private lateinit var albumCoverLayout: LinearLayout
     private lateinit var progressDialog: ProgressDialog
-    private lateinit var timer: Timer
+    private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
+
 
     private var mediaPlayer: MediaPlayer? = null
-
 
 
     override fun onDestroy() {
@@ -64,14 +67,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Loading data...")
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
-
-
+        val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
         // Display a welcome message based on the time of day
         val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
             in 0..5 -> "Good night!"
@@ -79,11 +80,23 @@ class MainActivity : AppCompatActivity() {
             in 12..17 -> "Good afternoon!"
             else -> "Good evening!"
         }
-
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Calendar.getInstance().time)
         val welcomeMessageWithTime = "$welcomeMessage"
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
+        // Set click listener for "Show Search History" button
+        showSearchHistoryButton.setOnClickListener {
+            val searchHistory =
+                searchHistoryDatabaseHelper.getLatestSearchQueries(10) // Holen der letzten 10 Suchanfragen aus der Datenbank
+            val historyText = searchHistory.joinToString("\n")
+            AlertDialog.Builder(this)
+                .setTitle("Search History")
+                .setMessage(historyText)
+                .setPositiveButton("OK", null)
+                .show()
+        }
+
+        searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
+
 
         // Initialize views
         searchButton = findViewById(R.id.searchButton)
@@ -104,11 +117,13 @@ class MainActivity : AppCompatActivity() {
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
         // Set click listener for search button
+        // Set click listener for search button
         searchButton.setOnClickListener {
             val artistName = artistEditText.text.toString()
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
             searchArtist(artistName)
+            searchHistoryDatabaseHelper.insertSearchQuery(artistName) // Hinzufügen der Suchanfrage zur Datenbank
         }
 
         // Set click listener for album cover image view to show fullscreen image
@@ -119,8 +134,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
 
     // Search for an artist using Deezer API
@@ -207,7 +220,12 @@ class MainActivity : AppCompatActivity() {
                         if (latestRelease != null) {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
-                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate, artistImageUrl)
+                            getAlbumDetails(
+                                albumId,
+                                albumCoverUrl,
+                                latestReleaseDate,
+                                artistImageUrl
+                            )
                         } else {
                             runOnUiThread {
                                 trackTitleTextView.text = "No releases found"
@@ -231,7 +249,12 @@ class MainActivity : AppCompatActivity() {
 
     // Get details of an album using Deezer API
     // Get details of an album using Deezer API
-    private fun getAlbumDetails(albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String) {
+    private fun getAlbumDetails(
+        albumId: String,
+        albumCoverUrl: String,
+        releaseDate: String?,
+        artistImageUrl: String
+    ) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
@@ -352,8 +375,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     // Load album cover image using Glide library
     private fun loadAlbumCoverImage(url: String) {
         Glide.with(this)
@@ -361,7 +382,6 @@ class MainActivity : AppCompatActivity() {
             .apply(RequestOptions().transform(RoundedCorners(50)))
             .into(albumCoverImageView)
     }
-
 
 
     // Show a fullscreen image in a dialog
@@ -386,7 +406,8 @@ class MainActivity : AppCompatActivity() {
 class Track(val title: String, val previewUrl: String)
 
 
-class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapter<TrackListAdapter.TrackViewHolder>() {
+class TrackListAdapter(private val trackList: List<Track>) :
+    RecyclerView.Adapter<TrackListAdapter.TrackViewHolder>() {
 
     private var mediaPlayer: MediaPlayer? = null
     private var currentlyPlayingPosition: Int = -1
@@ -402,11 +423,15 @@ class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapte
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
         return TrackViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: TrackViewHolder, @SuppressLint("RecyclerView") position: Int) {
+    override fun onBindViewHolder(
+        holder: TrackViewHolder,
+        @SuppressLint("RecyclerView") position: Int
+    ) {
         val track = trackList[position]
         holder.titleTextView.text = track.title
 
@@ -438,5 +463,57 @@ class TrackListAdapter(private val trackList: List<Track>) : RecyclerView.Adapte
 
     override fun getItemCount(): Int {
         return trackList.size
+    }
+}
+
+class SearchHistoryDatabaseHelper(context: Context) :
+    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    companion object {
+        private const val DATABASE_NAME = "search_history.db"
+        private const val DATABASE_VERSION = 1
+        private const val TABLE_NAME = "search_history"
+        private const val COLUMN_ID = "id"
+        private const val COLUMN_SEARCH_QUERY = "search_query"
+    }
+
+    override fun onCreate(db: SQLiteDatabase) {
+        val createTableQuery =
+            "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_SEARCH_QUERY TEXT)"
+        db.execSQL(createTableQuery)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        val dropTableQuery = "DROP TABLE IF EXISTS $TABLE_NAME"
+        db.execSQL(dropTableQuery)
+        onCreate(db)
+    }
+
+    fun insertSearchQuery(searchQuery: String) {
+        val db = writableDatabase
+        val values = ContentValues()
+        values.put(COLUMN_SEARCH_QUERY, searchQuery)
+        db.insert(TABLE_NAME, null, values)
+        db.close()
+    }
+
+    @SuppressLint("Range")
+    fun getLatestSearchQueries(limit: Int): List<String> {
+        val db = readableDatabase
+        val columns = arrayOf(COLUMN_SEARCH_QUERY)
+        val orderBy = "$COLUMN_ID DESC"
+        val cursor: Cursor =
+            db.query(TABLE_NAME, columns, null, null, null, null, orderBy, limit.toString())
+        val searchQueries = mutableListOf<String>()
+
+        while (cursor.moveToNext()) {
+            val searchQuery = cursor.getString(cursor.getColumnIndex(COLUMN_SEARCH_QUERY))
+            searchQueries.add(searchQuery)
+        }
+
+        cursor.close()
+        db.close()
+
+        return searchQueries
     }
 }
