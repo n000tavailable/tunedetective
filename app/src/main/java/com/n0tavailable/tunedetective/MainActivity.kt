@@ -88,14 +88,24 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
         // Set click listener for "Show Search History" button
         showSearchHistoryButton.setOnClickListener {
-            val searchHistory =
-                searchHistoryDatabaseHelper.getLatestSearchQueries(10) // Holen der letzten 10 Suchanfragen aus der Datenbank
+            val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(10)
             val historyText = searchHistory.joinToString("\n")
-            AlertDialog.Builder(this)
-                .setTitle("Search History")
-                .setMessage(historyText)
-                .setPositiveButton("OK", null)
-                .show()
+
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
+            val historyTextView = dialogView.findViewById<TextView>(R.id.historyTextView)
+            val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+
+            historyTextView.text = historyText
+
+            val alertDialogBuilder = AlertDialog.Builder(this)
+            alertDialogBuilder.setView(dialogView)
+
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+
+            closeButton.setOnClickListener {
+                alertDialog.dismiss()
+            }
         }
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
