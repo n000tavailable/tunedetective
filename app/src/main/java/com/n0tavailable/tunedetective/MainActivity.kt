@@ -493,55 +493,62 @@ class SearchHistoryDatabaseHelper(context: Context) :
         private const val DATABASE_VERSION = 1
         private const val TABLE_NAME = "search_history"
         private const val COLUMN_ID = "id"
-        private const val COLUMN_SEARCH_QUERY = "search_query"
+        private const val COLUMN_QUERY = "query"
     }
 
-    override fun onCreate(db: SQLiteDatabase) {
-        val createTableQuery =
-            "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_SEARCH_QUERY TEXT)"
-        db.execSQL(createTableQuery)
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTableQuery = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_QUERY TEXT)"
+        db?.execSQL(createTableQuery)
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         val dropTableQuery = "DROP TABLE IF EXISTS $TABLE_NAME"
-        db.execSQL(dropTableQuery)
+        db?.execSQL(dropTableQuery)
         onCreate(db)
     }
 
-    fun insertSearchQuery(searchQuery: String) {
+    // Funktion zum Einfügen einer Suchanfrage in die Datenbank
+    fun insertSearchQuery(query: String) {
+        val formattedQuery = query.toLowerCase(Locale.getDefault()) // Umwandeln der Suchanfrage in Kleinbuchstaben
         val db = writableDatabase
         val values = ContentValues()
-        values.put(COLUMN_SEARCH_QUERY, searchQuery)
+        values.put(COLUMN_QUERY, formattedQuery)
         db.insert(TABLE_NAME, null, values)
         db.close()
     }
 
+    // Funktion zum Überprüfen, ob eine bestimmte Suchanfrage bereits in der Datenbank vorhanden ist
+    fun isSearchQueryExists(query: String): Boolean {
+        val formattedQuery = query.toLowerCase(Locale.getDefault()) // Umwandeln der Suchanfrage in Kleinbuchstaben
+        val db = readableDatabase
+        val selection = "$COLUMN_QUERY = ?"
+        val selectionArgs = arrayOf(formattedQuery)
+        val cursor = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, null)
+        val count = cursor.count
+        cursor.close()
+        db.close()
+        return count > 0
+    }
+
+    // Funktion zum Abrufen der neuesten Suchanfragen aus der Datenbank
     @SuppressLint("Range")
     fun getLatestSearchQueries(limit: Int): List<String> {
         val db = readableDatabase
-        val columns = arrayOf(COLUMN_SEARCH_QUERY)
+        val columns = arrayOf(COLUMN_QUERY)
         val orderBy = "$COLUMN_ID DESC"
-        val cursor: Cursor =
-            db.query(TABLE_NAME, columns, null, null, null, null, orderBy, limit.toString())
-        val searchQueries = mutableListOf<String>()
+        val limitString = limit.toString()
+        val cursor = db.query(TABLE_NAME, columns, null, null, null, null, orderBy, limitString)
+        val queries = mutableListOf<String>()
 
-        while (cursor.moveToNext()) {
-            val searchQuery = cursor.getString(cursor.getColumnIndex(COLUMN_SEARCH_QUERY))
-            searchQueries.add(searchQuery)
+        if (cursor.moveToFirst()) {
+            do {
+                val query = cursor.getString(cursor.getColumnIndex(COLUMN_QUERY))
+                queries.add(query)
+            } while (cursor.moveToNext())
         }
 
         cursor.close()
         db.close()
-
-        return searchQueries
-    }
-
-    fun isSearchQueryExists(searchQuery: String): Boolean {
-        val db = readableDatabase
-        val query = "SELECT * FROM $TABLE_NAME WHERE $COLUMN_SEARCH_QUERY = ?"
-        val cursor = db.rawQuery(query, arrayOf(searchQuery))
-        val exists = cursor.count > 0
-        cursor.close()
-        return exists
+        return queries
     }
 }

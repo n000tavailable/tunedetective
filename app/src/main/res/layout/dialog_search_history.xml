@@ -18,6 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="No history found"
+        android:textStyle="bold"
+        android:textAlignment="center"
         android:padding="16dp" />
 
     <Button
@@ -26,6 +28,14 @@
         android:layout_height="wrap_content"
         android:text="Close"
         android:layout_gravity="center"
+        android:padding="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tapping on a search history element will open it"
+        android:textStyle="bold"
+        android:textAlignment="center"
         android:padding="16dp" />
 
 </LinearLayout>
