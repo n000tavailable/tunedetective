@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         showSearchHistoryButton.setOnClickListener {
-            val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(10)
+            val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(20)
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
             val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
