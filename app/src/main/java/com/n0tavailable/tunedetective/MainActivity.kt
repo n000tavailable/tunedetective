@@ -110,9 +110,16 @@ class MainActivity : AppCompatActivity() {
 
             historyListView.setOnItemLongClickListener { parent, view, position, id ->
                 val selectedArtist = searchHistory[position]
-                searchHistoryDatabaseHelper.deleteSearchQuery(selectedArtist)
-                historyAdapter.remove(selectedArtist)
-                historyAdapter.notifyDataSetChanged()
+                val alertDialogBuilder = AlertDialog.Builder(this)
+                alertDialogBuilder.setTitle("Confirmation")
+                alertDialogBuilder.setMessage("Do you really want to delete \"$selectedArtist\"?")
+                alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
+                    searchHistoryDatabaseHelper.deleteSearchQuery(selectedArtist)
+                    historyAdapter.remove(selectedArtist)
+                    historyAdapter.notifyDataSetChanged()
+                }
+                alertDialogBuilder.setNegativeButton("No", null)
+                alertDialogBuilder.show()
                 true
             }
 
