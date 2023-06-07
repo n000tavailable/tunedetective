@@ -148,20 +148,19 @@ class MainActivity : AppCompatActivity() {
 
 
         searchButton.setOnClickListener {
-            val artistNames = artistEditText.text.toString().split(",").map { it.trim() }
-            if (artistNames.isEmpty()) {
-                Toast.makeText(this, "Please enter artist names", Toast.LENGTH_SHORT).show()
+            val artistName = artistEditText.text.toString().trim()
+            if (artistName.isEmpty()) {
+                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
 
-            artistNames.forEach { artistName ->
-                if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
-                    searchHistoryDatabaseHelper.insertSearchQuery(artistName)
-                }
-                searchSimilarArtists(artistName)
+            if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
+                searchHistoryDatabaseHelper.insertSearchQuery(artistName)
             }
+            searchSimilarArtists(artistName)
         }
 
         albumCoverImageView.setOnClickListener {
