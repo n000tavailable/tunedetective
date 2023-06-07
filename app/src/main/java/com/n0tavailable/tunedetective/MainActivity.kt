@@ -35,6 +35,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
+import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -160,6 +161,10 @@ class MainActivity : AppCompatActivity() {
             if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
                 searchHistoryDatabaseHelper.insertSearchQuery(artistName)
             }
+
+            val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+            pepeGif.visibility = View.GONE
+
             searchSimilarArtists(artistName)
         }
 
