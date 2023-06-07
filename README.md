@@ -3,14 +3,19 @@
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/7a7e6249-d450-4ba5-837c-2e4a55d7edd9" width="200">
 </p>
 
-Tune Detective is a simple opensource app written in kotlin.
+TuneDetective is an Android application designed to help users discover music artists and explore their latest releases. The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.
 
-I always used to have problems finding out about the latest releases of an artist
-without using any social media or streaming app.
+TuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases. TuneDetective has you covered. Enjoy the world of music at your fingertips!
 
-So, now with Tune Detective it's possible to search for your
-favourite artists and get the latest releases with just one
-simple search!
+# Features:
+
+- Search for music artists and view their similar artists
+- Explore the latest release of an artist, including album details and tracklist
+- Play track previews directly within the app
+- View album cover images and release dates
+- History of previous artist searches
+
+# Download
 
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
       alt='Get it on IzzyOnDroid'
@@ -25,14 +30,6 @@ simple search!
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/42b5d988-66cf-4817-ac60-86ee49625510" width="350">
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f54b55fb-dc7a-42fc-9cc1-5cac018c4db7" width="350">
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/5e0eb9bb-7453-4453-bcc8-10ba5849e049" width="350">
-
-
-# Features
-- Find latest Releases (Song, EP, Album) with just one simple search
-- Clicking on the cover will enlarge it
-- Tracklist of any release (EPs, Albums)
-- Preview of tracklist (play short snippet of a track)
-- Database, the last 10 searches are saved
 
 # How to use?
 Enter an artist name in the "Enter artist name" text line and press "search".
