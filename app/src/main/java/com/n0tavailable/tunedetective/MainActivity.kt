@@ -199,16 +199,19 @@ class MainActivity : AppCompatActivity() {
                     val artistArray = jsonResponse.getJSONArray("data")
 
                     if (artistArray.length() > 0) {
-                        val artists = mutableListOf<String>()
+                        val artists = mutableListOf<Pair<String, String>>()
 
                         for (i in 0 until artistArray.length()) {
                             val artist = artistArray.getJSONObject(i)
                             val artistName = artist.getString("name")
-                            artists.add(artistName)
+                            val artistImageUrl = artist.getString("picture_big")
+                            artists.add(Pair(artistName, artistImageUrl)) // Add the artist name and image URL as a pair
                         }
 
+                        val finalArtists = artists.toList() // Create a final copy of the artists list
+
                         runOnUiThread {
-                            showArtistSelectionDialog(artists)
+                            showArtistSelectionDialog(finalArtists) // Use the finalArtists variable here
                         }
                     } else {
                         runOnUiThread {
@@ -223,20 +226,19 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
-    private fun showArtistSelectionDialog(artists: List<String>) {
+    private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) { // Update the parameter type
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_artist_selection)
 
         val artistListView = dialog.findViewById<ListView>(R.id.artistListView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
 
-        val artistAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, artists)
+        val artistAdapter = ArtistAdapter(this, artists)
         artistListView.adapter = artistAdapter
 
         artistListView.setOnItemClickListener { parent, view, position, id ->
             val selectedArtist = artists[position]
-            searchArtist(selectedArtist)
+            searchArtist(selectedArtist.first)
             dialog.dismiss()
         }
 
@@ -268,7 +270,6 @@ class MainActivity : AppCompatActivity() {
 
                 progressDialog.dismiss()
 
-
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val artistArray = jsonResponse.getJSONArray("data")
@@ -286,7 +287,9 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    println("Error: ${response.code} ${response.message}")
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         })
@@ -632,4 +635,28 @@ class SearchHistoryDatabaseHelper(context: Context) :
         db.close()
     }
 
+}
+
+class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
+    ArrayAdapter<Pair<String, String>>(context, R.layout.item_artist, artists) {
+
+    private val inflater: LayoutInflater = LayoutInflater.from(context)
+
+    @SuppressLint("ViewHolder")
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = inflater.inflate(R.layout.item_artist, parent, false)
+
+        val artistNameTextView: TextView = view.findViewById(R.id.artistNameTextView)
+        val artistImageView: ImageView = view.findViewById(R.id.artistImageView)
+
+        val artist = getItem(position)
+        artistNameTextView.text = artist?.first
+
+        Glide.with(context)
+            .load(artist?.second)
+            .apply(RequestOptions().transform(RoundedCorners(50)))
+            .into(artistImageView)
+
+        return view
+    }
 }

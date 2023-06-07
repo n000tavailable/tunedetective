@@ -1,0 +1,21 @@
+<!-- item_artist.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/artistImageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/artistNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:textSize="16sp" />
+
+</LinearLayout>
