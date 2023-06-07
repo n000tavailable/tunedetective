@@ -115,6 +115,14 @@
         android:layout_marginTop="16dp"
         android:text="Show Search History" />
 
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/pepeGif"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/pepe" />
+
+
     <TextView
         android:id="@+id/versionTextView"
         android:layout_width="wrap_content"
