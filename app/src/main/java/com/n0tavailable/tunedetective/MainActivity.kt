@@ -79,6 +79,9 @@ class MainActivity : AppCompatActivity() {
         releaseDateTextView.visibility = View.GONE
         albumCoverImageView.setImageResource(R.drawable.round_album_cover)
         artistEditText.text = null
+
+        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+        pepeGif.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
