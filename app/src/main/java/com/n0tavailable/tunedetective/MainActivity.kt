@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-    private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) { // Update the parameter type
+    private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_artist_selection)
 
@@ -238,6 +238,7 @@ class MainActivity : AppCompatActivity() {
 
         artistListView.setOnItemClickListener { parent, view, position, id ->
             val selectedArtist = artists[position]
+            saveSelectedArtist(selectedArtist.first) // Save the selected artist to the database
             searchArtist(selectedArtist.first)
             dialog.dismiss()
         }
@@ -247,6 +248,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun saveSelectedArtist(artistName: String) {
+        if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
+            searchHistoryDatabaseHelper.insertSearchQuery(artistName)
+        }
     }
 
     private fun searchArtist(artistName: String) {
