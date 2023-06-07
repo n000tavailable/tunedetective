@@ -55,11 +55,20 @@ class MainActivity : AppCompatActivity() {
 
 
     private var mediaPlayer: MediaPlayer? = null
+    private var isPepeGifVisible = true
+
 
 
     override fun onDestroy() {
         super.onDestroy()
+        resetUI()
         stopPlayback()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stopPlayback()
+        resetUI()
     }
 
     private fun stopPlayback() {
@@ -74,6 +83,10 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+        val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+        isPepeGifVisible = sharedPreferences.getBoolean("isPepeGifVisible", true)
+        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+        pepeGif.visibility = if (isPepeGifVisible) View.VISIBLE else View.GONE
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
@@ -162,9 +175,10 @@ class MainActivity : AppCompatActivity() {
                 searchHistoryDatabaseHelper.insertSearchQuery(artistName)
             }
 
-            val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-            pepeGif.visibility = View.GONE
-
+            val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putBoolean("isPepeGifVisible", false)
+            editor.apply()
             searchSimilarArtists(artistName)
         }
 
@@ -174,7 +188,19 @@ class MainActivity : AppCompatActivity() {
                 showFullscreenImage(drawable)
             }
         }
+
+        resetUI()
     }
+
+    private fun resetUI() {
+        albumCoverLayout.visibility = View.GONE
+        trackTitleTextView.visibility = View.GONE
+        releaseDateTextView.visibility = View.GONE
+        albumCoverImageView.setImageResource(R.drawable.round_album_cover)
+        trackTitleTextView.text = ""
+        releaseDateTextView.text = ""
+    }
+
 
 
     private fun searchSimilarArtists(artistName: String) {
