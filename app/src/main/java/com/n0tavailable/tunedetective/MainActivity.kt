@@ -164,6 +164,78 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun searchSimilarArtists(artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        progressDialog.show()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                progressDialog.dismiss()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                progressDialog.dismiss()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistArray = jsonResponse.getJSONArray("data")
+
+                    if (artistArray.length() > 0) {
+                        val similarArtists = mutableListOf<String>()
+
+                        for (i in 0 until artistArray.length()) {
+                            val artist = artistArray.getJSONObject(i)
+                            val artistName = artist.getString("name")
+                            similarArtists.add(artistName)
+                        }
+
+                        runOnUiThread {
+                            showSimilarArtistsDialog(similarArtists)
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "No similar artists found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun showSimilarArtistsDialog(similarArtists: List<String>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_similar_artists)
+
+        val similarArtistsListView = dialog.findViewById<ListView>(R.id.similarArtistsListView)
+        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, similarArtists)
+        similarArtistsListView.adapter = adapter
+
+        similarArtistsListView.setOnItemClickListener { parent, view, position, id ->
+            val selectedArtist = similarArtists[position]
+            searchArtist(selectedArtist)
+            dialog.dismiss()
+        }
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
 
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
@@ -186,21 +258,25 @@ class MainActivity : AppCompatActivity() {
 
                 progressDialog.dismiss()
 
-
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val artistArray = jsonResponse.getJSONArray("data")
 
                     if (artistArray.length() > 0) {
                         val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getString("id")
+                        val artistId = artist.getInt("id")
+                        val artistName = artist.getString("name")
                         val artistImageUrl = artist.getString("picture_big")
-                        getLatestRelease(artistId, artistImageUrl)
+
+                        runOnUiThread {
+                            displayArtistDetails(artistName, artistImageUrl)
+                        }
+
+                        // Search for similar artists
+                        searchSimilarArtists(artistName)
                     } else {
                         runOnUiThread {
-                            trackTitleTextView.text = "No artist found"
-                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
-                            releaseDateTextView.text = ""
+                            Toast.makeText(this@MainActivity, "Artist not found", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {
@@ -208,6 +284,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun displayArtistDetails(artistName: String, artistImageUrl: String) {
+        // Implement the logic to display the artist details, such as updating UI elements with the provided data.
+        // For example, you can use the Glide library to load the artist image into an ImageView:
+        Glide.with(this)
+            .load(artistImageUrl)
+            .into(albumCoverImageView)
+
+        // Update other UI elements with the artist details
+        // ...
     }
 
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
