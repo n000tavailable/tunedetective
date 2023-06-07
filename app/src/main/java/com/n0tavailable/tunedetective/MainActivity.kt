@@ -164,108 +164,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun searchSimilarArtists(artistName: String) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        progressDialog.show()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                progressDialog.dismiss()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                progressDialog.dismiss()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val artistArray = jsonResponse.getJSONArray("data")
-
-                    if (artistArray.length() > 0) {
-                        val similarArtists = mutableListOf<String>()
-                        val similarArtistImages = mutableListOf<String>()
-
-                        for (i in 0 until artistArray.length()) {
-                            val artist = artistArray.getJSONObject(i)
-                            val artistName = artist.getString("name")
-                            val artistImage = artist.getString("picture_big")
-                            similarArtists.add(artistName)
-                            similarArtistImages.add(artistImage)
-                        }
-
-                        runOnUiThread {
-                            showSimilarArtistsDialog(similarArtists, similarArtistImages)
-                        }
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(this@MainActivity, "No similar artists found", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                } else {
-                    println("Error: ${response.code} ${response.message}")
-                }
-            }
-        })
-    }
-
-    private fun showSimilarArtistsDialog(similarArtists: List<String>, similarArtistImages: List<String>) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_similar_artists)
-
-        val similarArtistsListView = dialog.findViewById<ListView>(R.id.similarArtistsListView)
-        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
-
-        // Create a custom adapter to display artist name and profile picture
-        val adapter = SimilarArtistsAdapter(this, similarArtists, similarArtistImages)
-        similarArtistsListView.adapter = adapter
-
-        similarArtistsListView.setOnItemClickListener { parent, view, position, id ->
-            val selectedArtist = similarArtists[position]
-            searchArtist(selectedArtist)
-            dialog.dismiss()
-        }
-
-        closeButton.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private class SimilarArtistsAdapter(
-        context: Context,
-        private val similarArtists: List<String>,
-        private val similarArtistImages: List<String>
-    ) : ArrayAdapter<String>(context, R.layout.item_similar_artist, similarArtists) {
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view: View = convertView ?: LayoutInflater.from(context)
-                .inflate(R.layout.item_similar_artist, parent, false)
-
-            val artistNameTextView: TextView = view.findViewById(R.id.artistNameTextView)
-            val artistImageView: ImageView = view.findViewById(R.id.artistImageView)
-
-            val artistName = similarArtists[position]
-            val artistImage = similarArtistImages[position]
-
-            artistNameTextView.text = artistName
-
-            Glide.with(context)
-                .load(artistImage)
-                .apply(RequestOptions.circleCropTransform())
-                .into(artistImageView)
-
-            return view
-        }
-    }
 
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
@@ -288,25 +186,21 @@ class MainActivity : AppCompatActivity() {
 
                 progressDialog.dismiss()
 
+
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val artistArray = jsonResponse.getJSONArray("data")
 
                     if (artistArray.length() > 0) {
                         val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getInt("id")
-                        val artistName = artist.getString("name")
+                        val artistId = artist.getString("id")
                         val artistImageUrl = artist.getString("picture_big")
-
-                        runOnUiThread {
-                            displayArtistDetails(artistName, artistImageUrl)
-                        }
-
-                        // Search for similar artists
-                        searchSimilarArtists(artistName)
+                        getLatestRelease(artistId, artistImageUrl)
                     } else {
                         runOnUiThread {
-                            Toast.makeText(this@MainActivity, "Artist not found", Toast.LENGTH_SHORT).show()
+                            trackTitleTextView.text = "No artist found"
+                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
+                            releaseDateTextView.text = ""
                         }
                     }
                 } else {
@@ -314,17 +208,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun displayArtistDetails(artistName: String, artistImageUrl: String) {
-        // Implement the logic to display the artist details, such as updating UI elements with the provided data.
-        // For example, you can use the Glide library to load the artist image into an ImageView:
-        Glide.with(this)
-            .load(artistImageUrl)
-            .into(albumCoverImageView)
-
-        // Update other UI elements with the artist details
-        // ...
     }
 
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
