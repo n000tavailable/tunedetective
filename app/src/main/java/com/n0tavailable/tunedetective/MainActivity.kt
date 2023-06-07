@@ -148,19 +148,20 @@ class MainActivity : AppCompatActivity() {
 
 
         searchButton.setOnClickListener {
-            val artistName = artistEditText.text.toString()
-            if (artistName.isEmpty()) {
-                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
+            val artistNames = artistEditText.text.toString().split(",").map { it.trim() }
+            if (artistNames.isEmpty()) {
+                Toast.makeText(this, "Please enter artist names", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
 
-            if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
-                searchHistoryDatabaseHelper.insertSearchQuery(artistName)
+            artistNames.forEach { artistName ->
+                if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
+                    searchHistoryDatabaseHelper.insertSearchQuery(artistName)
+                }
+                searchSimilarArtists(artistName)
             }
-
-            searchArtist(artistName)
         }
 
         albumCoverImageView.setOnClickListener {
@@ -171,6 +172,80 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun searchSimilarArtists(artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        progressDialog.show()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                progressDialog.dismiss()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                progressDialog.dismiss()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistArray = jsonResponse.getJSONArray("data")
+
+                    if (artistArray.length() > 0) {
+                        val artists = mutableListOf<String>()
+
+                        for (i in 0 until artistArray.length()) {
+                            val artist = artistArray.getJSONObject(i)
+                            val artistName = artist.getString("name")
+                            artists.add(artistName)
+                        }
+
+                        runOnUiThread {
+                            showArtistSelectionDialog(artists)
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "No artists found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun showArtistSelectionDialog(artists: List<String>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_artist_selection)
+
+        val artistListView = dialog.findViewById<ListView>(R.id.artistListView)
+        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+
+        val artistAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, artists)
+        artistListView.adapter = artistAdapter
+
+        artistListView.setOnItemClickListener { parent, view, position, id ->
+            val selectedArtist = artists[position]
+            searchArtist(selectedArtist)
+            dialog.dismiss()
+        }
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
