@@ -191,15 +191,18 @@ class MainActivity : AppCompatActivity() {
 
                     if (artistArray.length() > 0) {
                         val similarArtists = mutableListOf<String>()
+                        val similarArtistImages = mutableListOf<String>()
 
                         for (i in 0 until artistArray.length()) {
                             val artist = artistArray.getJSONObject(i)
                             val artistName = artist.getString("name")
+                            val artistImage = artist.getString("picture_big")
                             similarArtists.add(artistName)
+                            similarArtistImages.add(artistImage)
                         }
 
                         runOnUiThread {
-                            showSimilarArtistsDialog(similarArtists)
+                            showSimilarArtistsDialog(similarArtists, similarArtistImages)
                         }
                     } else {
                         runOnUiThread {
@@ -213,14 +216,15 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showSimilarArtistsDialog(similarArtists: List<String>) {
+    private fun showSimilarArtistsDialog(similarArtists: List<String>, similarArtistImages: List<String>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_similar_artists)
 
         val similarArtistsListView = dialog.findViewById<ListView>(R.id.similarArtistsListView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, similarArtists)
+        // Create a custom adapter to display artist name and profile picture
+        val adapter = SimilarArtistsAdapter(this, similarArtists, similarArtistImages)
         similarArtistsListView.adapter = adapter
 
         similarArtistsListView.setOnItemClickListener { parent, view, position, id ->
@@ -236,6 +240,32 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private class SimilarArtistsAdapter(
+        context: Context,
+        private val similarArtists: List<String>,
+        private val similarArtistImages: List<String>
+    ) : ArrayAdapter<String>(context, R.layout.item_similar_artist, similarArtists) {
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val view: View = convertView ?: LayoutInflater.from(context)
+                .inflate(R.layout.item_similar_artist, parent, false)
+
+            val artistNameTextView: TextView = view.findViewById(R.id.artistNameTextView)
+            val artistImageView: ImageView = view.findViewById(R.id.artistImageView)
+
+            val artistName = similarArtists[position]
+            val artistImage = similarArtistImages[position]
+
+            artistNameTextView.text = artistName
+
+            Glide.with(context)
+                .load(artistImage)
+                .apply(RequestOptions.circleCropTransform())
+                .into(artistImageView)
+
+            return view
+        }
+    }
 
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
