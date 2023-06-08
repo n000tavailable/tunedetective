@@ -1,17 +1,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#121212"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="10dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/trackListRecyclerView"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:padding="16dp"
-        android:textAlignment="center" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxHeight="500dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/trackListRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            tools:ignore="MissingConstraints" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/closeButton"
@@ -22,10 +32,10 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="15dp"
-        android:textAlignment="center"
         android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause"
+        android:textAlignment="center"
         android:textColor="#FFF" />
 
 </LinearLayout>
