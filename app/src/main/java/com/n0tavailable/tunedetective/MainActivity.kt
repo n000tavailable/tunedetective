@@ -202,6 +202,8 @@ class MainActivity : AppCompatActivity() {
                 if (selectedItem == "About") {
                     val intent = Intent(this@MainActivity, AboutActivity::class.java)
                     startActivity(intent)
+                    // Reset the spinner selection
+                    dropdownMenu.setSelection(0)
                 }
             }
 

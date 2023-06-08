@@ -32,8 +32,10 @@ class AboutActivity : AppCompatActivity() {
                 val selectedItem = parent.getItemAtPosition(position) as String
                 if (selectedItem == "Home") {
                     val intent = Intent(this@AboutActivity, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
+
+                    // Reset the spinner selection
+                    spinner.setSelection(0)
                 }
             }
 
