@@ -7,6 +7,15 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
+    <Spinner
+        android:id="@+id/dropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="16dp"
+        android:entries="@array/dropdown_menu_items" />
+
     <TextView
         android:id="@+id/welcomeMessageTextView"
         android:layout_width="wrap_content"

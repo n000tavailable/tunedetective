@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
@@ -20,12 +21,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -171,6 +174,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
         searchButton = findViewById(R.id.searchButton)
@@ -187,6 +191,24 @@ class MainActivity : AppCompatActivity() {
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
+
+
+        val dropdownMenu = findViewById<Spinner>(R.id.dropdownMenu)
+        val dropdownMenuItems = resources.getStringArray(R.array.dropdown_menu_items)
+
+        dropdownMenu.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = dropdownMenuItems[position]
+                if (selectedItem == "About") {
+                    val intent = Intent(this@MainActivity, AboutActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // Handle nothing selected if needed
+            }
+        }
 
 
 

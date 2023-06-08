@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">tunedetective</string>
+    <string-array name="dropdown_menu_items">
+        <item>Home</item>
+        <item>About</item>
+        <!-- Add more items if needed -->
+    </string-array>
 </resources>
