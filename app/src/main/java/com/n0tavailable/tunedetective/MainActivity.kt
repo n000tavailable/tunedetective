@@ -447,10 +447,7 @@ class MainActivity : AppCompatActivity() {
 
                         // Create a SpannableString and apply formatting
                         val spannableString = SpannableString("Release Date: $newReleasePrefix$formattedReleaseDate")
-                        val newReleaseSpan = StyleSpan(Typeface.BOLD)
-                        val greenColorSpan = ForegroundColorSpan(Color.GREEN)
-                        spannableString.setSpan(newReleaseSpan, 13, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        spannableString.setSpan(greenColorSpan, 13, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
                         releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
