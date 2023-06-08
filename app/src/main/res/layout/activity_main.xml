@@ -71,6 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
+            android:textStyle="bold"
             android:text="Tracks" />
 
     </LinearLayout>
@@ -104,6 +105,8 @@
             android:id="@+id/searchButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
+
             android:text="Search" />
     </LinearLayout>
 
@@ -113,6 +116,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginTop="16dp"
+        android:textStyle="bold"
+
         android:text="Show Search History" />
 
     <pl.droidsonroids.gif.GifImageView
@@ -126,7 +131,7 @@
         android:id="@+id/versionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Version: 0.6"
+        android:text="Version: 0.7"
         android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
         android:textColor="#A8A8A8" />
 

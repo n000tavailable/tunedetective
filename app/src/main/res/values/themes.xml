@@ -3,7 +3,11 @@
     <style name="Base.Theme.Tunedetective" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">#121212</item>
         <item name="android:background">#121212</item>
-        <item name="android:textColor">#FFF</item></style>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:fontFamily">@font/dmsansregular</item>
+
+    </style>
+
 
     <style name="Theme.Tunedetective" parent="Base.Theme.Tunedetective" />
 </resources>

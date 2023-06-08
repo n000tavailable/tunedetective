@@ -4,6 +4,7 @@
         <item name="android:statusBarColor">#121212</item>
         <item name="android:textColor">#FFF</item>
         <item name="android:background">#121212</item>
+        <item name="android:fontFamily">@font/dmsansregular</item>
 
     </style>
 </resources>
