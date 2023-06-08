@@ -115,6 +115,9 @@ class MainActivity : AppCompatActivity() {
 
         showSearchHistoryButton.setOnClickListener {
 
+            hideKeyboard()
+
+
             val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(20)
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
             val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
