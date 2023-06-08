@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         showSearchHistoryButton.setOnClickListener {
+
             val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(20)
             val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
             val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
@@ -124,6 +125,9 @@ class MainActivity : AppCompatActivity() {
                 val selectedArtist = searchHistory[position]
                 searchArtist(selectedArtist)
                 alertDialog.dismiss()
+
+                val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+                pepeGif.visibility = View.GONE
             }
 
             historyListView.setOnItemLongClickListener { parent, view, position, id ->
