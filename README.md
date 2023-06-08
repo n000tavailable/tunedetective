@@ -26,19 +26,31 @@ TuneDetective is a great tool for music enthusiasts who don't want to use any cl
       height="80">](https://github.com/n000tavailable/tunedetective/releases/latest)
 
 # Screenshots
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/a2176ddd-8aef-4a7b-936f-474e9650ecf7" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/42b5d988-66cf-4817-ac60-86ee49625510" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f54b55fb-dc7a-42fc-9cc1-5cac018c4db7" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/5e0eb9bb-7453-4453-bcc8-10ba5849e049" width="350">
+
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/d9f3ecdc-e303-4e6d-9a29-70cbb27de6ac" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/eef4f050-1cbb-4298-8c4c-4764cc29341a" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/7c82f31e-dcfb-4df8-aab9-64ea5dd992da" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/ba050dc1-29a0-4802-bd0d-f76fe26e6921" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/b21b511b-bde6-49f2-825d-51d9faad1c6d" width="350">
 
 # How to use?
-Enter an artist name in the "Enter artist name" text line and press "search".
-Then you will see the latest release of the entered artist.
+**Discover the Latest Release of Your Favorite Artist**
 
-With the button "Tracks" all tracks from the release are listed. By tapping on a track, it will be played briefly. By a second tap or by leaving the dialog the playback will be stopped.
+1. Enter the name of the artist in the designated text field labeled "Enter artist name."
+2. Press the "search" button to unveil their freshest release.
 
-With the button "Show Search History" your search requests are displayed. Up to 10 are possible. Click on a saved artist to open it.
-A long click on the saved artist will delete this search request.
+**Explore the Tracks:**
+- Tap the "Tracks" button to access a comprehensive list of all the tracks from the artist's latest release.
+- Experience a preview of a track by simply tapping on it.
+- Stop the playback either by tapping it again or by exiting the dialog.
+
+**Access Your Search History:**
+- Revisit your previous searches effortlessly by selecting the "Show Search History" button.
+- Up to 20 search requests are saved for your convenience.
+- Open a saved artist by clicking on their name.
+- Delete a search request by performing a long click on the artist's name.
+
+Unveil the music you love with a simple search and easy-to-use controls!
 
 # Permissions
 - uses-permission android:name="android.permission.INTERNET"
