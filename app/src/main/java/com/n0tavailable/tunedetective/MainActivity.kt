@@ -7,9 +7,15 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +46,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
@@ -393,9 +400,17 @@ class MainActivity : AppCompatActivity() {
         releaseDate: String?,
         artistImageUrl: String
     ) {
-        val apiKey = APIKeys.DEEZER_API_KEY
+        val currentDate = Calendar.getInstance().time
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
+
+        val releaseDateTime = sdfInput.parse(releaseDate)
+        val daysDifference = TimeUnit.MILLISECONDS.toDays(currentDate.time - releaseDateTime.time)
+
+        val isNewRelease = daysDifference <= 7
+        val newReleasePrefix = if (isNewRelease) "NEW - " else ""
+
+        val apiKey = APIKeys.DEEZER_API_KEY
 
         val formattedReleaseDate = try {
             val date = sdfInput.parse(releaseDate)
@@ -429,7 +444,14 @@ class MainActivity : AppCompatActivity() {
                         releaseDateTextView.visibility = View.VISIBLE
                         trackTitleTextView.text = albumTitle
                         loadAlbumCoverImage(albumCoverUrl)
-                        releaseDateTextView.text = "Release Date: $formattedReleaseDate"
+
+                        // Create a SpannableString and apply formatting
+                        val spannableString = SpannableString("Release Date: $newReleasePrefix$formattedReleaseDate")
+                        val newReleaseSpan = StyleSpan(Typeface.BOLD)
+                        val greenColorSpan = ForegroundColorSpan(Color.GREEN)
+                        spannableString.setSpan(newReleaseSpan, 13, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        spannableString.setSpan(greenColorSpan, 13, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
                             getTrackList(tracklistUrl)
