@@ -138,6 +138,8 @@ class MainActivity : AppCompatActivity() {
             alertDialogBuilder.setView(dialogView)
 
             val alertDialog = alertDialogBuilder.create()
+            (dialogView.parent as? ViewGroup)?.removeView(dialogView)
+
             alertDialog.show()
 
             historyListView.setOnItemClickListener { parent, view, position, id ->
