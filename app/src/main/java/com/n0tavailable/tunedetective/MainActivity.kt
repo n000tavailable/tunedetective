@@ -100,6 +100,13 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
+
+
+        val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
+        val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
+        historyListView.layoutParams.height = Math.min(historyListView.layoutParams.height, maxHeight)
+
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
@@ -119,8 +126,9 @@ class MainActivity : AppCompatActivity() {
 
 
             val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(20)
-            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
             val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
+            val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
+            historyListView.layoutParams.height = maxHeight
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
             val historyAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
