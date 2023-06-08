@@ -175,10 +175,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
 
-            if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
-                searchHistoryDatabaseHelper.insertSearchQuery(artistName)
-            }
-
             val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
             pepeGif.visibility = View.GONE
 
