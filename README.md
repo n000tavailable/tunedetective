@@ -7,6 +7,10 @@ TuneDetective is an Android application designed to help users discover music ar
 
 TuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases. TuneDetective has you covered. Enjoy the world of music at your fingertips!
 
+## Social:
+Join our Matrix Server:
+https://matrix.to/#/#tunedetective:matrix.org
+
 # Features:
 
 - Search for music artists and view their similar artists
