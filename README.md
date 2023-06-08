@@ -1,6 +1,6 @@
 # tunedetective!
-<p align="center">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/7a7e6249-d450-4ba5-837c-2e4a55d7edd9" width="200">
+<p align="center">   
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/ba0daa6c-df51-4f62-ae8b-dfb85f7a0239" width="400">
 </p>
 
 TuneDetective is an Android application designed to help users discover music artists and explore their latest releases. The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.
