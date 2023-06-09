@@ -6,6 +6,7 @@ import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
@@ -31,6 +32,7 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -62,9 +64,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var albumCoverLayout: LinearLayout
     private lateinit var progressDialog: ProgressDialog
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
+    private lateinit var sharedPreferences: SharedPreferences
+
 
 
     private var mediaPlayer: MediaPlayer? = null
+    private var pepeGifEnabled = true
+
 
 
     override fun onDestroy() {
@@ -84,6 +90,25 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = null
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        // Save the toggle state to SharedPreferences
+        sharedPreferences.edit()
+            .putBoolean("pepeGifEnabled", pepeGifEnabled)
+            .apply()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Retrieve the toggle state from SharedPreferences
+        pepeGifEnabled = sharedPreferences.getBoolean("pepeGifEnabled", true)
+
+        // Update the PepeGif visibility
+        updatePepeGifVisibility()
+    }
+
     private fun resetLayout() {
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
@@ -92,7 +117,12 @@ class MainActivity : AppCompatActivity() {
         artistEditText.text = null
 
         val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-        pepeGif.visibility = View.VISIBLE
+        // Hide the PepeGif based on the toggle state
+        if (pepeGifEnabled) {
+            pepeGif.visibility = View.VISIBLE
+        } else {
+            pepeGif.visibility = View.GONE
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +132,14 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+
+        // Initialize the SharedPreferences instance
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        // Retrieve the toggle state from SharedPreferences
+        pepeGifEnabled = sharedPreferences.getBoolean("pepeGifEnabled", true)
+
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
 
@@ -201,11 +239,19 @@ class MainActivity : AppCompatActivity() {
         dropdownMenu.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val selectedItem = dropdownMenuItems[position]
-                if (selectedItem == "About") {
-                    val intent = Intent(this@MainActivity, AboutActivity::class.java)
-                    startActivity(intent)
-                    // Reset the spinner selection
-                    dropdownMenu.setSelection(0)
+                when (selectedItem) {
+                    "About" -> {
+                        val intent = Intent(this@MainActivity, AboutActivity::class.java)
+                        startActivity(intent)
+                        // Reset the spinner selection
+                        dropdownMenu.setSelection(0)
+                    }
+                    "Settings" -> {
+                        val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                        startActivity(intent)
+                        // Reset the spinner selection
+                        dropdownMenu.setSelection(0)
+                    }
                 }
             }
 
@@ -227,8 +273,10 @@ class MainActivity : AppCompatActivity() {
             hideKeyboard()
 
             val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-            pepeGif.visibility = View.GONE
-
+            // Hide the PepeGif based on the toggle state
+            if (pepeGifEnabled) {
+                pepeGif.visibility = View.GONE
+            }
             searchSimilarArtists(artistName)
         }
 
@@ -240,6 +288,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updatePepeGifVisibility() {
+        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+
+        if (pepeGifEnabled) {
+            pepeGif.visibility = View.VISIBLE
+        } else {
+            pepeGif.visibility = View.GONE
+        }
+    }
 
     private fun searchSimilarArtists(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY

@@ -60,17 +60,4 @@
             android:text="Join the Matrix-Server" />
 
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="20dp" />
-
-
-
-
-    <pl.droidsonroids.gif.GifImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/pepe2" />
-
 </LinearLayout>
