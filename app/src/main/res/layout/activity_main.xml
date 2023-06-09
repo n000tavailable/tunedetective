@@ -16,6 +16,10 @@
         android:layout_gravity="center"
         android:entries="@array/dropdown_menu_items" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
     <TextView
         android:id="@+id/welcomeMessageTextView"
         android:layout_width="wrap_content"
