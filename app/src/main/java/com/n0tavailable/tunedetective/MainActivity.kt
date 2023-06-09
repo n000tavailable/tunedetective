@@ -288,6 +288,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun searchArtistById(artistId: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        progressDialog.show()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                progressDialog.dismiss()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                progressDialog.dismiss()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistName = jsonResponse.getString("name")
+                    val artistImageUrl = jsonResponse.getString("picture_big")
+                    val artist = Pair(artistName, artistImageUrl)
+
+                    runOnUiThread {
+                        showArtistSelectionDialog(listOf(artist))
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+
     private fun updatePepeGifVisibility() {
         val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
 
@@ -301,6 +341,13 @@ class MainActivity : AppCompatActivity() {
     private fun searchSimilarArtists(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
+
+        // Check if artistName is a valid ID
+        if (artistName.matches(Regex("\\d+"))) {
+            searchArtistById(artistName)
+            return
+        }
+
         val request = Request.Builder()
             .url("https://api.deezer.com/search/artist?q=$artistName")
             .addHeader("Authorization", "Bearer $apiKey")
