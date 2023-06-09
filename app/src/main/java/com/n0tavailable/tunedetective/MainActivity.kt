@@ -51,8 +51,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -72,20 +70,16 @@ class MainActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
 
-    private lateinit var timer: Timer
-
     override fun onDestroy() {
         super.onDestroy()
         stopPlayback()
         resetLayout()
-        timer.cancel()
     }
 
     override fun onStop() {
         super.onStop()
         stopPlayback()
         resetLayout()
-        timer.cancel()
     }
 
     private fun stopPlayback() {
@@ -133,7 +127,9 @@ class MainActivity : AppCompatActivity() {
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Loading data...")
         progressDialog.setCancelable(false)
+
         setContentView(R.layout.activity_main)
+
 
         // Initialize the welcomeMessageTextView
         welcomeMessageTextView = findViewById(R.id.welcomeMessageTextView)
@@ -146,30 +142,27 @@ class MainActivity : AppCompatActivity() {
 
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
+
+
         val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
         val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
-        historyListView.layoutParams.height = Math.min(historyListView.layoutParams.height, maxHeight)
+        historyListView.layoutParams.height =
+            Math.min(historyListView.layoutParams.height, maxHeight)
+
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        timer = Timer()
-        timer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                runOnUiThread {
-                    val welcomeMessageWithTime = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-                        in 0..4 -> "It's late at night."
-                        in 5..8 -> "Enjoy the early morning!"
-                        in 9..11 -> "Have a productive day!"
-                        in 12..14 -> "It's lunchtime!"
-                        in 15..17 -> "Keep up the good work!"
-                        in 18..20 -> "Relax in the evening."
-                        else -> "Have a pleasant night!"
-                    }
-                    welcomeMessageTextView.text = welcomeMessageWithTime
-                }
-            }
-        }, 0, 60 * 60 * 1000) // Update every hour
+        val welcomeMessageWithTime = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+            in 0..4 -> "It's late at night."
+            in 5..8 -> "Enjoy the early morning!"
+            in 9..11 -> "Have a productive day!"
+            in 12..14 -> "It's lunchtime!"
+            in 15..17 -> "Keep up the good work!"
+            in 18..20 -> "Relax in the evening."
+            else -> "Have a pleasant night!"
+        }
 
+        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         showSearchHistoryButton.setOnClickListener {
 
