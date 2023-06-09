@@ -7,49 +7,48 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
+    <TextView
+        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+        android:layout_width="wrap_content"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        android:layout_height="wrap_content"
+        android:text="tunedetective!"
+        />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:src="@drawable/frog" />
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        />
 
-        <ImageView
-            android:id="@+id/profile"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center_horizontal"
-            android:scaleType="centerCrop"
-            android:src="@drawable/profile" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#fff"
+        style="@style/TextAppearance.Material3.BodyMedium"
+        android:text="TuneDetective is an Android application designed to help users discover music artists and explore their latest releases. The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.\n \nTuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases. TuneDetective has you covered. Enjoy the world of music at your fingertips!"
+        />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:text="n000tavailable"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-            android:textColor="#fff"
-            android:textStyle="bold" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:text="Developer"
-            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-            android:textColor="#A8A8A8" />
+    <Button
+        android:id="@+id/joinMatrix"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:text="Join the Matrix-Server"
+        android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/joinMatrix"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:textStyle="bold"
-            android:text="Join the Matrix-Server" />
-
-    </LinearLayout>
 </LinearLayout>

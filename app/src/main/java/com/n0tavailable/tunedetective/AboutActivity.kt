@@ -20,11 +20,11 @@ class AboutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
 
-        val profileImageView: ImageView = findViewById(R.id.profile)
-        Glide.with(this)
-            .load(R.drawable.profile)
-            .apply(RequestOptions.circleCropTransform())
-            .into(profileImageView)
+    //    val profileImageView: ImageView = findViewById(R.id.profile)
+            //    Glide.with(this)
+            //         .load(R.drawable.profile)
+            //        .apply(RequestOptions.circleCropTransform())
+        //        .into(profileImageView)
 
         val joinMatrixButton: Button = findViewById(R.id.joinMatrix)
         joinMatrixButton.setOnClickListener {
