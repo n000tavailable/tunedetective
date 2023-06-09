@@ -8,13 +8,12 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
         android:layout_width="wrap_content"
-        android:textStyle="bold"
-        android:textColor="#fff"
         android:layout_height="wrap_content"
         android:text="tunedetective!"
-        />
+        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+        android:textColor="#fff"
+        android:textStyle="bold" />
 
     <ImageView
         android:layout_width="200dp"
@@ -25,22 +24,32 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        />
+        android:padding="10dp" />
 
     <TextView
+        style="@style/TextAppearance.Material3.BodyMedium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#fff"
-        style="@style/TextAppearance.Material3.BodyMedium"
-        android:text="TuneDetective is an Android application designed to help users discover music artists and explore their latest releases. The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.\n \nTuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases. TuneDetective has you covered. Enjoy the world of music at your fingertips!"
-        />
+        android:textStyle="bold"
+        android:text="You're running version 0.9!"
+        android:textColor="#fff" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        />
+        android:padding="10dp" />
+
+    <TextView
+        style="@style/TextAppearance.Material3.BodyMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TuneDetective is an Android application designed to help users discover music artists and explore their latest releases. The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.\n \nTuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases. TuneDetective has you covered. Enjoy the world of music at your fingertips!"
+        android:textColor="#fff" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp" />
 
     <Button
         android:id="@+id/joinMatrix"
