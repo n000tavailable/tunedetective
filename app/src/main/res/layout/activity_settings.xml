@@ -1,8 +1,26 @@
-<Switch xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/toggleButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Toggle PepeGif"
-    android:checked="true"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    tools:ignore="UseSwitchCompatOrMaterialXml" />
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toggle PepeGif"
+        android:textSize="18sp"
+        android:layout_gravity="center_vertical"/>
+
+    <Switch
+        style="@style/Widget.Material3.CompoundButton.Switch"
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:layout_marginStart="16dp"
+        android:layout_gravity="center_vertical"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+</LinearLayout>
