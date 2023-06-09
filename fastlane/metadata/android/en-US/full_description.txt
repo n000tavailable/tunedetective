@@ -1,1 +1,4 @@
-<p>I always used to have problems finding out about the latest releases of an artist without using any social media or streaming app.</p><p>So now, with <i>Tune Detective</i> it's possible to search for your favourite artists and get the latest releases (Song, EP, Album) with just one simple search!</p><p><i>Tune Detective</i> utilizes the Deezer API to obtain the details you're looking for.</p>
+<p>TuneDetective is an Android application designed to help users discover music artists and explore their latest releases.</p>
+<p>The app utilizes the Deezer API to search for similar artists based on user input and provides information about their albums and tracks.</p>
+<p>TuneDetective is a great tool for music enthusiasts who don't want to use any closed source software and stay up to date with the latest music releases.</p>
+<p>TuneDetective has you covered. Enjoy the world of music at your fingertips!</p>
