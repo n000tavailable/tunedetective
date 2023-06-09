@@ -113,13 +113,15 @@ class MainActivity : AppCompatActivity() {
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        val welcomeMessage = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-            in 0..5 -> "Good night!"
-            in 6..11 -> "Good morning!"
-            in 12..17 -> "Good afternoon!"
-            else -> "Good evening!"
+        val welcomeMessageWithTime = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+            in 0..4 -> "It's late at night."
+            in 5..8 -> "Enjoy the early morning!"
+            in 9..11 -> "Have a productive day!"
+            in 12..14 -> "It's lunchtime!"
+            in 15..17 -> "Keep up the good work!"
+            in 18..20 -> "Relax in the evening."
+            else -> "Have a pleasant night!"
         }
-        val welcomeMessageWithTime = "$welcomeMessage"
 
         findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
