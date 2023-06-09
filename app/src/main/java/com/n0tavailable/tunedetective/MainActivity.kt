@@ -65,13 +65,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressDialog: ProgressDialog
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
     private lateinit var sharedPreferences: SharedPreferences
-
-
-
+    private lateinit var welcomeMessageTextView: TextView
+    private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
-
-
 
     override fun onDestroy() {
         super.onDestroy()
@@ -92,15 +89,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-
-        // Save the toggle state to SharedPreferences
-        sharedPreferences.edit()
-            .putBoolean("pepeGifEnabled", pepeGifEnabled)
-            .apply()
     }
 
     override fun onResume() {
         super.onResume()
+
+        // Retrieve the toggle state from SharedPreferences
+        welcomeMessageVisible = sharedPreferences.getBoolean("welcomeMessageVisible", true)
+
+        updateWelcomeMessageVisibility()
 
         // Retrieve the toggle state from SharedPreferences
         pepeGifEnabled = sharedPreferences.getBoolean("pepeGifEnabled", true)
@@ -134,6 +131,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
+        // Initialize the welcomeMessageTextView
+        welcomeMessageTextView = findViewById(R.id.welcomeMessageTextView)
+
         // Initialize the SharedPreferences instance
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
@@ -146,7 +146,8 @@ class MainActivity : AppCompatActivity() {
 
         val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
         val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
-        historyListView.layoutParams.height = Math.min(historyListView.layoutParams.height, maxHeight)
+        historyListView.layoutParams.height =
+            Math.min(historyListView.layoutParams.height, maxHeight)
 
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
@@ -174,7 +175,8 @@ class MainActivity : AppCompatActivity() {
             historyListView.layoutParams.height = maxHeight
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
-            val historyAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
+            val historyAdapter =
+                ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
             historyListView.adapter = historyAdapter
 
             val alertDialogBuilder = AlertDialog.Builder(this)
@@ -237,7 +239,9 @@ class MainActivity : AppCompatActivity() {
         val dropdownMenuItems = resources.getStringArray(R.array.dropdown_menu_items)
 
         dropdownMenu.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>, view: View?, position: Int, id: Long
+            ) {
                 val selectedItem = dropdownMenuItems[position]
                 when (selectedItem) {
                     "About" -> {
@@ -246,6 +250,7 @@ class MainActivity : AppCompatActivity() {
                         // Reset the spinner selection
                         dropdownMenu.setSelection(0)
                     }
+
                     "Settings" -> {
                         val intent = Intent(this@MainActivity, SettingsActivity::class.java)
                         startActivity(intent)
@@ -288,13 +293,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateWelcomeMessageVisibility() {
+        welcomeMessageTextView.visibility = if (welcomeMessageVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun updatePepeGifVisibility() {
+        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+
+        if (pepeGifEnabled) {
+            pepeGif.visibility = View.VISIBLE
+        } else {
+            pepeGif.visibility = View.GONE
+        }
+    }
+
     private fun searchArtistById(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/artist/$artistId")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         progressDialog.show()
 
@@ -320,22 +337,15 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         })
-    }
-
-
-    private fun updatePepeGifVisibility() {
-        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-
-        if (pepeGifEnabled) {
-            pepeGif.visibility = View.VISIBLE
-        } else {
-            pepeGif.visibility = View.GONE
-        }
     }
 
     private fun searchSimilarArtists(artistName: String) {
@@ -348,10 +358,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         progressDialog.show()
 
@@ -377,27 +385,39 @@ class MainActivity : AppCompatActivity() {
                             val artist = artistArray.getJSONObject(i)
                             val artistName = artist.getString("name")
                             val artistImageUrl = artist.getString("picture_big")
-                            artists.add(Pair(artistName, artistImageUrl)) // Add the artist name and image URL as a pair
+                            artists.add(
+                                Pair(
+                                    artistName, artistImageUrl
+                                )
+                            ) // Add the artist name and image URL as a pair
                         }
 
-                        val finalArtists = artists.toList() // Create a final copy of the artists list
+                        val finalArtists =
+                            artists.toList() // Create a final copy of the artists list
 
                         runOnUiThread {
                             showArtistSelectionDialog(finalArtists) // Use the finalArtists variable here
                         }
                     } else {
                         runOnUiThread {
-                            Toast.makeText(this@MainActivity, "No artists found", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MainActivity, "No artists found", Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 } else {
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         })
     }
+
     private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_artist_selection)
@@ -431,10 +451,8 @@ class MainActivity : AppCompatActivity() {
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         progressDialog.show()
 
@@ -467,7 +485,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Error: ${response.code} ${response.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -477,10 +499,8 @@ class MainActivity : AppCompatActivity() {
     private fun getLatestRelease(artistId: String, artistImageUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId/albums")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/artist/$artistId/albums")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -512,10 +532,7 @@ class MainActivity : AppCompatActivity() {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
                             getAlbumDetails(
-                                albumId,
-                                albumCoverUrl,
-                                latestReleaseDate,
-                                artistImageUrl
+                                albumId, albumCoverUrl, latestReleaseDate, artistImageUrl
                             )
                         } else {
                             runOnUiThread {
@@ -539,10 +556,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAlbumDetails(
-        albumId: String,
-        albumCoverUrl: String,
-        releaseDate: String?,
-        artistImageUrl: String
+        albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String
     ) {
         val currentDate = Calendar.getInstance().time
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -563,10 +577,8 @@ class MainActivity : AppCompatActivity() {
             releaseDate
         }
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/album/$albumId")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/album/$albumId")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -590,7 +602,8 @@ class MainActivity : AppCompatActivity() {
                         loadAlbumCoverImage(albumCoverUrl)
 
                         // Create a SpannableString and apply formatting
-                        val spannableString = SpannableString("Release Date: $newReleasePrefix$formattedReleaseDate")
+                        val spannableString =
+                            SpannableString("Release Date: $newReleasePrefix$formattedReleaseDate")
 
                         releaseDateTextView.text = spannableString
 
@@ -608,10 +621,8 @@ class MainActivity : AppCompatActivity() {
     private fun getTrackList(tracklistUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(tracklistUrl)
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request =
+            Request.Builder().url(tracklistUrl).addHeader("Authorization", "Bearer $apiKey").build()
 
 
         client.newCall(request).enqueue(object : Callback {
@@ -672,9 +683,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadAlbumCoverImage(url: String) {
-        Glide.with(this)
-            .load(url)
-            .apply(RequestOptions().transform(RoundedCorners(50)))
+        Glide.with(this).load(url).apply(RequestOptions().transform(RoundedCorners(50)))
             .into(albumCoverImageView)
     }
 
@@ -721,8 +730,7 @@ class TrackListAdapter(private val trackList: List<Track>) :
     }
 
     override fun onBindViewHolder(
-        holder: TrackViewHolder,
-        @SuppressLint("RecyclerView") position: Int
+        holder: TrackViewHolder, @SuppressLint("RecyclerView") position: Int
     ) {
         val track = trackList[position]
         holder.titleTextView.text = track.title
@@ -768,7 +776,8 @@ class SearchHistoryDatabaseHelper(context: Context) :
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
-        val createTableQuery = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_QUERY TEXT)"
+        val createTableQuery =
+            "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_QUERY TEXT)"
         db?.execSQL(createTableQuery)
     }
 
@@ -819,6 +828,7 @@ class SearchHistoryDatabaseHelper(context: Context) :
         db.close()
         return queries
     }
+
     fun deleteSearchQuery(query: String) {
         val formattedQuery = query.toLowerCase(Locale.getDefault())
         val db = writableDatabase
@@ -843,10 +853,8 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
         val artist = getItem(position)
         artistNameTextView.text = artist?.first
 
-        Glide.with(context)
-            .load(artist?.second)
-            .apply(RequestOptions().transform(RoundedCorners(50)))
-            .into(artistImageView)
+        Glide.with(context).load(artist?.second)
+            .apply(RequestOptions().transform(RoundedCorners(50))).into(artistImageView)
 
         return view
     }

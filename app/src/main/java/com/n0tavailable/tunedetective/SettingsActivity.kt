@@ -16,11 +16,17 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-        val toggleButton = findViewById<Switch>(R.id.toggleButton)
+        val pepeGifSwitch = findViewById<Switch>(R.id.pepeGifSwitch)
+        val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
 
-        toggleButton.isChecked = sharedPreferences.getBoolean("pepeGifEnabled", true)
-        toggleButton.setOnCheckedChangeListener { _, isChecked ->
+        pepeGifSwitch.isChecked = sharedPreferences.getBoolean("pepeGifEnabled", true)
+        pepeGifSwitch.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("pepeGifEnabled", isChecked).apply()
+        }
+
+        welcomeMessageToggleButton.isChecked = sharedPreferences.getBoolean("welcomeMessageVisible", true)
+        welcomeMessageToggleButton.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().putBoolean("welcomeMessageVisible", isChecked).apply()
         }
     }
 }
