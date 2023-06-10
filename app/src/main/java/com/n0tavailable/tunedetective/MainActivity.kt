@@ -770,14 +770,17 @@ class TrackListAdapter(private val trackList: List<Track>) :
         return TrackViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(
-        holder: TrackViewHolder, @SuppressLint("RecyclerView") position: Int
-    ) {
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = trackList[position]
-        holder.titleTextView.text = track.title
+        val trackNumber = position + 1
+
+        val trackTitleWithNumber = "$trackNumber. ${track.title}"
+        holder.titleTextView.text = trackTitleWithNumber
 
         holder.itemView.setOnClickListener {
-            if (currentlyPlayingPosition == position) {
+            val currentPosition = holder.adapterPosition
+
+            if (currentlyPlayingPosition == currentPosition) {
                 mediaPlayer?.pause()
                 mediaPlayer?.release()
                 mediaPlayer = null
@@ -789,7 +792,7 @@ class TrackListAdapter(private val trackList: List<Track>) :
                     prepareAsync()
                     setOnPreparedListener {
                         start()
-                        currentlyPlayingPosition = position
+                        currentlyPlayingPosition = currentPosition
                     }
                     setOnCompletionListener {
                         release()
