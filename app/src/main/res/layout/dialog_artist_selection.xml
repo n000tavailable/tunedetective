@@ -10,7 +10,7 @@
         android:id="@+id/artistListView"
         android:layout_width="match_parent"
         android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
+        android:divider="#2C2C2C"
         android:dividerHeight="1dp"
         android:background="#121212"
         android:layout_height="wrap_content" />
