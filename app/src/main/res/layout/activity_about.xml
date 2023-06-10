@@ -58,6 +58,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:text="Join the Matrix-Server"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:textStyle="bold" />
 
 </LinearLayout>

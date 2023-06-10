@@ -33,12 +33,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Yes"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/noThanksButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:text="No, thanks"/>
 
     </LinearLayout>

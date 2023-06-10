@@ -23,5 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:textStyle="bold"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:text="Close" />
 </LinearLayout>

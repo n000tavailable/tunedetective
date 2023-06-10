@@ -88,6 +88,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:textStyle="bold"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:text="Tracks" />
 
     </LinearLayout>
@@ -122,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:text="Search" />
     </LinearLayout>
 
@@ -133,7 +134,7 @@
         android:layout_gravity="end"
         android:layout_marginTop="16dp"
         android:textStyle="bold"
-
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:text="Show Search History" />
 
     <pl.droidsonroids.gif.GifImageView

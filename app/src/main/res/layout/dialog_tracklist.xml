@@ -29,6 +29,7 @@
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:textStyle="bold"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:text="Close" />
 
     <TextView
