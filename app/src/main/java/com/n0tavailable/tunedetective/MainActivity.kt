@@ -104,6 +104,24 @@ class MainActivity : AppCompatActivity() {
 
         // Update the PepeGif visibility
         updatePepeGifVisibility()
+
+        updateWelcomeMessageWithTime()
+
+    }
+
+    private fun updateWelcomeMessageWithTime() {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val welcomeMessageWithTime = when (currentHour) {
+            in 0..4 -> "It's late at night."
+            in 5..8 -> "Enjoy the early morning!"
+            in 9..11 -> "Have a productive day!"
+            in 12..14 -> "It's lunchtime!"
+            in 15..17 -> "Keep up the good work!"
+            in 18..20 -> "Relax in the evening."
+            else -> "Have a pleasant night!"
+        }
+
+        welcomeMessageTextView.text = welcomeMessageWithTime
     }
 
     private fun resetLayout() {
@@ -151,18 +169,6 @@ class MainActivity : AppCompatActivity() {
 
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
-
-        val welcomeMessageWithTime = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-            in 0..4 -> "It's late at night."
-            in 5..8 -> "Enjoy the early morning!"
-            in 9..11 -> "Have a productive day!"
-            in 12..14 -> "It's lunchtime!"
-            in 15..17 -> "Keep up the good work!"
-            in 18..20 -> "Relax in the evening."
-            else -> "Have a pleasant night!"
-        }
-
-        findViewById<TextView>(R.id.welcomeMessageTextView).text = welcomeMessageWithTime
 
         showSearchHistoryButton.setOnClickListener {
 
