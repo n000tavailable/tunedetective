@@ -13,6 +13,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -147,6 +148,9 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+        showFeedbackDialog()
+
 
 
         // Initialize the welcomeMessageTextView
@@ -296,6 +300,37 @@ class MainActivity : AppCompatActivity() {
             if (drawable != null) {
                 showFullscreenImage(drawable)
             }
+        }
+    }
+
+    private fun showFeedbackDialog() {
+        val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
+
+        if (showDialog) {
+            val dialog = Dialog(this)
+            dialog.setContentView(R.layout.dialog_feedback)
+
+            val yesButton = dialog.findViewById<Button>(R.id.yesButton)
+            val noThanksButton = dialog.findViewById<Button>(R.id.noThanksButton)
+
+            yesButton.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5"))
+                startActivity(intent)
+                dialog.dismiss()
+            }
+
+            noThanksButton.setOnClickListener {
+                dialog.dismiss()
+
+                // Save the preference to not show the dialog again
+                sharedPreferences.edit().apply {
+                    putBoolean("ShowFeedbackDialog", false)
+                    apply()
+                }
+            }
+
+            dialog.show()
         }
     }
 
