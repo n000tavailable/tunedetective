@@ -895,7 +895,7 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
         artistNameTextView.text = artist?.first
 
         Glide.with(context).load(artist?.second)
-            .apply(RequestOptions().transform(RoundedCorners(50))).into(artistImageView)
+            .apply(RequestOptions().transform(RoundedCorners(100))).into(artistImageView)
 
         return view
     }
