@@ -19,6 +19,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,7 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -164,7 +166,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
             }
         }
-
 
 
         // Initialize the welcomeMessageTextView
@@ -404,13 +405,19 @@ class MainActivity : AppCompatActivity() {
                         discography.sortByDescending { it.second } // Sort by release date
 
                         runOnUiThread {
-                            val discographyDialogView = layoutInflater.inflate(R.layout.dialog_discography, null)
-                            val discographyTitleTextView = discographyDialogView.findViewById<TextView>(R.id.dialogTitleTextView)
-                            val discographyListView = discographyDialogView.findViewById<ListView>(R.id.discographyListView)
+                            val discographyDialogView =
+                                layoutInflater.inflate(R.layout.dialog_discography, null)
+                            val discographyTitleTextView =
+                                discographyDialogView.findViewById<TextView>(R.id.dialogTitleTextView)
+                            val discographyListView =
+                                discographyDialogView.findViewById<ListView>(R.id.discographyListView)
 
                             discographyTitleTextView.text = "Discography"
 
-                            val discographyAdapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_list_item_1, discography.map { it.first })
+                            val discographyAdapter = ArrayAdapter(
+                                this@MainActivity,
+                                android.R.layout.simple_list_item_1,
+                                discography.map { it.first })
                             discographyListView.adapter = discographyAdapter
 
                             val discographyDialog = AlertDialog.Builder(this@MainActivity)
@@ -458,7 +465,10 @@ class MainActivity : AppCompatActivity() {
             val noThanksButton = dialog.findViewById<Button>(R.id.noThanksButton)
 
             yesButton.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5"))
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5")
+                )
                 startActivity(intent)
                 dialog.dismiss()
             }
@@ -527,9 +537,12 @@ class MainActivity : AppCompatActivity() {
                                 dialog.setContentView(R.layout.album_details_dialog)
 
                                 // Set the album details in the dialog views
-                                val albumTitleTextView = dialog.findViewById<TextView>(R.id.albumTitleTextView)
-                                val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
-                                val tracklistButton = dialog.findViewById<Button>(R.id.tracklistButton)
+                                val albumTitleTextView =
+                                    dialog.findViewById<TextView>(R.id.albumTitleTextView)
+                                val albumCoverImageView =
+                                    dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+                                val tracklistButton =
+                                    dialog.findViewById<Button>(R.id.tracklistButton)
 
                                 albumTitleTextView.text = albumTitle
 
@@ -606,10 +619,41 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         runOnUiThread {
+                            // Create a dialog to display the tracklist
+                            val dialogView =
+                                layoutInflater.inflate(R.layout.dialog_tracklist2, null)
+                            val tracklistListView =
+                                dialogView.findViewById<ListView>(R.id.tracklistListView)
+
+                            val tracklistAdapter = object : ArrayAdapter<String>(
+                                this@MainActivity,
+                                android.R.layout.simple_list_item_1,
+                                tracklist
+                            ) {
+                                override fun getView(
+                                    position: Int,
+                                    convertView: View?,
+                                    parent: ViewGroup
+                                ): View {
+                                    val view = super.getView(position, convertView, parent)
+                                    val textView = view.findViewById<TextView>(android.R.id.text1)
+                                    textView.setTextColor(
+                                        ContextCompat.getColor(
+                                            this@MainActivity,
+                                            R.color.white
+                                        )
+                                    )
+                                    textView.gravity = Gravity.CENTER // Set text gravity to center
+                                    return view
+                                }
+                            }
+
+                            tracklistListView.adapter = tracklistAdapter
+
                             val tracklistDialog = AlertDialog.Builder(this@MainActivity)
                                 .setTitle("Tracklist")
                                 .setPositiveButton("OK", null)
-                                .setItems(tracklist.toTypedArray(), null)
+                                .setView(dialogView)
                                 .create()
 
                             tracklistDialog.show()
@@ -1085,7 +1129,8 @@ class TrackListAdapter(private val trackList: List<Track>) :
         holder.titleTextView.text = track.title
 
         val trackTitleWithNumber = "<font color='#797979'>$trackNumber.</font> ${track.title}"
-        holder.titleTextView.text = HtmlCompat.fromHtml(trackTitleWithNumber, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        holder.titleTextView.text =
+            HtmlCompat.fromHtml(trackTitleWithNumber, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         // Set total tracks indicator
         holder.totalTracksTextView.text = "Total Tracks: $totalTracks"
