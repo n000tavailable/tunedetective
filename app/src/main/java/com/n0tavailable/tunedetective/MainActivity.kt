@@ -754,6 +754,11 @@ class TrackListAdapter(private val trackList: List<Track>) :
 
     private var mediaPlayer: MediaPlayer? = null
     private var currentlyPlayingPosition: Int = -1
+    private var totalTracks: Int = 0
+
+    init {
+        totalTracks = trackList.size
+    }
 
     fun stopPlayback() {
         mediaPlayer?.release()
@@ -763,6 +768,7 @@ class TrackListAdapter(private val trackList: List<Track>) :
 
     inner class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
+        val totalTracksTextView: TextView = itemView.findViewById(R.id.totalTracksTextView)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
@@ -775,8 +781,14 @@ class TrackListAdapter(private val trackList: List<Track>) :
         val track = trackList[position]
         val trackNumber = position + 1
 
+        holder.titleTextView.text = track.title
+
         val trackTitleWithNumber = "<font color='#797979'>$trackNumber.</font> ${track.title}"
         holder.titleTextView.text = HtmlCompat.fromHtml(trackTitleWithNumber, HtmlCompat.FROM_HTML_MODE_LEGACY)
+
+        // Set total tracks indicator
+        holder.totalTracksTextView.text = "Total Tracks: $totalTracks"
+        holder.totalTracksTextView.visibility = if (position == 0) View.VISIBLE else View.GONE
 
         holder.itemView.setOnClickListener {
             val currentPosition = holder.adapterPosition
@@ -803,6 +815,7 @@ class TrackListAdapter(private val trackList: List<Track>) :
             }
         }
     }
+
     override fun getItemCount(): Int {
         return trackList.size
     }
