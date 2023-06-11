@@ -40,16 +40,5 @@
         android:layout_gravity="center_vertical"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
-    <Button
-        android:id="@+id/gifSelectionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginTop="16dp"
-        android:text="gifSelectionButton"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:textStyle="bold" />
-
-
 
 </LinearLayout>
