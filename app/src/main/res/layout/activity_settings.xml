@@ -40,5 +40,22 @@
         android:layout_gravity="center_vertical"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toggle Discography-Button (unreliable)"
+        android:textSize="18sp"
+        android:layout_gravity="center_vertical"/>
+
+    <Switch
+        style="@style/Preference.SwitchPreferenceCompat"
+        android:id="@+id/discographyButtonSwitch"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:checked="false"
+        android:layout_marginStart="16dp"
+        android:layout_gravity="center_vertical"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
 
 </LinearLayout>

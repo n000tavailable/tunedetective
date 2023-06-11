@@ -155,9 +155,20 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+
         showFeedbackDialog()
 
+        val discographyButtonVisible = sharedPreferences.getBoolean("discographyButtonVisible", false)
         val discographyButton = findViewById<Button>(R.id.discographyButton)
+
+        if (!discographyButtonVisible) {
+            discographyButton.visibility = View.GONE
+        } else {
+            discographyButton.visibility = View.VISIBLE
+        }
+
         discographyButton.setOnClickListener {
             val artistName = artistEditText.text.toString().trim()
             if (artistName.isNotEmpty()) {
@@ -317,7 +328,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun showArtistDiscography(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
