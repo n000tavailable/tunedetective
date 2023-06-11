@@ -43,8 +43,8 @@
 
         <ImageView
             android:id="@+id/albumCoverImageView"
-            android:layout_width="240dp"
-            android:layout_height="240dp"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
             android:layout_gravity="center_horizontal"
             android:scaleType="centerCrop"
             android:src="@drawable/round_music_note_24" />
