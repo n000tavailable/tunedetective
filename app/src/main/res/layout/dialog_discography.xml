@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
+        style="@style/TextAppearance.Material3.TitleLarge"
         android:textColor="#FFF"
         android:textStyle="bold" />
 
@@ -15,7 +16,7 @@
         android:id="@+id/discographyListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@android:color/darker_gray"
+        android:divider="#00FFFFFF"
         android:dividerHeight="1dp" />
 
 </LinearLayout>
