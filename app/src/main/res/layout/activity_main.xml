@@ -11,8 +11,8 @@
         android:id="@+id/dropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
         android:layout_gravity="center"
         android:entries="@array/dropdown_menu_items" />
 
@@ -23,11 +23,11 @@
     <TextView
         android:id="@+id/welcomeMessageTextView"
         android:layout_width="wrap_content"
-        android:textAlignment="center"
-        android:layout_gravity="center"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
+        android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
         android:textColor="#FFFFFF"
         android:textSize="30dp"
@@ -83,13 +83,13 @@
 
         <Button
             android:id="@+id/displayTracks"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:textStyle="bold"
-            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-            android:text="Tracks" />
+            android:text="Tracks"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
@@ -120,22 +120,22 @@
 
         <Button
             android:id="@+id/searchButton"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-            android:text="Search" />
+            android:text="Search"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <Button
         android:id="@+id/showSearchHistoryButton"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginTop="16dp"
-        android:textStyle="bold"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:text="Show Search History" />
+        android:text="Show Search History"
+        android:textStyle="bold" />
 
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/pepeGif"
