@@ -47,6 +47,7 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.json.JSONArray
 import org.json.JSONObject
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
@@ -71,6 +72,8 @@ class MainActivity : AppCompatActivity() {
     private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
+    private var artistName: String? = null
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -151,6 +154,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         showFeedbackDialog()
+
+        val discographyButton = findViewById<Button>(R.id.discographyButton)
+        discographyButton.setOnClickListener {
+            val artistName = artistEditText.text.toString().trim()
+            if (artistName.isNotEmpty()) {
+                showArtistDiscography(artistName)
+            } else {
+                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
+            }
+        }
 
 
 
@@ -304,6 +317,135 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showArtistDiscography(artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        progressDialog.show()
+
+        this.artistName = artistName
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                progressDialog.dismiss()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                progressDialog.dismiss()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistArray = jsonResponse.getJSONArray("data")
+
+                    if (artistArray.length() > 0) {
+                        val artist = artistArray.getJSONObject(0)
+                        val artistId = artist.getString("id")
+                        val artistImageUrl = artist.getString("picture_big")
+                        getArtistDiscography(artistId, artistImageUrl)
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "No artist found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun getArtistDiscography(artistId: String, artistImageUrl: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    if (albumArray.length() > 0) {
+                        val discography = mutableListOf<Pair<String, String>>()
+
+                        for (i in 0 until albumArray.length()) {
+                            val album = albumArray.getJSONObject(i)
+                            val albumTitle = album.getString("title")
+                            val albumReleaseDate = album.getString("release_date")
+                            discography.add(albumTitle to albumReleaseDate)
+                        }
+
+                        discography.sortByDescending { it.second } // Sort by release date
+
+                        runOnUiThread {
+                            val discographyDialogView = layoutInflater.inflate(R.layout.dialog_discography, null)
+                            val discographyTitleTextView = discographyDialogView.findViewById<TextView>(R.id.dialogTitleTextView)
+                            val discographyListView = discographyDialogView.findViewById<ListView>(R.id.discographyListView)
+
+                            discographyTitleTextView.text = "Discography"
+
+                            val discographyAdapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_list_item_1, discography.map { it.first })
+                            discographyListView.adapter = discographyAdapter
+
+                            val discographyDialog = AlertDialog.Builder(this@MainActivity)
+                                .setView(discographyDialogView)
+                                .setPositiveButton("OK", null)
+                                .create()
+
+                            discographyDialog.show()
+
+                            discographyListView.setOnItemClickListener { _, _, index, _ ->
+                                artistName?.let { showAlbumDetails(discography[index].first, it) }
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "No discography found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+
     private fun showFeedbackDialog() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
@@ -333,6 +475,165 @@ class MainActivity : AppCompatActivity() {
 
             dialog.show()
         }
+    }
+
+    private fun showAlbumDetails(albumTitle: String, artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val encodedAlbumTitle = Uri.encode(albumTitle) // Encode the album title if needed
+
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/album?q=$encodedAlbumTitle")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    if (albumArray.length() > 0) {
+                        var foundAlbum: JSONObject? = null
+
+                        // Iterate over the albums and find the one with a matching title and artist
+                        for (i in 0 until albumArray.length()) {
+                            val album = albumArray.getJSONObject(i)
+                            val currentAlbumTitle = album.getString("title")
+                            val currentArtistName = album.getJSONObject("artist").getString("name")
+
+                            if (currentAlbumTitle.equals(albumTitle, ignoreCase = true) &&
+                                currentArtistName.equals(artistName, ignoreCase = true)
+                            ) {
+                                foundAlbum = album
+                                break
+                            }
+                        }
+
+                        if (foundAlbum != null) {
+                            val albumId = foundAlbum.getString("id")
+                            val albumTitle = foundAlbum.getString("title")
+                            val albumCoverUrl = foundAlbum.getString("cover_medium")
+
+                            runOnUiThread {
+                                // Create a dialog to display the album details
+                                val dialog = Dialog(this@MainActivity)
+                                dialog.setContentView(R.layout.album_details_dialog)
+
+                                // Set the album details in the dialog views
+                                val albumTitleTextView = dialog.findViewById<TextView>(R.id.albumTitleTextView)
+                                val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+                                val tracklistButton = dialog.findViewById<Button>(R.id.tracklistButton)
+
+                                albumTitleTextView.text = albumTitle
+
+                                // Load the album cover image using Glide
+                                Glide.with(this@MainActivity)
+                                    .load(albumCoverUrl)
+                                    .into(albumCoverImageView)
+
+                                // Set click listener for the tracklist button
+                                tracklistButton.setOnClickListener {
+                                    fetchAndShowTracklist(albumId)
+                                }
+
+                                dialog.show()
+                            }
+                        } else {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Album details not found",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Album details not found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun fetchAndShowTracklist(albumId: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/album/$albumId/tracks")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val tracklistArray = jsonResponse.getJSONArray("data")
+
+                    if (tracklistArray.length() > 0) {
+                        val tracklist = mutableListOf<String>()
+
+                        for (i in 0 until tracklistArray.length()) {
+                            val track = tracklistArray.getJSONObject(i)
+                            val trackTitle = track.getString("title")
+                            tracklist.add(trackTitle)
+                        }
+
+                        runOnUiThread {
+                            val tracklistDialog = AlertDialog.Builder(this@MainActivity)
+                                .setTitle("Tracklist")
+                                .setPositiveButton("OK", null)
+                                .setItems(tracklist.toTypedArray(), null)
+                                .create()
+
+                            tracklistDialog.show()
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Tracklist not found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error: ${response.code} ${response.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
     }
 
     private fun updateWelcomeMessageVisibility() {

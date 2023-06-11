@@ -1,0 +1,38 @@
+<!-- album_details_dialog.xml -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Album cover image -->
+    <ImageView
+        android:id="@+id/albumCoverImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true" />
+
+    <!-- Album title -->
+    <TextView
+        android:id="@+id/albumTitleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:textAppearanceLarge"
+        android:textStyle="bold"
+        android:textColor="#FFF"
+        android:padding="16dp" />
+
+
+    <Button
+        android:id="@+id/tracklistButton"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tracklist"
+        android:layout_gravity="center"
+        android:textStyle="bold" />
+
+    <!-- Add more album details views as needed -->
+
+</LinearLayout>
