@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
     android:orientation="vertical"
+    android:background="#121212"
     android:padding="16dp"
     tools:context=".MainActivity">
 
@@ -13,21 +13,20 @@
         android:layout_height="48dp"
         android:entries="@array/dropdown_menu_items" />
 
-    <LinearLayout
+    <Space
         android:layout_width="match_parent"
         android:layout_height="20dp" />
 
     <TextView
         android:id="@+id/welcomeMessageTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
         android:textColor="#FFFFFF"
-        android:textSize="30dp"
+        android:textSize="30sp"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -42,7 +41,6 @@
             android:id="@+id/albumCoverImageView"
             android:layout_width="300dp"
             android:layout_height="300dp"
-            android:layout_gravity="center_horizontal"
             android:scaleType="centerCrop"
             android:src="@drawable/round_music_note_24" />
 
@@ -50,19 +48,17 @@
             android:id="@+id/trackTitleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:text="Track Title"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
-            android:textColor="#fff"
+            android:textColor="#FFF"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/releaseDateTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"
             android:text="Release Date"
             android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
@@ -72,7 +68,6 @@
             android:id="@+id/artistImageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
             android:background="@drawable/default_profile_image"
             android:scaleType="centerCrop"
@@ -89,24 +84,24 @@
                 style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:text="Tracks"
                 android:textStyle="bold" />
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
 
             <Button
                 android:id="@+id/discographyButton"
                 style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
                 android:text="Show Discography"
                 android:textStyle="bold" />
-
         </LinearLayout>
-
     </LinearLayout>
 
-    <LinearLayout
+    <Space
         android:layout_width="match_parent"
         android:layout_height="20dp" />
 
