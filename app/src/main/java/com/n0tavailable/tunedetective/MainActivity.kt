@@ -36,6 +36,7 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -774,8 +775,8 @@ class TrackListAdapter(private val trackList: List<Track>) :
         val track = trackList[position]
         val trackNumber = position + 1
 
-        val trackTitleWithNumber = "$trackNumber. ${track.title}"
-        holder.titleTextView.text = trackTitleWithNumber
+        val trackTitleWithNumber = "<font color='#797979'>$trackNumber.</font> ${track.title}"
+        holder.titleTextView.text = HtmlCompat.fromHtml(trackTitleWithNumber, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         holder.itemView.setOnClickListener {
             val currentPosition = holder.adapterPosition
@@ -802,7 +803,6 @@ class TrackListAdapter(private val trackList: List<Track>) :
             }
         }
     }
-
     override fun getItemCount(): Int {
         return trackList.size
     }
