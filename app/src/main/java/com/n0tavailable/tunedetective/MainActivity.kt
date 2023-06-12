@@ -368,7 +368,8 @@ class MainActivity : AppCompatActivity() {
                         val artistId = artist.getString("id")
 
                         // Start a new activity to display the artist discography
-                        val intent = Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                        val intent =
+                            Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
                         intent.putExtra("artistId", artistId)
                         startActivity(intent)
                     } else {
@@ -376,144 +377,6 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(
                                 this@MainActivity,
                                 "No artist found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Error: ${response.code} ${response.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        })
-    }
-
-    private fun getFullArtistDiscography(artistId: String) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId/albums?limit=50")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val albumArray = jsonResponse.getJSONArray("data")
-
-                    if (albumArray.length() > 0) {
-                        val discographyMap =
-                            mutableMapOf<String, String>() // Use a map to store the discography
-
-                        for (i in 0 until albumArray.length()) {
-                            val album = albumArray.getJSONObject(i)
-                            val albumTitle = album.getString("title")
-                            val albumReleaseDate = album.getString("release_date")
-
-                            // Add the album to the discography map if it doesn't already exist
-                            if (!discographyMap.containsKey(albumTitle)) {
-                                discographyMap[albumTitle] = albumReleaseDate
-                            }
-                        }
-
-                        // Retrieve the EPs and singles
-                        val epsAndSinglesRequest = Request.Builder()
-                            .url("https://api.deezer.com/artist/$artistId/albums?limit=50&filter=ep,single")
-                            .addHeader("Authorization", "Bearer $apiKey")
-                            .build()
-
-                        client.newCall(epsAndSinglesRequest).enqueue(object : Callback {
-                            override fun onFailure(call: Call, e: IOException) {
-                                e.printStackTrace()
-                            }
-
-                            override fun onResponse(call: Call, response: Response) {
-                                val epsAndSinglesData = response.body?.string()
-
-                                if (response.isSuccessful && epsAndSinglesData != null) {
-                                    val epsAndSinglesJson = JSONObject(epsAndSinglesData)
-                                    val epsAndSinglesArray = epsAndSinglesJson.getJSONArray("data")
-
-                                    for (i in 0 until epsAndSinglesArray.length()) {
-                                        val epOrSingle = epsAndSinglesArray.getJSONObject(i)
-                                        val epOrSingleTitle = epOrSingle.getString("title")
-                                        val epOrSingleReleaseDate =
-                                            epOrSingle.getString("release_date")
-
-                                        // Add the EP or single to the discography map if an album with the same name doesn't already exist
-                                        if (!discographyMap.containsKey(epOrSingleTitle)) {
-                                            discographyMap[epOrSingleTitle] = epOrSingleReleaseDate
-                                        }
-                                    }
-
-                                    val sortedDiscography = discographyMap.toList()
-                                        .sortedByDescending { it.second } // Sort by release date
-
-                                    runOnUiThread {
-                                        val discographyDialogView =
-                                            layoutInflater.inflate(
-                                                R.layout.dialog_discography,
-                                                null
-                                            )
-                                        val discographyTitleTextView =
-                                            discographyDialogView.findViewById<TextView>(R.id.dialogTitleTextView)
-                                        val discographyListView =
-                                            discographyDialogView.findViewById<ListView>(R.id.discographyListView)
-
-                                        discographyTitleTextView.text = "Discography"
-
-                                        val discographyAdapter = ArrayAdapter(
-                                            this@MainActivity,
-                                            android.R.layout.simple_list_item_1,
-                                            sortedDiscography.map { it.first })
-                                        discographyListView.adapter = discographyAdapter
-
-                                        val discographyDialog =
-                                            AlertDialog.Builder(this@MainActivity)
-                                                .setView(discographyDialogView)
-                                                .setPositiveButton("OK", null)
-                                                .create()
-
-                                        discographyDialog.show()
-
-                                        discographyListView.setOnItemClickListener { _, _, index, _ ->
-                                            artistName?.let {
-                                                showAlbumDetails(
-                                                    sortedDiscography[index].first,
-                                                    it
-                                                )
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    runOnUiThread {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "No discography found",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                            }
-                        })
-
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "No discography found",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -1364,8 +1227,9 @@ class ArtistDiscographyActivity : AppCompatActivity() {
     private fun getFullArtistDiscography(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
+
         val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId/albums")
+            .url("https://api.deezer.com/artist/$artistId/albums?limit=1000&type=album,single,ep")
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
@@ -1422,45 +1286,46 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             }
         })
     }
-}
 
-data class Album(
-    val albumId: String,
-    val title: String,
-    val coverUrl: String,
-    val releaseDate: String
-)
+    data class Album(
+        val albumId: String,
+        val title: String,
+        val coverUrl: String,
+        val releaseDate: String
+    )
 
-class AlbumAdapter(private val albums: List<Album>) :
-    RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
+    class AlbumAdapter(private val albums: List<Album>) :
+        RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val albumCoverImageView: ImageView = itemView.findViewById(R.id.albumCoverImageView)
-        val albumTitleTextView: TextView = itemView.findViewById(R.id.albumTitleTextView)
-        val albumReleaseDateTextView: TextView = itemView.findViewById(R.id.albumReleaseDateTextView)
-    }
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val albumCoverImageView: ImageView = itemView.findViewById(R.id.albumCoverImageView)
+            val albumTitleTextView: TextView = itemView.findViewById(R.id.albumTitleTextView)
+            val albumReleaseDateTextView: TextView =
+                itemView.findViewById(R.id.albumReleaseDateTextView)
+        }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_album, parent, false)
-        return ViewHolder(view)
-    }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_album, parent, false)
+            return ViewHolder(view)
+        }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val album = albums[position]
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val album = albums[position]
 
-        Glide.with(holder.itemView)
-            .load(album.coverUrl)
-            .transition(DrawableTransitionOptions.withCrossFade())
-            .transform(RoundedCorners(50))
-            .into(holder.albumCoverImageView)
+            Glide.with(holder.itemView)
+                .load(album.coverUrl)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .transform(RoundedCorners(50))
+                .into(holder.albumCoverImageView)
 
-        holder.albumTitleTextView.text = album.title
-        holder.albumReleaseDateTextView.text = album.releaseDate
-    }
+            holder.albumTitleTextView.text = album.title
+            holder.albumReleaseDateTextView.text = album.releaseDate
+        }
 
-    override fun getItemCount(): Int {
-        return albums.size
+        override fun getItemCount(): Int {
+            return albums.size
+        }
     }
 }
 
