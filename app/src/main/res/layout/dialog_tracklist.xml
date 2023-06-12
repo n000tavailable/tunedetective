@@ -8,6 +8,14 @@
     android:orientation="vertical"
     android:padding="10dp">
 
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/trackCountTextView"
+        />
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause"
+        android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause \n Only for latest releases"
         android:textAlignment="center"
         android:textColor="#FFF" />
 

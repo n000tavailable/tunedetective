@@ -7,6 +7,12 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/albumCoverImageView2"
+        />
+
     <TextView
         android:id="@+id/trackTitleTextView"
         android:layout_width="match_parent"
