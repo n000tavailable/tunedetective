@@ -61,6 +61,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
     private lateinit var displayTracks: Button
+    private lateinit var discographyButton: Button
     private lateinit var artistEditText: EditText
     private lateinit var trackTitleTextView: TextView
     private lateinit var albumCoverImageView: ImageView
@@ -135,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
+        discographyButton.visibility = View.VISIBLE
         albumCoverImageView.setImageResource(R.drawable.round_album_cover)
         artistEditText.text = null
 
@@ -154,6 +156,9 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+        discographyButton = findViewById(R.id.discographyButton)
+
 
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
@@ -1058,7 +1063,9 @@ class MainActivity : AppCompatActivity() {
                         albumCoverLayout.visibility = View.VISIBLE
                         trackTitleTextView.visibility = View.VISIBLE
                         releaseDateTextView.visibility = View.VISIBLE
+                        discographyButton.visibility = View.GONE
                         trackTitleTextView.text = albumTitle
+
                         loadAlbumCoverImage(albumCoverUrl)
 
                         // Create a SpannableString and apply formatting
