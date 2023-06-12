@@ -39,7 +39,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         discographyButtonSwitch.isChecked =
-            sharedPreferences.getBoolean("discographyButtonVisible", false)
+            sharedPreferences.getBoolean("discographyButtonVisible", true)
         discographyButtonSwitch.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("discographyButtonVisible", isChecked).apply()
             showDialogAndRestart()

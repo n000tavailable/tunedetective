@@ -43,7 +43,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toggle Discography-Button (unreliable)"
+        android:text="Toggle Discography-Button"
         android:textSize="18sp"
         android:layout_gravity="center_vertical"/>
 
@@ -52,7 +52,7 @@
         android:id="@+id/discographyButtonSwitch"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:checked="false"
+        android:checked="true"
         android:layout_marginStart="16dp"
         android:layout_gravity="center_vertical"
         tools:ignore="UseSwitchCompatOrMaterialXml" />

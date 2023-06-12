@@ -124,7 +124,7 @@
             style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Latest Release"
+            android:text="Search"
             android:textStyle="bold" />
     </LinearLayout>
 
