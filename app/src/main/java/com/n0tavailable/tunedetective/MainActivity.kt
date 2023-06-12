@@ -160,7 +160,8 @@ class MainActivity : AppCompatActivity() {
 
         showFeedbackDialog()
 
-        val discographyButtonVisible = sharedPreferences.getBoolean("discographyButtonVisible", false)
+        val discographyButtonVisible =
+            sharedPreferences.getBoolean("discographyButtonVisible", false)
         val discographyButton = findViewById<Button>(R.id.discographyButton)
 
         if (!discographyButtonVisible) {
@@ -328,6 +329,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun showArtistDiscography(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
@@ -407,7 +409,8 @@ class MainActivity : AppCompatActivity() {
                     val albumArray = jsonResponse.getJSONArray("data")
 
                     if (albumArray.length() > 0) {
-                        val discographyMap = mutableMapOf<String, String>() // Use a map to store the discography
+                        val discographyMap =
+                            mutableMapOf<String, String>() // Use a map to store the discography
 
                         for (i in 0 until albumArray.length()) {
                             val album = albumArray.getJSONObject(i)
@@ -441,7 +444,8 @@ class MainActivity : AppCompatActivity() {
                                     for (i in 0 until epsAndSinglesArray.length()) {
                                         val epOrSingle = epsAndSinglesArray.getJSONObject(i)
                                         val epOrSingleTitle = epOrSingle.getString("title")
-                                        val epOrSingleReleaseDate = epOrSingle.getString("release_date")
+                                        val epOrSingleReleaseDate =
+                                            epOrSingle.getString("release_date")
 
                                         // Add the EP or single to the discography map if an album with the same name doesn't already exist
                                         if (!discographyMap.containsKey(epOrSingleTitle)) {
@@ -449,11 +453,15 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }
 
-                                    val sortedDiscography = discographyMap.toList().sortedByDescending { it.second } // Sort by release date
+                                    val sortedDiscography = discographyMap.toList()
+                                        .sortedByDescending { it.second } // Sort by release date
 
                                     runOnUiThread {
                                         val discographyDialogView =
-                                            layoutInflater.inflate(R.layout.dialog_discography, null)
+                                            layoutInflater.inflate(
+                                                R.layout.dialog_discography,
+                                                null
+                                            )
                                         val discographyTitleTextView =
                                             discographyDialogView.findViewById<TextView>(R.id.dialogTitleTextView)
                                         val discographyListView =
@@ -467,15 +475,21 @@ class MainActivity : AppCompatActivity() {
                                             sortedDiscography.map { it.first })
                                         discographyListView.adapter = discographyAdapter
 
-                                        val discographyDialog = AlertDialog.Builder(this@MainActivity)
-                                            .setView(discographyDialogView)
-                                            .setPositiveButton("OK", null)
-                                            .create()
+                                        val discographyDialog =
+                                            AlertDialog.Builder(this@MainActivity)
+                                                .setView(discographyDialogView)
+                                                .setPositiveButton("OK", null)
+                                                .create()
 
                                         discographyDialog.show()
 
                                         discographyListView.setOnItemClickListener { _, _, index, _ ->
-                                            artistName?.let { showAlbumDetails(sortedDiscography[index].first, it) }
+                                            artistName?.let {
+                                                showAlbumDetails(
+                                                    sortedDiscography[index].first,
+                                                    it
+                                                )
+                                            }
                                         }
                                     }
                                 } else {
@@ -511,6 +525,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
     private fun showFeedbackDialog() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)

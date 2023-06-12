@@ -1,5 +1,36 @@
-<!-- dialog_tracklist.xml -->
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tracklistListView"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:background="#121212"
+android:gravity="center"
+android:orientation="vertical"
+android:padding="10dp">
+
+
+
+    <!-- dialog_tracklist.xml -->
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tracklistListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+<Button
+    android:id="@+id/closeButton"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:textStyle="bold"
+    style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+    android:text="Close" />
+
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause"
+    android:textAlignment="center"
+    android:textColor="#FFF" />
+
+</LinearLayout>
