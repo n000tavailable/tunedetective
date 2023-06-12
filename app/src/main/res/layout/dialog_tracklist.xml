@@ -46,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause \n Only for latest releases"
+        android:text="!Tracklist is scrollable! \n Tap on any track to play and re-tap to pause."
         android:textAlignment="center"
         android:textColor="#FFF" />
 
