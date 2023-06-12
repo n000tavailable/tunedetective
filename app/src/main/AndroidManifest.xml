@@ -41,9 +41,12 @@
         </activity>
 
         <activity
-            android:name="com.n0tavailable.tunedetective.ArtistDiscographyActivity"
-            android:label="Artist Discography" >
-        </activity>
+            android:name=".ArtistDiscographyActivity"
+            android:label="Artist Discography" />
+
+        <activity android:name=".TracklistActivity"
+            android:label="Tracklist" />
+
 
 
     </application>

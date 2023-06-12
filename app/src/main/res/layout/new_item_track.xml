@@ -1,0 +1,22 @@
+<!-- new_item_track.xml -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/trackTitleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="#FFF" />
+
+    <!-- Add more views here based on your requirements -->
+
+</LinearLayout>
+
+
+

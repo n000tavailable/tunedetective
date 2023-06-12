@@ -1272,7 +1272,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
                         val adapter = AlbumAdapter(albums)
                         recyclerView.adapter = adapter
-                        recyclerView.layoutManager = LinearLayoutManager(this@ArtistDiscographyActivity)
+                        recyclerView.layoutManager =
+                            LinearLayoutManager(this@ArtistDiscographyActivity)
                     }
                 } else {
                     runOnUiThread {
@@ -1297,11 +1298,39 @@ class ArtistDiscographyActivity : AppCompatActivity() {
     class AlbumAdapter(private val albums: List<Album>) :
         RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
             val albumCoverImageView: ImageView = itemView.findViewById(R.id.albumCoverImageView)
             val albumTitleTextView: TextView = itemView.findViewById(R.id.albumTitleTextView)
             val albumReleaseDateTextView: TextView =
                 itemView.findViewById(R.id.albumReleaseDateTextView)
+
+            lateinit var album: Album
+
+            init {
+                itemView.setOnClickListener(this)
+            }
+
+            fun bind(album: Album) {
+                this.album = album
+
+                Glide.with(itemView)
+                    .load(album.coverUrl)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .transform(RoundedCorners(50))
+                    .into(albumCoverImageView)
+
+                albumTitleTextView.text = album.title
+                albumReleaseDateTextView.text = album.releaseDate
+            }
+
+            override fun onClick(view: View) {
+                val context = itemView.context
+
+                // Start a new activity to display the tracklist
+                val intent = Intent(context, TracklistActivity::class.java)
+                intent.putExtra("albumId", album.albumId)
+                context.startActivity(intent)
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -1312,15 +1341,7 @@ class ArtistDiscographyActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val album = albums[position]
-
-            Glide.with(holder.itemView)
-                .load(album.coverUrl)
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .transform(RoundedCorners(50))
-                .into(holder.albumCoverImageView)
-
-            holder.albumTitleTextView.text = album.title
-            holder.albumReleaseDateTextView.text = album.releaseDate
+            holder.bind(album)
         }
 
         override fun getItemCount(): Int {
@@ -1329,3 +1350,113 @@ class ArtistDiscographyActivity : AppCompatActivity() {
     }
 }
 
+class TracklistActivity : AppCompatActivity() {
+    private lateinit var albumId: String
+    private lateinit var trackRecyclerView: RecyclerView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_tracklist)
+
+        // Retrieve the album ID from the intent
+        albumId = intent.getStringExtra("albumId") ?: ""
+
+        // Set the title as the album ID (for testing)
+        title = albumId
+
+        // Find the RecyclerView in the layout
+        trackRecyclerView = findViewById(R.id.trackRecyclerView)
+
+        // Call a function to retrieve the tracklist for the album
+        getAlbumTracklist(albumId)
+    }
+
+    private fun getAlbumTracklist(albumId: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url("https://api.deezer.com/album/$albumId/tracks")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(
+                        this@TracklistActivity,
+                        "Failed to retrieve album tracklist",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val trackArray = jsonResponse.getJSONArray("data")
+
+                    val tracks = ArrayList<Track>()
+
+                    for (i in 0 until trackArray.length()) {
+                        val trackData = trackArray.getJSONObject(i)
+                        val trackTitle = trackData.getString("title")
+                        val trackDuration = trackData.getInt("duration")
+
+                        val track = Track(trackTitle, trackDuration)
+                        tracks.add(track)
+                    }
+
+                    runOnUiThread {
+                        // Create an instance of the adapter and pass in the list of tracks
+                        val adapter = TrackAdapter(tracks)
+
+                        // Set the adapter on the RecyclerView
+                        trackRecyclerView.adapter = adapter
+
+                        // Set the layout manager on the RecyclerView
+                        trackRecyclerView.layoutManager = LinearLayoutManager(this@TracklistActivity)
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@TracklistActivity,
+                            "Failed to retrieve album tracklist",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+
+    data class Track(
+        val title: String,
+        val duration: Int
+    )
+
+    class TrackAdapter(private val tracks: List<Track>) :
+        RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
+
+        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            val trackTitleTextView: TextView = itemView.findViewById(R.id.trackTitleTextView)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.new_item_track, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val track = tracks[position]
+            holder.trackTitleTextView.text = track.title
+        }
+
+        override fun getItemCount(): Int {
+            return tracks.size
+        }
+    }
+}
