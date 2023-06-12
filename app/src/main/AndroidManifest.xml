@@ -40,6 +40,11 @@
                 android:value=".MainActivity" />
         </activity>
 
+        <activity
+            android:name="com.n0tavailable.tunedetective.ArtistDiscographyActivity"
+            android:label="Artist Discography" >
+        </activity>
+
 
     </application>
 

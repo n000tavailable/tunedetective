@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import okhttp3.Call
 import okhttp3.Callback
@@ -365,12 +366,11 @@ class MainActivity : AppCompatActivity() {
                     if (artistArray.length() > 0) {
                         val artist = artistArray.getJSONObject(0)
                         val artistId = artist.getString("id")
-                        // Remove the call to getArtistDiscography
-                        // val artistImageUrl = artist.getString("picture_big")
-                        // getArtistDiscography(artistId, artistImageUrl)
 
-                        // Call a new function to retrieve the full discography
-                        getFullArtistDiscography(artistId)
+                        // Start a new activity to display the artist discography
+                        val intent = Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                        intent.putExtra("artistId", artistId)
+                        startActivity(intent)
                     } else {
                         runOnUiThread {
                             Toast.makeText(
@@ -1342,3 +1342,125 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
         return view
     }
 }
+
+class ArtistDiscographyActivity : AppCompatActivity() {
+    private lateinit var artistId: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_artist_discography)
+
+        // Retrieve the artist ID from the intent
+        artistId = intent.getStringExtra("artistId") ?: ""
+
+        // Set the title "Discography"
+        title = "Discography"
+
+
+        // Call a function to retrieve the full artist discography
+        getFullArtistDiscography(artistId)
+    }
+
+    private fun getFullArtistDiscography(artistId: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(
+                        this@ArtistDiscographyActivity,
+                        "Failed to retrieve artist discography",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    val albums = ArrayList<Album>()
+
+                    for (i in 0 until albumArray.length()) {
+                        val albumData = albumArray.getJSONObject(i)
+                        val albumId = albumData.getString("id")
+                        val albumTitle = albumData.getString("title")
+                        val albumCoverUrl = albumData.getString("cover_big")
+                        val albumReleaseDate = albumData.getString("release_date")
+
+                        val album = Album(albumId, albumTitle, albumCoverUrl, albumReleaseDate)
+                        albums.add(album)
+                    }
+
+                    // Sort albums by release date in descending order (newest on top)
+                    albums.sortByDescending { it.releaseDate }
+
+                    runOnUiThread {
+                        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+                        val adapter = AlbumAdapter(albums)
+                        recyclerView.adapter = adapter
+                        recyclerView.layoutManager = LinearLayoutManager(this@ArtistDiscographyActivity)
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ArtistDiscographyActivity,
+                            "Failed to retrieve artist discography",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        })
+    }
+}
+
+data class Album(
+    val albumId: String,
+    val title: String,
+    val coverUrl: String,
+    val releaseDate: String
+)
+
+class AlbumAdapter(private val albums: List<Album>) :
+    RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val albumCoverImageView: ImageView = itemView.findViewById(R.id.albumCoverImageView)
+        val albumTitleTextView: TextView = itemView.findViewById(R.id.albumTitleTextView)
+        val albumReleaseDateTextView: TextView = itemView.findViewById(R.id.albumReleaseDateTextView)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_album, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val album = albums[position]
+
+        Glide.with(holder.itemView)
+            .load(album.coverUrl)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .transform(RoundedCorners(50))
+            .into(holder.albumCoverImageView)
+
+        holder.albumTitleTextView.text = album.title
+        holder.albumReleaseDateTextView.text = album.releaseDate
+    }
+
+    override fun getItemCount(): Int {
+        return albums.size
+    }
+}
+
