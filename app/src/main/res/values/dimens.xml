@@ -3,5 +3,6 @@
 
     <dimen name="max_listview_height">500dp</dimen>
 
+    <dimen name="album_item_margin">8dp</dimen>
 
 </resources>

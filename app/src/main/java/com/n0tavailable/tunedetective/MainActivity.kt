@@ -340,6 +340,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
             if (drawable != null) {
@@ -356,6 +357,10 @@ class MainActivity : AppCompatActivity() {
         for (artist in artists) {
             fetchLatestRelease(artist)
         }
+
+        // Start the ReleasesActivity
+        val intent = Intent(this, ReleasesActivity::class.java)
+        startActivity(intent)
     }
 
     private fun fetchArtistsFromDatabase(): List<String> {
@@ -1407,6 +1412,19 @@ class ArtistDiscographyActivity : AppCompatActivity() {
         override fun getItemCount(): Int {
             return albums.size
         }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+            super.onBindViewHolder(holder, position, payloads)
+
+            // Calculate the margin for each item to create spacing between them
+            val context = holder.itemView.context
+            val margin = context.resources.getDimensionPixelSize(R.dimen.album_item_margin)
+            val params = holder.itemView.layoutParams as RecyclerView.LayoutParams
+            params.marginEnd = margin
+
+            // Apply the margin to the item's layout params
+            holder.itemView.layoutParams = params
+        }
     }
 }
 
@@ -1532,4 +1550,298 @@ class TracklistActivity : AppCompatActivity() {
             return tracks.size
         }
     }
+}
+
+class ReleasesActivity : AppCompatActivity() {
+    private lateinit var releaseContainer: LinearLayout
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_releases)
+
+        releaseContainer = findViewById(R.id.releaseContainer)
+
+        fetchAndDisplayReleases()
+    }
+
+    data class Artist(
+        val artistId: String,
+        val artistName: String,
+        val artistImageUrl: String
+    )
+
+    private fun fetchAndDisplayReleases() {
+        val artists = fetchArtistsFromDatabase()
+
+        for (artist in artists) {
+            fetchLatestRelease(artist)
+        }
+    }
+
+    private fun fetchArtistsFromDatabase(): List<String> {
+        // Use your existing database helper class to fetch the artists from the database
+        val dbHelper = SearchHistoryDatabaseHelper(this)
+        return dbHelper.getLatestSearchQueries(limit = 10) // Adjust the limit as needed
+    }
+
+    private fun fetchLatestRelease(artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistArray = jsonResponse.getJSONArray("data")
+
+                    if (artistArray.length() > 0) {
+                        val artist = artistArray.getJSONObject(0)
+                        val artistId = artist.getString("id")
+                        val artistImageUrl = artist.getString("picture_big")
+                        fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
+                    } else {
+                        runOnUiThread {
+                            // Handle case when no artist is found
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun fetchArtistLatestAlbum(artistId: String, artistImageUrl: String, artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums?limit=1000&type=album,single,ep")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    if (albumArray.length() > 0) {
+                        val latestAlbum = findLatestAlbum(albumArray)
+                        if (latestAlbum != null) {
+                            val albumId = latestAlbum.getString("id")
+                            val albumTitle = latestAlbum.getString("title")
+                            val albumCoverUrl = latestAlbum.getString("cover_big")
+                            val releaseDate = latestAlbum.getString("release_date")
+
+                            val albumItem = ArtistDiscographyActivity.Album(
+                                albumId,
+                                albumTitle,
+                                albumCoverUrl,
+                                releaseDate
+                            )
+
+                            runOnUiThread {
+                                addAlbumToView(albumItem, artistName, artistImageUrl)
+                            }
+                        } else {
+                            runOnUiThread {
+                                // Handle case when no album is found
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            // Handle case when no album is found
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun findLatestAlbum(albumArray: JSONArray): JSONObject? {
+        var latestAlbum: JSONObject? = null
+        var latestReleaseDate: String? = null
+
+        for (i in 0 until albumArray.length()) {
+            val album = albumArray.getJSONObject(i)
+            val releaseDate = album.getString("release_date")
+
+            if (latestReleaseDate == null || releaseDate > latestReleaseDate) {
+                latestAlbum = album
+                latestReleaseDate = releaseDate
+            }
+        }
+
+        return latestAlbum
+    }
+
+    private fun addAlbumToView(album: ArtistDiscographyActivity.Album, artistName: String, artistImageUrl: String) {
+        val releaseItemView = LayoutInflater.from(this)
+            .inflate(R.layout.item_release, releaseContainer, false)
+
+        val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
+        val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
+        val releaseCoverImageView = releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
+
+        artistTextView.text = artistName
+        releaseTitleTextView.text = album.title
+        Glide.with(this)
+            .load(album.coverUrl)
+            .into(releaseCoverImageView)
+
+        releaseContainer.addView(releaseItemView)
+    }
+
+    private fun fetchArtistReleases(artistId: String, artistImageUrl: String, artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums?limit=1000&type=album,single,ep")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    if (albumArray.length() > 0) {
+                        val latestRelease = findLatestRelease(albumArray)
+                        if (latestRelease != null) {
+                            val albumId = latestRelease.getString("id")
+                            val albumTitle = latestRelease.getString("title")
+                            val albumCoverUrl = latestRelease.getString("cover_big")
+                            val releaseDate = latestRelease.getString("release_date")
+
+                            val albumItem = ArtistDiscographyActivity.Album(
+                                albumId,
+                                albumTitle,
+                                albumCoverUrl,
+                                releaseDate
+                            )
+
+                            runOnUiThread {
+                                addAlbumToView(albumItem, artistName, artistImageUrl)
+                            }
+                        } else {
+                            runOnUiThread {
+                                // Handle case when no release is found
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            // Handle case when no release is found
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun fetchArtistDiscography(artistId: String, artistImageUrl: String, artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums?limit=10")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val albumArray = jsonResponse.getJSONArray("data")
+
+                    if (albumArray.length() > 0) {
+                        val latestRelease = findLatestRelease(albumArray)
+                        if (latestRelease != null) {
+                            val albumId = latestRelease.getString("id")
+                            val albumTitle = latestRelease.getString("title")
+                            val albumCoverUrl = latestRelease.getString("cover_big")
+                            val releaseDate = latestRelease.getString("release_date")
+
+                            val albumItem = ArtistDiscographyActivity.Album(
+                                albumId,
+                                albumTitle,
+                                albumCoverUrl,
+                                releaseDate
+                            )
+
+                            runOnUiThread {
+                                addAlbumToView(albumItem, artistName, artistImageUrl)
+                            }
+                        } else {
+                            runOnUiThread {
+                                // Handle case when no release is found
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            // Handle case when no release is found
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun findLatestRelease(albumArray: JSONArray): JSONObject? {
+        var latestRelease: JSONObject? = null
+        var latestReleaseDate: String? = null
+
+        for (i in 0 until albumArray.length()) {
+            val release = albumArray.getJSONObject(i)
+            val releaseType = release.getString("type")
+            val releaseDate = release.getString("release_date")
+
+            // Consider only albums, EPs, and singles
+            if (releaseType == "album" || releaseType == "ep" || releaseType == "single") {
+                if (latestReleaseDate == null || releaseDate > latestReleaseDate) {
+                    latestRelease = release
+                    latestReleaseDate = releaseDate
+                }
+            }
+        }
+
+        return latestRelease
+    }
+
+
+
 }
