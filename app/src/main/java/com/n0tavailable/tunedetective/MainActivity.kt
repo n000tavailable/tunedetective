@@ -202,6 +202,7 @@ class MainActivity : AppCompatActivity() {
             val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
             historyListView.layoutParams.height = maxHeight
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+            val fetchReleasesButton = dialogView.findViewById<Button>(R.id.fetchReleasesButton)
 
             val historyAdapter =
                 ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
@@ -239,6 +240,10 @@ class MainActivity : AppCompatActivity() {
                 alertDialogBuilder.setNegativeButton("No", null)
                 alertDialogBuilder.show()
                 true
+            }
+
+            fetchReleasesButton.setOnClickListener {
+                fetchAndDisplayReleases()
             }
 
             closeButton.setOnClickListener {
@@ -333,13 +338,6 @@ class MainActivity : AppCompatActivity() {
                 ).show()
             }
         }
-
-        val fetchReleasesButton = findViewById<Button>(R.id.fetchReleasesButton)
-        fetchReleasesButton.setOnClickListener {
-            fetchAndDisplayReleases()
-        }
-
-
 
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
