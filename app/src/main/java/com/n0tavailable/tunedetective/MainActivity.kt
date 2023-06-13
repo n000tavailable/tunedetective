@@ -222,6 +222,9 @@ class MainActivity : AppCompatActivity() {
 
             alertDialog.show()
 
+            alertDialog.setOnDismissListener {
+                resetLayout()
+            }
             historyListView.setOnItemClickListener { parent, view, position, id ->
                 selectedArtist = searchHistory[position] // Update the selected artist
                 selectedArtist?.let { artist ->
@@ -253,6 +256,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             closeButton.setOnClickListener {
+                resetLayout()
                 alertDialog.dismiss()
             }
         }
@@ -1573,6 +1577,16 @@ class ReleasesActivity : AppCompatActivity() {
         val artistName: String,
         val artistImageUrl: String
     )
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        resetLayout()
+    }
+
+    private fun resetLayout() {
+        releaseContainer.removeAllViews()
+    }
+
 
     private fun fetchAndDisplayReleases() {
         val artists = fetchArtistsFromDatabase()
