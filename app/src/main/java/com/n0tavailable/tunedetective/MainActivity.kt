@@ -222,9 +222,6 @@ class MainActivity : AppCompatActivity() {
 
             alertDialog.show()
 
-            alertDialog.setOnDismissListener {
-                resetLayout()
-            }
             historyListView.setOnItemClickListener { parent, view, position, id ->
                 selectedArtist = searchHistory[position] // Update the selected artist
                 selectedArtist?.let { artist ->
@@ -233,6 +230,10 @@ class MainActivity : AppCompatActivity() {
 
                     val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
                     pepeGif.visibility = View.GONE
+                }
+
+                alertDialog.setOnDismissListener {
+                    resetLayout()
                 }
             }
 
@@ -988,6 +989,7 @@ class MainActivity : AppCompatActivity() {
                     val artist = jsonResponse.getJSONObject("artist")
                     val artistName = artist.getString("name")
                     val albumUrl = jsonResponse.getString("link")
+                    val tracklistUrl = jsonResponse.getString("tracklist")
 
                     runOnUiThread {
                         // Update the UI to display the fetched release for the artist
@@ -1013,6 +1015,10 @@ class MainActivity : AppCompatActivity() {
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                         releaseDateTextView.text = spannableString
+
+                        displayTracks.setOnClickListener {
+                            getTrackList(tracklistUrl)
+                        }
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
