@@ -145,6 +145,16 @@
         android:text="Show Search History"
         android:textStyle="bold" />
 
+    <Button
+        android:id="@+id/fetchReleasesButton"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:text="fetchReleasesButton"
+        android:textStyle="bold" />
+
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/pepeGif"
         android:layout_width="wrap_content"

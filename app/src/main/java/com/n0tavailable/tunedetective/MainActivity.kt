@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var welcomeMessageTextView: TextView
+    private lateinit var artistNameTextView: TextView
     private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
@@ -256,6 +257,7 @@ class MainActivity : AppCompatActivity() {
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
         albumCoverLayout = findViewById(R.id.albumCoverLayout)
 
+
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
@@ -332,6 +334,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val fetchReleasesButton = findViewById<Button>(R.id.fetchReleasesButton)
+        fetchReleasesButton.setOnClickListener {
+            fetchAndDisplayReleases()
+        }
+
 
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
@@ -339,6 +346,59 @@ class MainActivity : AppCompatActivity() {
                 showFullscreenImage(drawable)
             }
         }
+    }
+
+    private fun fetchAndDisplayReleases() {
+        // Fetch the artists from the database (you will need to implement this part)
+        val artists = fetchArtistsFromDatabase()
+
+        // Loop through the artists and fetch their latest releases
+        for (artist in artists) {
+            fetchLatestRelease(artist)
+        }
+    }
+
+    private fun fetchArtistsFromDatabase(): List<String> {
+        // Use your existing database helper class to fetch the artists from the database
+        val dbHelper = SearchHistoryDatabaseHelper(this)
+        return dbHelper.getLatestSearchQueries(limit = 10) // Adjust the limit as needed
+    }
+
+    private fun fetchLatestRelease(artistName: String) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val artistArray = jsonResponse.getJSONArray("data")
+
+                    if (artistArray.length() > 0) {
+                        val artist = artistArray.getJSONObject(0)
+                        val artistId = artist.getString("id")
+                        val artistImageUrl = artist.getString("picture_big")
+                        getLatestRelease(artistId, artistImageUrl, artistName)
+                    } else {
+                        runOnUiThread {
+                            // Handle case when no artist is found
+                        }
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
     }
 
     private fun showArtistDiscography(artistName: String) {
@@ -784,8 +844,10 @@ class MainActivity : AppCompatActivity() {
     private fun searchArtist(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder().url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey").build()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         progressDialog.show()
 
@@ -808,7 +870,7 @@ class MainActivity : AppCompatActivity() {
                         val artist = artistArray.getJSONObject(0)
                         val artistId = artist.getString("id")
                         val artistImageUrl = artist.getString("picture_big")
-                        getLatestRelease(artistId, artistImageUrl)
+                        getLatestRelease(artistId, artistImageUrl, artistName)
                     } else {
                         runOnUiThread {
                             trackTitleTextView.text = "No artist found"
@@ -829,11 +891,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getLatestRelease(artistId: String, artistImageUrl: String) {
+    private fun getLatestRelease(artistId: String, artistImageUrl: String, artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder().url("https://api.deezer.com/artist/$artistId/albums")
-            .addHeader("Authorization", "Bearer $apiKey").build()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId/albums")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -864,21 +928,15 @@ class MainActivity : AppCompatActivity() {
                         if (latestRelease != null) {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
-                            getAlbumDetails(
-                                albumId, albumCoverUrl, latestReleaseDate, artistImageUrl
-                            )
+                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate, artistImageUrl, artistName)
                         } else {
                             runOnUiThread {
-                                trackTitleTextView.text = "No releases found"
-                                albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
-                                releaseDateTextView.text = ""
+                                // Handle case when no releases are found for the artist
                             }
                         }
                     } else {
                         runOnUiThread {
-                            trackTitleTextView.text = "No releases found"
-                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
-                            releaseDateTextView.text = ""
+                            // Handle case when no releases are found for the artist
                         }
                     }
                 } else {
@@ -889,29 +947,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAlbumDetails(
-        albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String
+        albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String, artistName: String
     ) {
         val currentDate = Calendar.getInstance().time
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val sdfOutput = SimpleDateFormat("dd. MMMM yyyy", Locale.getDefault())
-
-        val releaseDateTime = sdfInput.parse(releaseDate)
-        val daysDifference = TimeUnit.MILLISECONDS.toDays(currentDate.time - releaseDateTime.time)
-
-        val isNewRelease = daysDifference <= 7
-        val newReleasePrefix = if (isNewRelease) "NEW - " else ""
+        val formattedReleaseDate = sdfOutput.format(sdfInput.parse(releaseDate))
 
         val apiKey = APIKeys.DEEZER_API_KEY
-
-        val formattedReleaseDate = try {
-            val date = sdfInput.parse(releaseDate)
-            sdfOutput.format(date)
-        } catch (e: Exception) {
-            releaseDate
-        }
         val client = OkHttpClient()
-        val request = Request.Builder().url("https://api.deezer.com/album/$albumId")
-            .addHeader("Authorization", "Bearer $apiKey").build()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/album/$albumId")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -924,26 +972,34 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val albumTitle = jsonResponse.getString("title")
-                    val artistName = jsonResponse.getJSONObject("artist").getString("name")
-                    val tracklistUrl = jsonResponse.getString("tracklist")
+                    val artist = jsonResponse.getJSONObject("artist")
+                    val artistName = artist.getString("name")
+                    val albumUrl = jsonResponse.getString("link")
 
                     runOnUiThread {
+                        // Update the UI to display the fetched release for the artist
+                        // You can use this opportunity to show the artist name, album title, release date, album cover, etc.
                         albumCoverLayout.visibility = View.VISIBLE
                         trackTitleTextView.visibility = View.VISIBLE
                         releaseDateTextView.visibility = View.VISIBLE
+
+                        // Set the artist name
+
+                        // Set the album title
                         trackTitleTextView.text = albumTitle
 
+                        // Load the album cover image
                         loadAlbumCoverImage(albumCoverUrl)
 
-                        // Create a SpannableString and apply formatting
-                        val spannableString =
-                            SpannableString("Release Date: $newReleasePrefix$formattedReleaseDate")
-
+                        // Create a SpannableString and apply formatting to the release date
+                        val spannableString = SpannableString("Release Date: $formattedReleaseDate")
+                        spannableString.setSpan(
+                            StyleSpan(Typeface.BOLD),
+                            0,
+                            "Release Date: ".length,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        )
                         releaseDateTextView.text = spannableString
-
-                        displayTracks.setOnClickListener {
-                            getTrackList(tracklistUrl)
-                        }
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
