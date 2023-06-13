@@ -137,7 +137,6 @@ class MainActivity : AppCompatActivity() {
         albumCoverLayout.visibility = View.GONE
         trackTitleTextView.visibility = View.GONE
         releaseDateTextView.visibility = View.GONE
-        discographyButton.visibility = View.VISIBLE
         albumCoverImageView.setImageResource(R.drawable.round_album_cover)
         artistEditText.text = null
 
@@ -166,25 +165,7 @@ class MainActivity : AppCompatActivity() {
 
         showFeedbackDialog()
 
-        val discographyButtonVisible =
-            sharedPreferences.getBoolean("discographyButtonVisible", true)
         val discographyButton = findViewById<Button>(R.id.discographyButton)
-
-        if (!discographyButtonVisible) {
-            discographyButton.visibility = View.GONE
-        } else {
-            discographyButton.visibility = View.VISIBLE
-        }
-
-        discographyButton.setOnClickListener {
-            val artistName = artistEditText.text.toString().trim()
-            if (artistName.isNotEmpty()) {
-                showArtistDiscography(artistName)
-            } else {
-                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
-            }
-        }
-
 
         // Initialize the welcomeMessageTextView
         welcomeMessageTextView = findViewById(R.id.welcomeMessageTextView)
@@ -203,6 +184,22 @@ class MainActivity : AppCompatActivity() {
         val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
         historyListView.layoutParams.height =
             Math.min(historyListView.layoutParams.height, maxHeight)
+
+        discographyButton.setOnClickListener {
+            val artistName = artistEditText.text.toString().trim()
+
+            if (artistName.isNotEmpty()) {
+                showArtistDiscography(artistName)
+            } else {
+                val selectedItem = historyListView.selectedItem as? String
+                if (selectedItem != null) {
+                    showArtistDiscography(selectedItem)
+                } else {
+                    Toast.makeText(this, "Please enter an artist name or select from search history", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
 
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
@@ -926,7 +923,6 @@ class MainActivity : AppCompatActivity() {
                         albumCoverLayout.visibility = View.VISIBLE
                         trackTitleTextView.visibility = View.VISIBLE
                         releaseDateTextView.visibility = View.VISIBLE
-                        discographyButton.visibility = View.GONE
                         trackTitleTextView.text = albumTitle
 
                         loadAlbumCoverImage(albumCoverUrl)

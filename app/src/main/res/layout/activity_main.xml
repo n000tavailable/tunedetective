@@ -91,6 +91,13 @@
                 android:layout_width="16dp"
                 android:layout_height="match_parent" />
 
+            <Button
+                android:id="@+id/discographyButton"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show Discography"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
@@ -136,16 +143,6 @@
         android:layout_gravity="end"
         android:layout_marginTop="16dp"
         android:text="Show Search History"
-        android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/discographyButton"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="16dp"
-        android:text="Show Discography"
         android:textStyle="bold" />
 
     <pl.droidsonroids.gif.GifImageView

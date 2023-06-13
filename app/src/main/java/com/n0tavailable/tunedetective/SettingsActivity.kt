@@ -25,8 +25,6 @@ class SettingsActivity : AppCompatActivity() {
 
         val pepeGifSwitch = findViewById<Switch>(R.id.pepeGifSwitch)
         val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
-        val discographyButtonSwitch = findViewById<Switch>(R.id.discographyButtonSwitch)
-
         pepeGifSwitch.isChecked = sharedPreferences.getBoolean("pepeGifEnabled", true)
         pepeGifSwitch.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("pepeGifEnabled", isChecked).apply()
@@ -36,13 +34,6 @@ class SettingsActivity : AppCompatActivity() {
             sharedPreferences.getBoolean("welcomeMessageVisible", true)
         welcomeMessageToggleButton.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("welcomeMessageVisible", isChecked).apply()
-        }
-
-        discographyButtonSwitch.isChecked =
-            sharedPreferences.getBoolean("discographyButtonVisible", true)
-        discographyButtonSwitch.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("discographyButtonVisible", isChecked).apply()
-            showDialogAndRestart()
         }
     }
 
