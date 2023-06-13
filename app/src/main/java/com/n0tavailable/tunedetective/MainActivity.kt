@@ -77,6 +77,8 @@ class MainActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
     private var artistName: String? = null
+    private var selectedArtist: String? = null
+
 
 
     override fun onDestroy() {
@@ -185,21 +187,6 @@ class MainActivity : AppCompatActivity() {
         historyListView.layoutParams.height =
             Math.min(historyListView.layoutParams.height, maxHeight)
 
-        discographyButton.setOnClickListener {
-            val artistName = artistEditText.text.toString().trim()
-
-            if (artistName.isNotEmpty()) {
-                showArtistDiscography(artistName)
-            } else {
-                val selectedItem = historyListView.selectedItem as? String
-                if (selectedItem != null) {
-                    showArtistDiscography(selectedItem)
-                } else {
-                    Toast.makeText(this, "Please enter an artist name or select from search history", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
 
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
@@ -228,12 +215,14 @@ class MainActivity : AppCompatActivity() {
             alertDialog.show()
 
             historyListView.setOnItemClickListener { parent, view, position, id ->
-                val selectedArtist = searchHistory[position]
-                searchArtist(selectedArtist)
-                alertDialog.dismiss()
+                selectedArtist = searchHistory[position] // Update the selected artist
+                selectedArtist?.let { artist ->
+                    searchArtist(artist)
+                    alertDialog.dismiss()
 
-                val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-                pepeGif.visibility = View.GONE
+                    val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+                    pepeGif.visibility = View.GONE
+                }
             }
 
             historyListView.setOnItemLongClickListener { parent, view, position, id ->
@@ -324,6 +313,25 @@ class MainActivity : AppCompatActivity() {
             }
             searchSimilarArtists(artistName)
         }
+
+        discographyButton.setOnClickListener {
+            val artistName = artistEditText.text.toString().trim()
+
+            val selected = selectedArtist // Assign the value of selectedArtist to a local variable
+
+            if (artistName.isNotEmpty()) {
+                showArtistDiscography(artistName)
+            } else if (selected != null) {
+                showArtistDiscography(selected) // Use the selected artist
+            } else {
+                Toast.makeText(
+                    this,
+                    "Please enter an artist name or select from search history",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
 
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
