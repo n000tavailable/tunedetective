@@ -1,32 +1,51 @@
-<LinearLayout android:layout_width="match_parent"
+<!-- item_release.xml -->
+<ScrollView android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ImageView
-        android:id="@+id/releaseCoverImageView"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/round_music_note_24" />
-
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <TextView
-            android:id="@+id/artistTextView"
+        <ImageView
+            android:id="@+id/releaseCoverImageView"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:src="@drawable/round_music_note_24"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
 
-        <TextView
-            android:id="@+id/releaseTitleTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp" />
+            <TextView
+                android:id="@+id/artistTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFF" />
+
+            <TextView
+                android:id="@+id/releaseTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#808080" />
+
+            <TextView
+                android:id="@+id/releaseDateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#808080" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

@@ -194,6 +194,12 @@ class MainActivity : AppCompatActivity() {
 
         showSearchHistoryButton.setOnClickListener {
 
+            val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
+            // Hide the PepeGif based on the toggle state
+            if (pepeGifEnabled) {
+                pepeGif.visibility = View.GONE
+            }
+
             hideKeyboard()
 
 
@@ -1252,7 +1258,6 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    @SuppressLint("ViewHolder")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = inflater.inflate(R.layout.item_artist, parent, false)
 
@@ -1698,12 +1703,19 @@ class ReleasesActivity : AppCompatActivity() {
 
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
+        val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
         val releaseCoverImageView = releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
 
-        artistTextView.text = artistName
+        artistTextView.text = artistName.toUpperCase() // Convert to uppercase
         releaseTitleTextView.text = album.title
+        releaseDateTextView.text = album.releaseDate
+
+        val requestOptions = RequestOptions()
+            .transform(RoundedCorners(50))
+
         Glide.with(this)
             .load(album.coverUrl)
+            .apply(requestOptions)
             .into(releaseCoverImageView)
 
         releaseContainer.addView(releaseItemView)
