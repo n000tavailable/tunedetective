@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         showFeedbackDialog()
 
         val discographyButtonVisible =
-            sharedPreferences.getBoolean("discographyButtonVisible", false)
+            sharedPreferences.getBoolean("discographyButtonVisible", true)
         val discographyButton = findViewById<Button>(R.id.discographyButton)
 
         if (!discographyButtonVisible) {
@@ -564,7 +564,7 @@ class MainActivity : AppCompatActivity() {
                             val dialogView =
                                 layoutInflater.inflate(R.layout.dialog_tracklist2, null)
                             val tracklistListView =
-                                dialogView.findViewById<ListView>(R.id.tracklistListView)
+                                dialogView.findViewById<ListView>(R.id.trackListRecyclerView2)
 
                             val tracklistAdapter = object : ArrayAdapter<String>(
                                 this@MainActivity,
@@ -1352,23 +1352,21 @@ class ArtistDiscographyActivity : AppCompatActivity() {
 
 class TracklistActivity : AppCompatActivity() {
     private lateinit var albumId: String
-    private lateinit var trackRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tracklist)
+        setContentView(R.layout.dialog_tracklist2)
 
         // Retrieve the album ID from the intent
         albumId = intent.getStringExtra("albumId") ?: ""
 
-        // Set the title as the album ID (for testing)
-        title = albumId
-
-        // Find the RecyclerView in the layout
-        trackRecyclerView = findViewById(R.id.trackRecyclerView)
-
         // Call a function to retrieve the tracklist for the album
         getAlbumTracklist(albumId)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
     }
 
     private fun getAlbumTracklist(albumId: String) {
@@ -1411,6 +1409,11 @@ class TracklistActivity : AppCompatActivity() {
                     }
 
                     runOnUiThread {
+                        // Find the RecyclerView in the dialog layout
+                        val trackRecyclerView = findViewById<RecyclerView>(R.id.trackListRecyclerView2)
+                        // Find the TextView for the track count
+                        val trackCountTextView = findViewById<TextView>(R.id.trackCountTextView)
+
                         // Create an instance of the adapter and pass in the list of tracks
                         val adapter = TrackAdapter(tracks)
 
@@ -1419,6 +1422,15 @@ class TracklistActivity : AppCompatActivity() {
 
                         // Set the layout manager on the RecyclerView
                         trackRecyclerView.layoutManager = LinearLayoutManager(this@TracklistActivity)
+
+                        // Set the track count
+                        trackCountTextView.text = getString(R.string.track_count_format, tracks.size)
+
+                        // Find the close button and set a click listener
+                        val closeButton = findViewById<Button>(R.id.closeButton)
+                        closeButton.setOnClickListener {
+                            finish()
+                        }
                     }
                 } else {
                     runOnUiThread {
@@ -1446,7 +1458,8 @@ class TracklistActivity : AppCompatActivity() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.new_item_track, parent, false)
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.new_item_track, parent, false)
             return ViewHolder(view)
         }
 
