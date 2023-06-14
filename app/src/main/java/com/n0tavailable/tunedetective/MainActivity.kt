@@ -106,6 +106,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        resetLayout()
+
+
         // Retrieve the toggle state from SharedPreferences
         welcomeMessageVisible = sharedPreferences.getBoolean("welcomeMessageVisible", true)
 
