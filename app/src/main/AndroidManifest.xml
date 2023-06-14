@@ -52,7 +52,6 @@
             android:name=".ReleasesActivity"
             android:label="ReleasesActivity" />
 
-
     </application>
 
 </manifest>

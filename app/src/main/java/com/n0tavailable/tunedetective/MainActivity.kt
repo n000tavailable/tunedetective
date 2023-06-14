@@ -1741,8 +1741,25 @@ class ReleasesActivity : AppCompatActivity() {
             .apply(requestOptions)
             .into(releaseCoverImageView)
 
+        // Add a click listener to the album cover image
+        releaseCoverImageView.setOnClickListener {
+            openTracklist(album.albumId) // Pass the album ID to the function to open the tracklist
+        }
+
         releaseContainer.addView(releaseItemView)
     }
+
+    private fun openTracklist(albumId: String) {
+        // Implement the logic to open the tracklist for the album with the given ID
+        // This could be a new activity or fragment where you fetch and display the tracklist
+        // You can use the albumId to fetch the tracklist from the API or your local database
+        // and then navigate to the tracklist screen passing the necessary data
+        // Example:
+        val intent = Intent(this, TracklistActivity::class.java)
+        intent.putExtra("albumId", albumId)
+        startActivity(intent)
+    }
+
 
     private fun fetchArtistReleases(artistId: String, artistImageUrl: String, artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
