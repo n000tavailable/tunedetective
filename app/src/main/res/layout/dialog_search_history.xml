@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="All"
+            android:text="Fetch all Artists"
             android:textStyle="bold" />
     </LinearLayout>
 
