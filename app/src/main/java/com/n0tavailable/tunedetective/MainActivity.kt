@@ -1454,8 +1454,8 @@ class TracklistActivity : AppCompatActivity() {
         // Retrieve the album ID from the intent
         albumId = intent.getStringExtra("albumId") ?: ""
 
-        // Call a function to retrieve the tracklist for the album
-        getAlbumTracklist(albumId)
+        // Call the function to retrieve the tracklist for the album
+        getTrackList("https://api.deezer.com/album/$albumId/tracks")
     }
 
     override fun onBackPressed() {
@@ -1463,108 +1463,80 @@ class TracklistActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun getAlbumTracklist(albumId: String) {
+    private fun getTrackList(tracklistUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
+        val trackList = mutableListOf<Track>()
 
-        val request = Request.Builder()
-            .url("https://api.deezer.com/album/$albumId/tracks")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        fun fetchTracks(url: String) {
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $apiKey")
+                .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-                runOnUiThread {
-                    Toast.makeText(
-                        this@TracklistActivity,
-                        "Failed to retrieve album tracklist",
-                        Toast.LENGTH_SHORT
-                    ).show()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    e.printStackTrace()
                 }
-            }
 
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
+                override fun onResponse(call: Call, response: Response) {
+                    val responseData = response.body?.string()
 
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val trackArray = jsonResponse.getJSONArray("data")
+                    if (response.isSuccessful && responseData != null) {
+                        val jsonResponse = JSONObject(responseData)
+                        val tracksArray = jsonResponse.getJSONArray("data")
 
-                    val tracks = ArrayList<Track>()
-
-                    for (i in 0 until trackArray.length()) {
-                        val trackData = trackArray.getJSONObject(i)
-                        val trackTitle = trackData.getString("title")
-                        val trackDuration = trackData.getInt("duration")
-
-                        val track = Track(trackTitle, trackDuration)
-                        tracks.add(track)
-                    }
-
-                    runOnUiThread {
-                        // Find the RecyclerView in the dialog layout
-                        val trackRecyclerView = findViewById<RecyclerView>(R.id.trackListRecyclerView2)
-                        // Find the TextView for the track count
-                        val trackCountTextView = findViewById<TextView>(R.id.trackCountTextView)
-
-                        // Create an instance of the adapter and pass in the list of tracks
-                        val adapter = TrackAdapter(tracks)
-
-                        // Set the adapter on the RecyclerView
-                        trackRecyclerView.adapter = adapter
-
-                        // Set the layout manager on the RecyclerView
-                        trackRecyclerView.layoutManager = LinearLayoutManager(this@TracklistActivity)
-
-                        // Set the track count
-                        trackCountTextView.text = getString(R.string.track_count_format, tracks.size)
-
-                        // Find the close button and set a click listener
-                        val closeButton = findViewById<Button>(R.id.closeButton)
-                        closeButton.setOnClickListener {
-                            finish()
+                        for (i in 0 until tracksArray.length()) {
+                            val track = tracksArray.getJSONObject(i)
+                            val trackTitle = track.getString("title")
+                            val previewUrl = track.getString("preview")
+                            trackList.add(Track(trackTitle, previewUrl))
                         }
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@TracklistActivity,
-                            "Failed to retrieve album tracklist",
-                            Toast.LENGTH_SHORT
-                        ).show()
+
+                        val nextPageUrl = jsonResponse.optString("next")
+
+                        if (!nextPageUrl.isNullOrEmpty()) {
+                            // Fetch next page of tracks recursively
+                            fetchTracks(nextPageUrl)
+                        } else {
+                            // All tracks fetched, show dialog
+                            runOnUiThread {
+                                showTrackListDialog(trackList)
+                            }
+                        }
+                    } else {
+                        println("Error: ${response.code} ${response.message}")
                     }
                 }
-            }
-        })
+            })
+        }
+
+        fetchTracks(tracklistUrl)
     }
 
-    data class Track(
-        val title: String,
-        val duration: Int
-    )
+    private fun showTrackListDialog(trackList: List<Track>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_tracklist)
 
-    class TrackAdapter(private val tracks: List<Track>) :
-        RecyclerView.Adapter<TrackAdapter.ViewHolder>() {
+        val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val trackTitleTextView: TextView = itemView.findViewById(R.id.trackTitleTextView)
+        val layoutManager = LinearLayoutManager(this)
+        val adapter = TrackListAdapter(trackList)
+
+        trackListRecyclerView.layoutManager = layoutManager
+        trackListRecyclerView.adapter = adapter
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+            adapter.stopPlayback()
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.new_item_track, parent, false)
-            return ViewHolder(view)
+        dialog.setOnDismissListener {
+            adapter.stopPlayback()
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val track = tracks[position]
-            holder.trackTitleTextView.text = track.title
-        }
-
-        override fun getItemCount(): Int {
-            return tracks.size
-        }
+        dialog.show()
     }
 }
 
