@@ -20,6 +20,8 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Features:
 
+- Fetch multiple artists at once
+- Display the entire Discography of an artist
 - Search for music artists and view their similar artists
 - Explore the latest release of an artist, including album details and tracklist
 - Play track previews directly within the app
