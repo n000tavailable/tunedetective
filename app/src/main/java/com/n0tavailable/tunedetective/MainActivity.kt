@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var welcomeMessageTextView: TextView
     private lateinit var artistNameTextView: TextView
+    private lateinit var dialog: Dialog
     private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
     private var pepeGifEnabled = true
@@ -145,6 +146,12 @@ class MainActivity : AppCompatActivity() {
         releaseDateTextView.visibility = View.GONE
         albumCoverImageView.setImageResource(R.drawable.round_album_cover)
         artistEditText.text = null
+
+        if (::dialog.isInitialized && dialog.isShowing) {
+            dialog.dismiss()
+            val adapter = (dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView).adapter as? TrackListAdapter)
+            adapter?.stopPlayback()
+        }
 
         val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
         // Hide the PepeGif based on the toggle state
@@ -1080,7 +1087,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTrackListDialog(trackList: List<Track>) {
-        val dialog = Dialog(this)
+        dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
