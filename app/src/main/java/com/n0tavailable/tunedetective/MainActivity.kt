@@ -1722,14 +1722,84 @@ class ReleasesActivity : AppCompatActivity() {
     }
 
     private fun openTracklist(albumId: String) {
-        // Implement the logic to open the tracklist for the album with the given ID
-        // This could be a new activity or fragment where you fetch and display the tracklist
-        // You can use the albumId to fetch the tracklist from the API or your local database
-        // and then navigate to the tracklist screen passing the necessary data
-        // Example:
-        val intent = Intent(this, TracklistActivity::class.java)
-        intent.putExtra("albumId", albumId)
-        startActivity(intent)
+        // Fetch the tracklist for the album with the given ID
+        fetchTrackList(albumId) { trackList ->
+            // Display the tracklist in a dialog
+            runOnUiThread {
+                showTrackListDialog(trackList)
+            }
+        }
+    }
+
+    private fun fetchTrackList(albumId: String, callback: (List<Track>) -> Unit) {
+        val apiKey = APIKeys.DEEZER_API_KEY
+        val client = OkHttpClient()
+        val trackList = mutableListOf<Track>()
+
+        val url = "https://api.deezer.com/album/$albumId/tracks"
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseData = response.body?.string()
+
+                if (response.isSuccessful && responseData != null) {
+                    val jsonResponse = JSONObject(responseData)
+                    val tracksArray = jsonResponse.getJSONArray("data")
+
+                    for (i in 0 until tracksArray.length()) {
+                        val track = tracksArray.getJSONObject(i)
+                        val trackTitle = track.getString("title")
+                        val previewUrl = track.getString("preview")
+                        trackList.add(Track(trackTitle, previewUrl))
+                    }
+
+                    val nextPageUrl = jsonResponse.optString("next")
+
+                    if (!nextPageUrl.isNullOrEmpty()) {
+                        // Fetch next page of tracks recursively
+                        fetchTrackList(nextPageUrl, callback)
+                    } else {
+                        // All tracks fetched, invoke the callback with the tracklist
+                        callback(trackList)
+                    }
+                } else {
+                    println("Error: ${response.code} ${response.message}")
+                }
+            }
+        })
+    }
+
+    private fun showTrackListDialog(trackList: List<Track>) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_tracklist)
+
+        val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+
+        val layoutManager = LinearLayoutManager(this)
+        val adapter = TrackListAdapter(trackList)
+
+        trackListRecyclerView.layoutManager = layoutManager
+        trackListRecyclerView.adapter = adapter
+
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+            adapter.stopPlayback()
+        }
+
+        dialog.setOnDismissListener {
+            adapter.stopPlayback()
+        }
+
+        dialog.show()
     }
 
 
