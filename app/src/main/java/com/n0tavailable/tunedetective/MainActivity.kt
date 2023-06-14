@@ -740,7 +740,7 @@ class MainActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(responseData)
                     val artistName = jsonResponse.getString("name")
                     val artistImageUrl = jsonResponse.getString("picture_big")
-                    val artist = Pair(artistName, artistImageUrl)
+                    val artist = Artist(artistName, artistImageUrl, artistId)
 
                     runOnUiThread {
                         showArtistSelectionDialog(listOf(artist))
@@ -758,13 +758,14 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+
     private fun searchSimilarArtists(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
 
         // Check if artistName is a valid ID
         if (artistName.matches(Regex("\\d+"))) {
-            searchArtistById(artistName)
+            searchArtist(artistName) // Use searchArtist instead of searchArtistById
             return
         }
 
@@ -789,24 +790,20 @@ class MainActivity : AppCompatActivity() {
                     val artistArray = jsonResponse.getJSONArray("data")
 
                     if (artistArray.length() > 0) {
-                        val artists = mutableListOf<Pair<String, String>>()
+                        val artists = mutableListOf<Artist>()
 
                         for (i in 0 until artistArray.length()) {
                             val artist = artistArray.getJSONObject(i)
                             val artistName = artist.getString("name")
                             val artistImageUrl = artist.getString("picture_big")
-                            artists.add(
-                                Pair(
-                                    artistName, artistImageUrl
-                                )
-                            ) // Add the artist name and image URL as a pair
+                            val artistId = artist.getString("id")
+                            artists.add(Artist(artistName, artistImageUrl, artistId))
                         }
 
-                        val finalArtists =
-                            artists.toList() // Create a final copy of the artists list
+                        val finalArtists = artists.toList()
 
                         runOnUiThread {
-                            showArtistSelectionDialog(finalArtists) // Use the finalArtists variable here
+                            showArtistSelectionDialog(finalArtists)
                         }
                     } else {
                         runOnUiThread {
@@ -827,8 +824,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+    data class Artist(val artistName: String, val artistImageUrl: String, val artistId: String)
 
-    private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) {
+
+    private fun showArtistSelectionDialog(artists: List<Artist>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_artist_selection)
 
@@ -840,8 +839,8 @@ class MainActivity : AppCompatActivity() {
 
         artistListView.setOnItemClickListener { parent, view, position, id ->
             val selectedArtist = artists[position]
-            saveSelectedArtist(selectedArtist.first) // Save the selected artist to the database
-            searchArtist(selectedArtist.first)
+            saveSelectedArtist(selectedArtist.artistName) // Save the selected artist name to the database
+            searchArtist(selectedArtist.artistId) // Perform the search by artist ID
             dialog.dismiss()
         }
 
@@ -852,19 +851,19 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+
+
     private fun saveSelectedArtist(artistName: String) {
         if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
             searchHistoryDatabaseHelper.insertSearchQuery(artistName)
         }
     }
 
-    private fun searchArtist(artistName: String) {
+    private fun searchArtist(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        val request = Request.Builder().url("https://api.deezer.com/artist/$artistId")
+            .addHeader("Authorization", "Bearer $apiKey").build()
 
         progressDialog.show()
 
@@ -881,19 +880,13 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
-                    val artistArray = jsonResponse.getJSONArray("data")
+                    val artistName = jsonResponse.getString("name")
+                    val artistImageUrl = jsonResponse.getString("picture_big")
+                    val artist = Artist(artistName, artistImageUrl, artistId)
 
-                    if (artistArray.length() > 0) {
-                        val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getString("id")
-                        val artistImageUrl = artist.getString("picture_big")
+                    runOnUiThread {
+                        // Handle the artist data as needed
                         getLatestRelease(artistId, artistImageUrl, artistName)
-                    } else {
-                        runOnUiThread {
-                            trackTitleTextView.text = "No artist found"
-                            albumCoverImageView.setImageResource(R.drawable.round_music_note_24)
-                            releaseDateTextView.text = ""
-                        }
                     }
                 } else {
                     runOnUiThread {
@@ -1276,9 +1269,7 @@ class SearchHistoryDatabaseHelper(context: Context) :
 
 }
 
-class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
-    ArrayAdapter<Pair<String, String>>(context, R.layout.item_artist, artists) {
-
+class ArtistAdapter(context: Context, private val artists: List<MainActivity.Artist>) : ArrayAdapter<MainActivity.Artist>(context, R.layout.item_artist, artists) {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -1288,15 +1279,14 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
         val artistImageView: ImageView = view.findViewById(R.id.artistImageView)
 
         val artist = getItem(position)
-        artistNameTextView.text = artist?.first
+        artistNameTextView.text = artist?.artistName
 
-        Glide.with(context).load(artist?.second)
+        Glide.with(context).load(artist?.artistImageUrl)
             .apply(RequestOptions().transform(RoundedCorners(100))).into(artistImageView)
 
         return view
     }
 }
-
 class ArtistDiscographyActivity : AppCompatActivity() {
     private lateinit var artistId: String
 
