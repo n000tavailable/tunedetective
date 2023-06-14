@@ -1,6 +1,7 @@
 package com.n0tavailable.tunedetective
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.ContentValues
@@ -79,7 +80,6 @@ class MainActivity : AppCompatActivity() {
     private var pepeGifEnabled = true
     private var artistName: String? = null
     private var selectedArtist: String? = null
-
 
 
     override fun onDestroy() {
@@ -945,7 +945,13 @@ class MainActivity : AppCompatActivity() {
                         if (latestRelease != null) {
                             val albumId = latestRelease.getString("id")
                             val albumCoverUrl = latestRelease.getString("cover_big")
-                            getAlbumDetails(albumId, albumCoverUrl, latestReleaseDate, artistImageUrl, artistName)
+                            getAlbumDetails(
+                                albumId,
+                                albumCoverUrl,
+                                latestReleaseDate,
+                                artistImageUrl,
+                                artistName
+                            )
                         } else {
                             runOnUiThread {
                                 // Handle case when no releases are found for the artist
@@ -964,7 +970,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAlbumDetails(
-        albumId: String, albumCoverUrl: String, releaseDate: String?, artistImageUrl: String, artistName: String
+        albumId: String,
+        albumCoverUrl: String,
+        releaseDate: String?,
+        artistImageUrl: String,
+        artistName: String
     ) {
         val currentDate = Calendar.getInstance().time
         val sdfInput = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -1407,10 +1417,76 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             override fun onClick(view: View) {
                 val context = itemView.context
 
-                // Start a new activity to display the tracklist
-                val intent = Intent(context, TracklistActivity::class.java)
-                intent.putExtra("albumId", album.albumId)
-                context.startActivity(intent)
+                // Fetch the tracklist for the album with the given ID
+                fetchTrackList(album.albumId) { trackList ->
+                    // Display the tracklist in a dialog
+                    (context as? Activity)?.runOnUiThread {
+                        showTrackListDialog(context, trackList)
+                    }
+                }
+            }
+
+            private fun fetchTrackList(albumId: String, callback: (List<Track>) -> Unit) {
+                val apiKey = APIKeys.DEEZER_API_KEY
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("https://api.deezer.com/album/$albumId/tracks")
+                    .addHeader("Authorization", "Bearer $apiKey")
+                    .build()
+
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        e.printStackTrace()
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        val responseData = response.body?.string()
+
+                        if (response.isSuccessful && responseData != null) {
+                            val jsonResponse = JSONObject(responseData)
+                            val trackArray = jsonResponse.getJSONArray("data")
+
+                            val trackList = mutableListOf<Track>()
+
+                            for (i in 0 until trackArray.length()) {
+                                val track = trackArray.getJSONObject(i)
+                                val trackTitle = track.getString("title")
+                                val previewUrl = track.getString("preview")
+                                val trackItem = Track(trackTitle, previewUrl)
+                                trackList.add(trackItem)
+                            }
+
+                            callback(trackList)
+                        } else {
+                            println("Error: ${response.code} ${response.message}")
+                        }
+                    }
+                })
+            }
+
+            private fun showTrackListDialog(context: Context, trackList: List<Track>) {
+                val dialog = Dialog(context)
+                dialog.setContentView(R.layout.dialog_tracklist)
+
+                val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+                val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+
+                val layoutManager = LinearLayoutManager(context)
+                val adapter = TrackListAdapter(trackList)
+
+                trackListRecyclerView.layoutManager = layoutManager
+                trackListRecyclerView.adapter = adapter
+
+                closeButton.setOnClickListener {
+                    dialog.dismiss()
+                    adapter.stopPlayback()
+                }
+
+                dialog.setOnDismissListener {
+                    adapter.stopPlayback()
+                }
+
+                dialog.show()
             }
         }
 
@@ -1429,7 +1505,11 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             return albums.size
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        override fun onBindViewHolder(
+            holder: ViewHolder,
+            position: Int,
+            payloads: MutableList<Any>
+        ) {
             super.onBindViewHolder(holder, position, payloads)
 
             // Calculate the margin for each item to create spacing between them
@@ -1620,7 +1700,11 @@ class ReleasesActivity : AppCompatActivity() {
         })
     }
 
-    private fun fetchArtistLatestAlbum(artistId: String, artistImageUrl: String, artistName: String) {
+    private fun fetchArtistLatestAlbum(
+        artistId: String,
+        artistImageUrl: String,
+        artistName: String
+    ) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -1692,14 +1776,19 @@ class ReleasesActivity : AppCompatActivity() {
         return latestAlbum
     }
 
-    private fun addAlbumToView(album: ArtistDiscographyActivity.Album, artistName: String, artistImageUrl: String) {
+    private fun addAlbumToView(
+        album: ArtistDiscographyActivity.Album,
+        artistName: String,
+        artistImageUrl: String
+    ) {
         val releaseItemView = LayoutInflater.from(this)
             .inflate(R.layout.item_release, releaseContainer, false)
 
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
-        val releaseCoverImageView = releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
+        val releaseCoverImageView =
+            releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
 
         artistTextView.text = artistName.toUpperCase() // Convert to uppercase
         releaseTitleTextView.text = album.title
@@ -1858,7 +1947,11 @@ class ReleasesActivity : AppCompatActivity() {
         })
     }
 
-    private fun fetchArtistDiscography(artistId: String, artistImageUrl: String, artistName: String) {
+    private fun fetchArtistDiscography(
+        artistId: String,
+        artistImageUrl: String,
+        artistName: String
+    ) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -1933,7 +2026,6 @@ class ReleasesActivity : AppCompatActivity() {
 
         return latestRelease
     }
-
 
 
 }
