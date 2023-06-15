@@ -3,6 +3,8 @@ package com.n0tavailable.tunedetective
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
@@ -10,10 +12,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -35,6 +39,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -54,6 +59,7 @@ import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -1635,6 +1641,8 @@ class ReleasesActivity : AppCompatActivity() {
 
                             runOnUiThread {
                                 addAlbumToView(albumItem, artistName, artistImageUrl)
+                                checkAndDisplayNotification(albumTitle, releaseDate)
+
                             }
                         } else {
                             runOnUiThread {
@@ -1651,6 +1659,41 @@ class ReleasesActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun checkAndDisplayNotification(albumTitle: String, releaseDate: String) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDate = Date()
+        val sevenDaysAgo = Calendar.getInstance()
+        sevenDaysAgo.add(Calendar.DAY_OF_YEAR, -7)
+        val releaseDateObj = dateFormat.parse(releaseDate)
+
+        if (releaseDateObj != null && releaseDateObj.after(sevenDaysAgo.time) && releaseDateObj.before(currentDate)) {
+            // Create a notification channel if the device is running on Android Oreo or above
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channelId = "release_notification_channel"
+                val channelName = "Release Notifications"
+                val channelDescription = "Channel for release notifications"
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
+
+                val channel = NotificationChannel(channelId, channelName, importance)
+                channel.description = channelDescription
+                channel.enableLights(true)
+                channel.lightColor = Color.BLUE
+
+                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            val notificationBuilder = NotificationCompat.Builder(this, "release_notification_channel")
+                .setContentTitle("New Release")
+                .setContentText("Check out the latest album: $albumTitle")
+                .setSmallIcon(R.drawable.ic_notification_icon)
+                .setAutoCancel(true)
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(0, notificationBuilder.build())
+        }
     }
 
     private fun findLatestAlbum(albumArray: JSONArray): JSONObject? {
