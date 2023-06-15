@@ -2,10 +2,13 @@ package com.n0tavailable.tunedetective
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlarmManager
 import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.ProgressDialog
+import android.content.BroadcastReceiver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -1529,6 +1532,26 @@ class TracklistActivity : AppCompatActivity() {
 class ReleasesActivity : AppCompatActivity() {
     private lateinit var releaseContainer: LinearLayout
 
+    companion object {
+        private const val ALARM_INTERVAL = 60 * 1000 // 1 minute
+
+        fun scheduleReleaseChecks(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val alarmIntent = Intent(context, ReleaseCheckReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            // Schedule the alarm to repeat every ALARM_INTERVAL milliseconds
+            alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + ALARM_INTERVAL,
+                ALARM_INTERVAL.toLong(),
+                pendingIntent
+            )
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -1536,7 +1559,11 @@ class ReleasesActivity : AppCompatActivity() {
 
         releaseContainer = findViewById(R.id.releaseContainer)
 
+        scheduleReleaseChecks(this)
+
+
         fetchAndDisplayReleases()
+
     }
 
     override fun onBackPressed() {
@@ -1718,6 +1745,12 @@ class ReleasesActivity : AppCompatActivity() {
         artistName: String,
         artistImageUrl: String
     ) {
+
+        if (isDestroyed) {
+            return
+        }
+
+
         val releaseItemView = LayoutInflater.from(this)
             .inflate(R.layout.item_release, releaseContainer, false)
 
@@ -1829,4 +1862,12 @@ class ReleasesActivity : AppCompatActivity() {
     }
 
 
+}
+
+class ReleaseCheckReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val releasesActivityIntent = Intent(context, ReleasesActivity::class.java)
+        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(releasesActivityIntent)
+    }
 }
