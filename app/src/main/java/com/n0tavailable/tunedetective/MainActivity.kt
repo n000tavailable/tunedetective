@@ -10,7 +10,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
@@ -18,7 +17,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -35,7 +33,6 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -58,7 +55,6 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
@@ -74,7 +70,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var welcomeMessageTextView: TextView
-    private lateinit var artistNameTextView: TextView
     private lateinit var dialog: Dialog
     private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
@@ -515,108 +510,6 @@ class MainActivity : AppCompatActivity() {
 
             dialog.show()
         }
-    }
-
-    private fun showAlbumDetails(albumTitle: String, artistName: String) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val encodedAlbumTitle = Uri.encode(albumTitle) // Encode the album title if needed
-
-        val request = Request.Builder()
-            .url("https://api.deezer.com/search/album?q=$encodedAlbumTitle")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val albumArray = jsonResponse.getJSONArray("data")
-
-                    if (albumArray.length() > 0) {
-                        var foundAlbum: JSONObject? = null
-
-                        // Iterate over the albums and find the one with a matching title and artist
-                        for (i in 0 until albumArray.length()) {
-                            val album = albumArray.getJSONObject(i)
-                            val currentAlbumTitle = album.getString("title")
-                            val currentArtistName = album.getJSONObject("artist").getString("name")
-
-                            if (currentAlbumTitle.equals(albumTitle, ignoreCase = true) &&
-                                currentArtistName.equals(artistName, ignoreCase = true)
-                            ) {
-                                foundAlbum = album
-                                break
-                            }
-                        }
-
-                        if (foundAlbum != null) {
-                            val albumId = foundAlbum.getString("id")
-                            val albumTitle = foundAlbum.getString("title")
-                            val albumCoverUrl = foundAlbum.getString("cover_medium")
-
-                            runOnUiThread {
-                                // Create a dialog to display the album details
-                                val dialog = Dialog(this@MainActivity)
-                                dialog.setContentView(R.layout.album_details_dialog)
-
-                                // Set the album details in the dialog views
-                                val albumTitleTextView =
-                                    dialog.findViewById<TextView>(R.id.albumTitleTextView)
-                                val albumCoverImageView =
-                                    dialog.findViewById<ImageView>(R.id.albumCoverImageView)
-                                val tracklistButton =
-                                    dialog.findViewById<Button>(R.id.tracklistButton)
-
-                                albumTitleTextView.text = albumTitle
-
-                                // Load the album cover image using Glide
-                                Glide.with(this@MainActivity)
-                                    .load(albumCoverUrl)
-                                    .into(albumCoverImageView)
-
-                                // Set click listener for the tracklist button
-                                tracklistButton.setOnClickListener {
-                                    fetchAndShowTracklist(albumId)
-                                }
-
-                                dialog.show()
-                            }
-                        } else {
-                            runOnUiThread {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Album details not found",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Album details not found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Error: ${response.code} ${response.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        })
     }
 
     private fun fetchAndShowTracklist(albumId: String) {
@@ -1640,12 +1533,6 @@ class ReleasesActivity : AppCompatActivity() {
         fetchAndDisplayReleases()
     }
 
-    data class Artist(
-        val artistId: String,
-        val artistName: String,
-        val artistImageUrl: String
-    )
-
     override fun onBackPressed() {
         super.onBackPressed()
         resetLayout()
@@ -1896,142 +1783,6 @@ class ReleasesActivity : AppCompatActivity() {
         }
 
         dialog.show()
-    }
-
-
-    private fun fetchArtistReleases(artistId: String, artistImageUrl: String, artistName: String) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId/albums?limit=1000&type=album,single,ep")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val albumArray = jsonResponse.getJSONArray("data")
-
-                    if (albumArray.length() > 0) {
-                        val latestRelease = findLatestRelease(albumArray)
-                        if (latestRelease != null) {
-                            val albumId = latestRelease.getString("id")
-                            val albumTitle = latestRelease.getString("title")
-                            val albumCoverUrl = latestRelease.getString("cover_big")
-                            val releaseDate = latestRelease.getString("release_date")
-
-                            val albumItem = ArtistDiscographyActivity.Album(
-                                albumId,
-                                albumTitle,
-                                albumCoverUrl,
-                                releaseDate
-                            )
-
-                            runOnUiThread {
-                                addAlbumToView(albumItem, artistName, artistImageUrl)
-                            }
-                        } else {
-                            runOnUiThread {
-                                // Handle case when no release is found
-                            }
-                        }
-                    } else {
-                        runOnUiThread {
-                            // Handle case when no release is found
-                        }
-                    }
-                } else {
-                    println("Error: ${response.code} ${response.message}")
-                }
-            }
-        })
-    }
-
-    private fun fetchArtistDiscography(
-        artistId: String,
-        artistImageUrl: String,
-        artistName: String
-    ) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId/albums?limit=10")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val albumArray = jsonResponse.getJSONArray("data")
-
-                    if (albumArray.length() > 0) {
-                        val latestRelease = findLatestRelease(albumArray)
-                        if (latestRelease != null) {
-                            val albumId = latestRelease.getString("id")
-                            val albumTitle = latestRelease.getString("title")
-                            val albumCoverUrl = latestRelease.getString("cover_big")
-                            val releaseDate = latestRelease.getString("release_date")
-
-                            val albumItem = ArtistDiscographyActivity.Album(
-                                albumId,
-                                albumTitle,
-                                albumCoverUrl,
-                                releaseDate
-                            )
-
-                            runOnUiThread {
-                                addAlbumToView(albumItem, artistName, artistImageUrl)
-                            }
-                        } else {
-                            runOnUiThread {
-                                // Handle case when no release is found
-                            }
-                        }
-                    } else {
-                        runOnUiThread {
-                            // Handle case when no release is found
-                        }
-                    }
-                } else {
-                    println("Error: ${response.code} ${response.message}")
-                }
-            }
-        })
-    }
-
-    private fun findLatestRelease(albumArray: JSONArray): JSONObject? {
-        var latestRelease: JSONObject? = null
-        var latestReleaseDate: String? = null
-
-        for (i in 0 until albumArray.length()) {
-            val release = albumArray.getJSONObject(i)
-            val releaseType = release.getString("type")
-            val releaseDate = release.getString("release_date")
-
-            // Consider only albums, EPs, and singles
-            if (releaseType == "album" || releaseType == "ep" || releaseType == "single") {
-                if (latestReleaseDate == null || releaseDate > latestReleaseDate) {
-                    latestRelease = release
-                    latestReleaseDate = releaseDate
-                }
-            }
-        }
-
-        return latestRelease
     }
 
 
