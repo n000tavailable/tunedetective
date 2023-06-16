@@ -1,20 +1,31 @@
 package com.n0tavailable.tunedetective
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.ProgressDialog
+import android.app.Service
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
@@ -35,6 +46,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +57,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -54,7 +72,9 @@ import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import java.util.Random
 
 class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
@@ -82,12 +102,30 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         stopPlayback()
         resetLayout()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceIntent = Intent(this, BackgroundService::class.java)
+            startForegroundService(serviceIntent)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceIntent = Intent(this, BackgroundService::class.java)
+            startForegroundService(serviceIntent)
+        }
     }
 
     override fun onStop() {
         super.onStop()
         stopPlayback()
         resetLayout()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceIntent = Intent(this, BackgroundService::class.java)
+            startForegroundService(serviceIntent)
+        }
     }
 
     private fun stopPlayback() {
@@ -101,6 +139,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceIntent = Intent(this, BackgroundService::class.java)
+            startForegroundService(serviceIntent)
+        }
 
         resetLayout()
 
@@ -164,6 +207,11 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceIntent = Intent(this, BackgroundService::class.java)
+            startForegroundService(serviceIntent)
+        }
 
         discographyButton = findViewById(R.id.discographyButton)
 
@@ -1522,15 +1570,33 @@ class TracklistActivity : AppCompatActivity() {
 
 class ReleasesActivity : AppCompatActivity() {
     private lateinit var releaseContainer: LinearLayout
+    private val addedAlbumIds = HashSet<String>()
+    private lateinit var notificationManager: NotificationManagerCompat
+    private val handler = Handler(Looper.getMainLooper())
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val delayBetweenArtists = 1 * 1000L // 1 seconds
+    private var notificationId = 1 // Initial notification ID
+    private val shownNotifications = HashSet<String>()
+    private val fetchRunnable = object : Runnable {
 
+        override fun run() {
+            fetchAndDisplayReleases()
+            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
 
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_releases)
 
         releaseContainer = findViewById(R.id.releaseContainer)
+        notificationManager = NotificationManagerCompat.from(this)
+
+        createNotificationChannel() // Create the notification channel
+
 
         fetchAndDisplayReleases()
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
     }
 
     override fun onBackPressed() {
@@ -1546,8 +1612,11 @@ class ReleasesActivity : AppCompatActivity() {
     private fun fetchAndDisplayReleases() {
         val artists = fetchArtistsFromDatabase()
 
-        for (artist in artists) {
-            fetchLatestRelease(artist)
+        coroutineScope.launch {
+            for (artist in artists) {
+                fetchLatestRelease(artist)
+                delay(delayBetweenArtists)
+            }
         }
     }
 
@@ -1622,19 +1691,23 @@ class ReleasesActivity : AppCompatActivity() {
                         val latestAlbum = findLatestAlbum(albumArray)
                         if (latestAlbum != null) {
                             val albumId = latestAlbum.getString("id")
-                            val albumTitle = latestAlbum.getString("title")
-                            val albumCoverUrl = latestAlbum.getString("cover_big")
-                            val releaseDate = latestAlbum.getString("release_date")
+                            if (albumId !in addedAlbumIds) {
+                                val albumTitle = latestAlbum.getString("title")
+                                val albumCoverUrl = latestAlbum.getString("cover_big")
+                                val releaseDate = latestAlbum.getString("release_date")
 
-                            val albumItem = ArtistDiscographyActivity.Album(
-                                albumId,
-                                albumTitle,
-                                albumCoverUrl,
-                                releaseDate
-                            )
+                                val albumItem = ArtistDiscographyActivity.Album(
+                                    albumId,
+                                    albumTitle,
+                                    albumCoverUrl,
+                                    releaseDate
+                                )
 
-                            runOnUiThread {
-                                addAlbumToView(albumItem, artistName, artistImageUrl)
+                                runOnUiThread {
+                                    addAlbumToView(albumItem, artistName, artistImageUrl)
+                                }
+
+                                addedAlbumIds.add(albumId)
                             }
                         } else {
                             runOnUiThread {
@@ -1683,18 +1756,31 @@ class ReleasesActivity : AppCompatActivity() {
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
         val releaseCoverImageView =
             releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val releaseDate = sdf.parse(album.releaseDate)
+        val currentDate = Date()
+
+        val releaseKey = "$artistName-${album.title}"
+        if (releaseKey !in shownNotifications) {
+            if (releaseDate != null && currentDate.time - releaseDate.time <= 1 * 24 * 60 * 60 * 1000) {
+                showNotification(artistName, album.title)
+                shownNotifications.add(releaseKey)
+            }
+        }
 
         artistTextView.text = artistName.toUpperCase() // Convert to uppercase
         releaseTitleTextView.text = album.title
         releaseDateTextView.text = album.releaseDate
 
-        val requestOptions = RequestOptions()
-            .transform(RoundedCorners(50))
+        if (!isDestroyed) {
+            val requestOptions = RequestOptions()
+                .transform(RoundedCorners(50))
 
-        Glide.with(this)
-            .load(album.coverUrl)
-            .apply(requestOptions)
-            .into(releaseCoverImageView)
+            Glide.with(this)
+                .load(album.coverUrl)
+                .apply(requestOptions)
+                .into(releaseCoverImageView)
+        }
 
         // Add a click listener to the album cover image
         releaseCoverImageView.setOnClickListener {
@@ -1703,6 +1789,62 @@ class ReleasesActivity : AppCompatActivity() {
 
         releaseContainer.addView(releaseItemView)
     }
+
+    private fun showNotification(artistName: String, albumTitle: String) {
+        val notificationId = generateNotificationId(artistName, albumTitle) // Generate unique notification ID
+
+        val intent = Intent(this, ReleasesActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.notification_icon)
+            .setContentTitle("New Release")
+            .setContentText("New release from $artistName: $albumTitle")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        notificationManager.notify(notificationId, notification) // Use the unique notification ID
+
+        // Schedule the next execution after 1 minute
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+    }
+
+    private fun generateNotificationId(artistName: String, albumTitle: String): Int {
+        // Generate a unique notification ID using a combination of artist name and album title
+        val idString = "$artistName-$albumTitle"
+        return idString.hashCode()
+    }
+
+
+    @SuppressLint("ServiceCast")
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "New Releases"
+            val descriptionText = "Shows notifications for new music releases"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "new_releases_channel"
+    }
+
 
     private fun openTracklist(albumId: String) {
         // Fetch the tracklist for the album with the given ID
@@ -1786,4 +1928,56 @@ class ReleasesActivity : AppCompatActivity() {
     }
 
 
+}
+
+class BackgroundService : Service() {
+    private lateinit var releasesActivityIntent: Intent
+    private val NOTIFICATION_CHANNEL_ID = "ReleasesNotificationChannel"
+    private val NOTIFICATION_ID = 1
+
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        startForegroundService()
+    }
+
+    private fun startForegroundService() {
+        releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "Releases Notification Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
+        val notification = createNotification()
+        startForeground(NOTIFICATION_ID, notification)
+        startReleasesActivity()
+    }
+
+    private fun createNotification(): Notification {
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, releasesActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Fetching Artists' Releases")
+            .setContentText("Fetching and displaying artists' latest releases in the background.")
+            .setSmallIcon(R.drawable.notification_icon)
+            .setContentIntent(pendingIntent)
+            .setOngoing(true) // Set the notification as ongoing
+            .build()
+    }
+
+    private fun startReleasesActivity() {
+        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(releasesActivityIntent)
+    }
 }
