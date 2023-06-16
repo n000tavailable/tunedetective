@@ -44,6 +44,7 @@ import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -102,15 +103,29 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         stopPlayback()
         resetLayout()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
-            startForegroundService(serviceIntent)
-        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onStart() {
         super.onStart()
+
+        // Check if the notification permission is granted
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request the notification permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                101
+            )
+        } else {
+            // Permission already granted, continue with the app initialization
+            initializeApp()
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceIntent = Intent(this, BackgroundService::class.java)
             startForegroundService(serviceIntent)
@@ -121,11 +136,6 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         stopPlayback()
         resetLayout()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
-            startForegroundService(serviceIntent)
-        }
     }
 
     private fun stopPlayback() {
@@ -139,11 +149,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
-            startForegroundService(serviceIntent)
-        }
 
         resetLayout()
 
@@ -200,6 +205,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progressDialog = ProgressDialog(this)
@@ -207,6 +213,23 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
 
         setContentView(R.layout.activity_main)
+
+        // Check if the notification permission is granted
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request the notification permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                101
+            )
+        } else {
+            // Permission already granted, continue with the app initialization
+            initializeApp()
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceIntent = Intent(this, BackgroundService::class.java)
@@ -410,6 +433,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, continue with the app initialization
+                initializeApp()
+            } else {
+                // Permission denied, handle accordingly (e.g., show a message, disable notification-related functionality)
+            }
+        }
+    }
+
+    private fun initializeApp() {
+        // Perform the remaining initialization steps
+        // ...
+    }
+
 
     private fun fetchAndDisplayReleases() {
         // Fetch the artists from the database (you will need to implement this part)
@@ -1581,7 +1626,7 @@ class ReleasesActivity : AppCompatActivity() {
 
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
+            handler.postDelayed(this, 60 * 1000); // Schedule the next execution after 1 minute
 
         }
     }
@@ -1596,7 +1641,7 @@ class ReleasesActivity : AppCompatActivity() {
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 1000); // Start periodic execution after 1 minute
     }
 
     override fun onBackPressed() {
@@ -1815,7 +1860,7 @@ class ReleasesActivity : AppCompatActivity() {
         notificationManager.notify(notificationId, notification) // Use the unique notification ID
 
         // Schedule the next execution after 1 minute
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 1000); // Start periodic execution after 1 minute
     }
 
     private fun generateNotificationId(artistName: String, albumTitle: String): Int {
