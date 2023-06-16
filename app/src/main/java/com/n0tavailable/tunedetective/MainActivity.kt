@@ -19,6 +19,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
@@ -64,6 +66,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -73,6 +76,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import pl.droidsonroids.gif.GifImageView
 import java.io.IOException
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -1815,7 +1819,6 @@ class ReleasesActivity : AppCompatActivity() {
         val releaseItemView = LayoutInflater.from(this)
             .inflate(R.layout.item_release, releaseContainer, false)
 
-
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
@@ -1828,7 +1831,7 @@ class ReleasesActivity : AppCompatActivity() {
         val releaseKey = "$artistName-${album.title}"
         if (releaseKey !in shownNotifications) {
             if (releaseDate != null && currentDate.time - releaseDate.time <= 1 * 24 * 60 * 60 * 1000) {
-                showNotification(artistName, album.title)
+                showNotification(artistName, album.title, album.coverUrl) // Pass the album cover URL
                 shownNotifications.add(releaseKey)
             }
         }
@@ -1855,37 +1858,62 @@ class ReleasesActivity : AppCompatActivity() {
         releaseContainer.addView(releaseItemView)
     }
 
-    private fun showNotification(artistName: String, albumTitle: String) {
+    private fun showNotification(artistName: String, albumTitle: String, albumCoverUrl: String) {
         val notificationId = generateNotificationId(artistName, albumTitle) // Generate unique notification ID
 
         val intent = Intent(this, ReleasesActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle("New Release")
-            .setContentText("New release from $artistName: $albumTitle")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
+        CoroutineScope(Dispatchers.IO).launch {
+            val bitmap = getBitmapFromUrl(albumCoverUrl)
+            withContext(Dispatchers.Main) {
+                val notification = NotificationCompat.Builder(this@ReleasesActivity, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.notification_icon)
+                    .setContentTitle("New Release")
+                    .setContentText("New release from $artistName: $albumTitle")
+                    .setLargeIcon(bitmap) // Set the retrieved bitmap as a large icon
+                    .setStyle(
+                        NotificationCompat.BigPictureStyle()
+                            .bigPicture(bitmap) // Set the retrieved bitmap as a big picture
+                            .bigLargeIcon(null as Bitmap?) // Explicitly specify the argument type to resolve ambiguity
+                    )
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build()
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
+                if (ActivityCompat.checkSelfPermission(
+                        this@ReleasesActivity,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@withContext
+                }
+                val notificationManager: NotificationManager =
+                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(notificationId, notification) // Use the unique notification ID
+
+                handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
+            }
         }
-        notificationManager.notify(notificationId, notification) // Use the unique notification ID
+    }
 
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+    private suspend fun getBitmapFromUrl(url: String): Bitmap? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val inputStream = URL(url).openStream()
+                BitmapFactory.decodeStream(inputStream)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun generateNotificationId(artistName: String, albumTitle: String): Int {
-        // Generate a unique notification ID using a combination of artist name and album title
-        val idString = "$artistName-$albumTitle"
-        return idString.hashCode()
+        val artistHash = artistName.hashCode()
+        val albumHash = albumTitle.hashCode()
+        return artistHash xor albumHash
     }
 
 
