@@ -57,9 +57,8 @@
 
         <activity
             android:name=".ReleasesActivity"
+            android:launchMode="singleTop"
             android:label="ReleasesActivity" />
-
-
 
         <service
             android:name=".BackgroundService"

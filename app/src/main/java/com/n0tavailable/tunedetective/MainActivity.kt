@@ -10,6 +10,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.app.Service
+import android.app.TaskStackBuilder
+import android.content.BroadcastReceiver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -1626,7 +1628,7 @@ class ReleasesActivity : AppCompatActivity() {
 
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 60 * 1000); // Schedule the next execution after 1 minute
+            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
 
         }
     }
@@ -1641,12 +1643,29 @@ class ReleasesActivity : AppCompatActivity() {
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 1000); // Start periodic execution after 1 minute
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
         resetLayout()
+    }
+
+    class NotificationReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // Check if the ReleasesActivity is already running
+            val activityIntent = Intent(context, ReleasesActivity::class.java)
+            activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            val isActivityRunning = PendingIntent.getActivity(
+                context, 0, activityIntent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            ) != null
+
+            if (!isActivityRunning) {
+                // The ReleasesActivity is not running, so start it
+                context.startActivity(activityIntent)
+            }
+        }
     }
 
     private fun resetLayout() {
@@ -1796,6 +1815,7 @@ class ReleasesActivity : AppCompatActivity() {
         val releaseItemView = LayoutInflater.from(this)
             .inflate(R.layout.item_release, releaseContainer, false)
 
+
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
@@ -1859,8 +1879,7 @@ class ReleasesActivity : AppCompatActivity() {
         }
         notificationManager.notify(notificationId, notification) // Use the unique notification ID
 
-        // Schedule the next execution after 1 minute
-        handler.postDelayed(fetchRunnable, 60 * 1000); // Start periodic execution after 1 minute
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
     }
 
     private fun generateNotificationId(artistName: String, albumTitle: String): Int {
@@ -2007,9 +2026,18 @@ class BackgroundService : Service() {
         startReleasesActivity()
     }
 
+    @SuppressLint("LaunchActivityFromNotification")
     private fun createNotification(): Notification {
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, releasesActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        val releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
+
+        // Create a TaskStackBuilder to handle the intent
+        val taskStackBuilder = TaskStackBuilder.create(this)
+            .addNextIntentWithParentStack(releasesActivityIntent)
+
+        // Get the PendingIntent from the TaskStackBuilder
+        val pendingIntent = taskStackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -2023,6 +2051,5 @@ class BackgroundService : Service() {
 
     private fun startReleasesActivity() {
         releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(releasesActivityIntent)
     }
 }
