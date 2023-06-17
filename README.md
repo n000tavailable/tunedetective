@@ -20,6 +20,7 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Features:
 
+- Get notified about new releases
 - Fetch multiple artists at once
 - Display the entire Discography of an artist
 - Search for music artists and view their similar artists
@@ -40,14 +41,30 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Screenshots
 
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/d9f3ecdc-e303-4e6d-9a29-70cbb27de6ac" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/eef4f050-1cbb-4298-8c4c-4764cc29341a" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/7c82f31e-dcfb-4df8-aab9-64ea5dd992da" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/ba050dc1-29a0-4802-bd0d-f76fe26e6921" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/b21b511b-bde6-49f2-825d-51d9faad1c6d" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/3f6c3670-b946-49c1-8ffd-0f80e0e73ebb" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/066ebcb8-9dad-476b-ac79-35dc94121e79" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/0357dacd-4ada-4baf-8b1c-753d371aa389" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/0178a8a3-7c5a-4145-86ce-06c2ae3edad0" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f40e2753-8578-42a1-b024-326c09c4d42f" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/72a11cdd-3a4f-46c8-ab57-87cdc8abeef4" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f37ec03e-e2b1-4ff5-9598-c512b1df9ffc" width="350">
 
 # How to use?
 **Discover the Latest Release of Your Favorite Artist**
+
+**Setup Notifications**
+
+**Permission:** You will be prompted to accept the permission request. This permission enables TuneDetective to display new release notifications.
+
+**Homescreen Waiting Period:** After accepting the permission-request, you will briefly wait on the app's homescreen. During this time, TuneDetective works diligently in the background to fetch the latest music releases.
+
+**Notification Prompt:** Once the app is done with the background progress, a notification will appear on your device's screen. The notification will prompt you to tap on it to initialize the new release notification.
+
+**Message Dismissal:** After tapping the notification, it will redirect you to the new release information within the app. After a few seconds, you can dismiss the notification. This dismissal option will be labeled as the "Turn Me Off" channel within the notification settings.
+
+**Hourly Updates:** After dismissing the initial notification, TuneDetective will continue to check for new releases every hour. If any new releases are found, they will be displayed as notifications, accompanied by the album cover of the respective release.
+
+**How to search for artists**
 
 1. Enter the name of the artist in the designated text field labeled "Enter artist name."
 2. Press the "search" button to unveil their freshest release.
@@ -62,12 +79,18 @@ https://matrix.to/#/#tunedetective:matrix.org
 - Up to 20 search requests are saved for your convenience.
 - Open a saved artist by clicking on their name.
 - Delete a search request by performing a long click on the artist's name.
+- You'll also be able to fetch all artists at once with a 1 second delay
 
 Unveil the music you love with a simple search and easy-to-use controls!
 
 # Permissions
 - uses-permission android:name="android.permission.INTERNET"
+- uses-permission android:name="android.permission.POST_NOTIFICATIONS"
 - uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+- uses-permission android:name="android.permission.WAKE_LOCK"
+- uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
+- uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+- uses-permission android:name="android.permission.VIBRATE"
 
 
 
