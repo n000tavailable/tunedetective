@@ -3,6 +3,7 @@ package com.n0tavailable.tunedetective
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationChannel
@@ -1864,6 +1865,14 @@ class ReleasesActivity : AppCompatActivity() {
         val intent = Intent(this, ReleasesActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
+        // Check if the user is on the ReleasesActivity or item_release screen
+        val isUserOnReleasesActivity = isUserOnActivity(ReleasesActivity::class.java)
+
+        if (isUserOnReleasesActivity) {
+            // User is on one of the screens, don't show the notification
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             val bitmap = getBitmapFromUrl(albumCoverUrl)
             withContext(Dispatchers.Main) {
@@ -1896,6 +1905,20 @@ class ReleasesActivity : AppCompatActivity() {
                 handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
             }
         }
+    }
+
+    private fun isUserOnActivity(activityClass: Class<*>): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val runningActivities = activityManager.getRunningTasks(1)
+
+        if (runningActivities.isNotEmpty()) {
+            val topActivity = runningActivities[0].topActivity
+            if (topActivity?.className == activityClass.name) {
+                return true
+            }
+        }
+
+        return false
     }
 
     private suspend fun getBitmapFromUrl(url: String): Bitmap? {
