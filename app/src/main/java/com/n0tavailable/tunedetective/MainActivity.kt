@@ -104,6 +104,8 @@ class MainActivity : AppCompatActivity() {
     private var pepeGifEnabled = true
     private var artistName: String? = null
     private var selectedArtist: String? = null
+    private val artistMap = mutableMapOf<String, Pair<String, String>>()
+
 
 
     override fun onDestroy() {
@@ -740,11 +742,14 @@ class MainActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(responseData)
                     val artistName = jsonResponse.getString("name")
                     val artistImageUrl = jsonResponse.getString("picture_big")
-                    val artist = Pair(artistName, artistImageUrl)
 
-                    runOnUiThread {
-                        showArtistSelectionDialog(listOf(artist))
-                    }
+                    // Start a new activity to display the artist discography
+                    val intent =
+                        Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                    intent.putExtra("artistId", artistId)
+                    intent.putExtra("artistName", artistName)
+                    intent.putExtra("artistImageUrl", artistImageUrl)
+                    startActivity(intent)
                 } else {
                     runOnUiThread {
                         Toast.makeText(
@@ -795,11 +800,15 @@ class MainActivity : AppCompatActivity() {
                             val artist = artistArray.getJSONObject(i)
                             val artistName = artist.getString("name")
                             val artistImageUrl = artist.getString("picture_big")
+                            val artistId = artist.getString("id")
                             artists.add(
                                 Pair(
                                     artistName, artistImageUrl
                                 )
                             ) // Add the artist name and image URL as a pair
+
+                            // Store artist id with its name and image URL in a map
+                            artistMap[artistId] = Pair(artistName, artistImageUrl)
                         }
 
                         val finalArtists =
@@ -827,6 +836,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 
     private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) {
         val dialog = Dialog(this)
