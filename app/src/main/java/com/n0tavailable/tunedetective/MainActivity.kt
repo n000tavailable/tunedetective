@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
@@ -290,15 +291,24 @@ class MainActivity : AppCompatActivity() {
                 val alertDialogBuilder = AlertDialog.Builder(this)
                 alertDialogBuilder.setTitle("Confirmation")
                 alertDialogBuilder.setMessage("Do you really want to delete \"$selectedArtist\"?")
+
                 alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
                     searchHistoryDatabaseHelper.deleteSearchQuery(selectedArtist)
                     historyAdapter.remove(selectedArtist)
                     historyAdapter.notifyDataSetChanged()
                 }
                 alertDialogBuilder.setNegativeButton("No", null)
-                alertDialogBuilder.show()
+
+                val alertDialog = alertDialogBuilder.create()
+                alertDialog.setOnShowListener {
+                    val messageTextView = alertDialog.findViewById<TextView>(android.R.id.message)
+                    messageTextView?.setTextColor(Color.WHITE)
+                }
+
+                alertDialog.show()
                 true
             }
+
 
             fetchReleasesButton.setOnClickListener {
                 fetchAndDisplayReleases()
