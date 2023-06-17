@@ -143,7 +143,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         stopPlayback()
-        resetLayout()
     }
 
     private fun stopPlayback() {
@@ -157,8 +156,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
-        resetLayout()
 
 
         // Retrieve the toggle state from SharedPreferences
@@ -186,11 +183,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetLayout() {
-        albumCoverLayout.visibility = View.GONE
-        trackTitleTextView.visibility = View.GONE
-        releaseDateTextView.visibility = View.GONE
-        albumCoverImageView.setImageResource(R.drawable.round_album_cover)
-        artistEditText.text = null
 
         if (::dialog.isInitialized && dialog.isShowing) {
             dialog.dismiss()
@@ -291,7 +283,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 alertDialog.setOnDismissListener {
-                    resetLayout()
                 }
             }
 
@@ -315,7 +306,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             closeButton.setOnClickListener {
-                resetLayout()
                 alertDialog.dismiss()
             }
         }
