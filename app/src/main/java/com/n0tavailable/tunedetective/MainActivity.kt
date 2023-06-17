@@ -1633,7 +1633,7 @@ class ReleasesActivity : AppCompatActivity() {
 
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 60 * 60 * 1000) // Schedule the next execution after 1 hour
+            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
 
         }
     }
@@ -1648,7 +1648,7 @@ class ReleasesActivity : AppCompatActivity() {
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
     }
 
     override fun onBackPressed() {
@@ -1679,7 +1679,18 @@ class ReleasesActivity : AppCompatActivity() {
         val intent = Intent(this, ReleasesActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create the notification channel
+        val channelId = "FetchFailureChannel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = "Fetch Failure Channel"
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Fetch Failed")
             .setContentText("Failed to fetch releases. Retrying in one hour.")
@@ -1688,11 +1699,12 @@ class ReleasesActivity : AppCompatActivity() {
             .setAutoCancel(true)
             .build()
 
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Modify the notification attributes to make it silent and prevent vibration
+        notification.flags = notification.flags or NotificationCompat.FLAG_ONLY_ALERT_ONCE or NotificationCompat.FLAG_AUTO_CANCEL
+
         notificationManager.notify(notificationId, notification)
 
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
     }
 
     private fun resetLayout() {
@@ -1937,7 +1949,7 @@ class ReleasesActivity : AppCompatActivity() {
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(notificationId, notification) // Use the unique notification ID
 
-                handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
+                handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
             }
         }
     }
