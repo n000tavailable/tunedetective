@@ -678,8 +678,10 @@ class MainActivity : AppCompatActivity() {
     private fun searchArtistById(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request = Request.Builder().url("https://api.deezer.com/artist/$artistId")
-            .addHeader("Authorization", "Bearer $apiKey").build()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/artist/$artistId")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         progressDialog.show()
 
@@ -698,14 +700,7 @@ class MainActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(responseData)
                     val artistName = jsonResponse.getString("name")
                     val artistImageUrl = jsonResponse.getString("picture_big")
-
-                    // Start a new activity to display the artist discography
-                    val intent =
-                        Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
-                    intent.putExtra("artistId", artistId)
-                    intent.putExtra("artistName", artistName)
-                    intent.putExtra("artistImageUrl", artistImageUrl)
-                    startActivity(intent)
+                    getLatestRelease(artistId, artistImageUrl, artistName)
                 } else {
                     runOnUiThread {
                         Toast.makeText(
@@ -729,8 +724,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val request = Request.Builder().url("https://api.deezer.com/search/artist?q=$artistName")
-            .addHeader("Authorization", "Bearer $apiKey").build()
+        val request = Request.Builder()
+            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         progressDialog.show()
 
@@ -806,12 +803,15 @@ class MainActivity : AppCompatActivity() {
 
         artistListView.setOnItemClickListener { parent, view, position, id ->
             val selectedArtist = artists[position]
-            saveSelectedArtist(selectedArtist.first) // Save the selected artist to the database
-            searchArtist(selectedArtist.first)
-            dialog.dismiss()
-        }
-
-        closeButton.setOnClickListener {
+            val artistName = selectedArtist.first
+            val artistId = artistMap.keys.find { key -> artistMap[key]?.first == artistName }
+            if (artistId != null) {
+                searchArtistById(artistId)
+            } else {
+                Toast.makeText(
+                    this@MainActivity, "Error: Artist ID not found", Toast.LENGTH_SHORT
+                ).show()
+            }
             dialog.dismiss()
         }
 
