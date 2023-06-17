@@ -488,17 +488,15 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showArtistDiscography(artistName: String) {
+    private fun showArtistDiscography(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .url("https://api.deezer.com/artist/$artistId")
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
         progressDialog.show()
-
-        this.artistName = artistName
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -513,26 +511,13 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
-                    val artistArray = jsonResponse.getJSONArray("data")
+                    val artistId = jsonResponse.getString("id")
 
-                    if (artistArray.length() > 0) {
-                        val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getString("id")
-
-                        // Start a new activity to display the artist discography
-                        val intent =
-                            Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
-                        intent.putExtra("artistId", artistId)
-                        startActivity(intent)
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "No artist found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                    // Start a new activity to display the artist discography
+                    val intent =
+                        Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                    intent.putExtra("artistId", artistId)
+                    startActivity(intent)
                 } else {
                     runOnUiThread {
                         Toast.makeText(
@@ -545,7 +530,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun showFeedbackDialog() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
@@ -806,7 +790,7 @@ class MainActivity : AppCompatActivity() {
             val artistName = selectedArtist.first
             val artistId = artistMap.keys.find { key -> artistMap[key]?.first == artistName }
             if (artistId != null) {
-                saveSelectedArtist(artistId, artistName) // Save the selected artist to the database
+                saveSelectedArtist(artistId, artistName) // Save the selected artist name to the database
                 searchArtistById(artistId)
             } else {
                 Toast.makeText(
