@@ -23,12 +23,7 @@ class SettingsActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
 
-        val pepeGifSwitch = findViewById<Switch>(R.id.pepeGifSwitch)
         val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
-        pepeGifSwitch.isChecked = sharedPreferences.getBoolean("pepeGifEnabled", true)
-        pepeGifSwitch.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("pepeGifEnabled", isChecked).apply()
-        }
 
         welcomeMessageToggleButton.isChecked =
             sharedPreferences.getBoolean("welcomeMessageVisible", true)

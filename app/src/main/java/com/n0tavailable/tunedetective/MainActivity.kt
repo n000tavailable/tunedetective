@@ -101,7 +101,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dialog: Dialog
     private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
-    private var pepeGifEnabled = true
     private var artistName: String? = null
     private var selectedArtist: String? = null
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
@@ -167,12 +166,6 @@ class MainActivity : AppCompatActivity() {
 
         updateWelcomeMessageVisibility()
 
-        // Retrieve the toggle state from SharedPreferences
-        pepeGifEnabled = sharedPreferences.getBoolean("pepeGifEnabled", true)
-
-        // Update the PepeGif visibility
-        updatePepeGifVisibility()
-
         updateWelcomeMessageWithTime()
 
     }
@@ -203,14 +196,6 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
             val adapter = (dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView).adapter as? TrackListAdapter)
             adapter?.stopPlayback()
-        }
-
-        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-        // Hide the PepeGif based on the toggle state
-        if (pepeGifEnabled) {
-            pepeGif.visibility = View.VISIBLE
-        } else {
-            pepeGif.visibility = View.GONE
         }
     }
 
@@ -261,9 +246,6 @@ class MainActivity : AppCompatActivity() {
         // Initialize the SharedPreferences instance
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        // Retrieve the toggle state from SharedPreferences
-        pepeGifEnabled = sharedPreferences.getBoolean("pepeGifEnabled", true)
-
         val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
 
@@ -278,12 +260,6 @@ class MainActivity : AppCompatActivity() {
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
         showSearchHistoryButton.setOnClickListener {
-
-            val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-            // Hide the PepeGif based on the toggle state
-            if (pepeGifEnabled) {
-                pepeGif.visibility = View.GONE
-            }
 
             hideKeyboard()
 
@@ -312,9 +288,6 @@ class MainActivity : AppCompatActivity() {
                 selectedArtist?.let { artist ->
                     searchArtist(artist)
                     alertDialog.dismiss()
-
-                    val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-                    pepeGif.visibility = View.GONE
                 }
 
                 alertDialog.setOnDismissListener {
@@ -408,12 +381,6 @@ class MainActivity : AppCompatActivity() {
 
             Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
             hideKeyboard()
-
-            val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-            // Hide the PepeGif based on the toggle state
-            if (pepeGifEnabled) {
-                pepeGif.visibility = View.GONE
-            }
             searchSimilarArtists(artistName)
         }
 
@@ -707,16 +674,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateWelcomeMessageVisibility() {
         welcomeMessageTextView.visibility = if (welcomeMessageVisible) View.VISIBLE else View.GONE
-    }
-
-    private fun updatePepeGifVisibility() {
-        val pepeGif = findViewById<GifImageView>(R.id.pepeGif)
-
-        if (pepeGifEnabled) {
-            pepeGif.visibility = View.VISIBLE
-        } else {
-            pepeGif.visibility = View.GONE
-        }
     }
 
     private fun searchArtistById(artistId: String) {
