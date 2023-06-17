@@ -1633,7 +1633,7 @@ class ReleasesActivity : AppCompatActivity() {
 
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
+            handler.postDelayed(this, 60 * 60 * 1000) // Schedule the next execution after 1 hour
 
         }
     }
@@ -1648,7 +1648,7 @@ class ReleasesActivity : AppCompatActivity() {
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
     }
 
     override fun onBackPressed() {
@@ -1673,6 +1673,28 @@ class ReleasesActivity : AppCompatActivity() {
         }
     }
 
+    private fun showFetchFailureNotification() {
+        val notificationId = generateNotificationId("FetchFailure", "")
+
+        val intent = Intent(this, ReleasesActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.notification_icon)
+            .setContentTitle("Fetch Failed")
+            .setContentText("Failed to fetch releases. Retrying in one hour.")
+            .setPriority(NotificationCompat.PRIORITY_LOW) // Set the priority to the lowest possible
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(notificationId, notification)
+
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000) // Start periodic execution after 1 hour
+    }
+
     private fun resetLayout() {
         releaseContainer.removeAllViews()
     }
@@ -1683,11 +1705,18 @@ class ReleasesActivity : AppCompatActivity() {
 
         coroutineScope.launch {
             for (artist in artists) {
-                fetchLatestRelease(artist)
-                delay(delayBetweenArtists)
+                try {
+                    fetchLatestRelease(artist)
+                    delay(delayBetweenArtists)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    showFetchFailureNotification()
+                    break // Stop fetching further releases on fetch failure
+                }
             }
         }
     }
+
 
     private fun fetchArtistsFromDatabase(): List<String> {
         // Use your existing database helper class to fetch the artists from the database
@@ -1706,6 +1735,9 @@ class ReleasesActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
+                runOnUiThread {
+                    showFetchFailureNotification()
+                }
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -1747,6 +1779,9 @@ class ReleasesActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
+                runOnUiThread {
+                    showFetchFailureNotification()
+                }
             }
 
             override fun onResponse(call: Call, response: Response) {
