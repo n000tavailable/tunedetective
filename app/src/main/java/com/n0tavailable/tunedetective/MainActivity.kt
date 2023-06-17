@@ -2065,7 +2065,7 @@ class BackgroundService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Releases Notification Channel",
+                "Turn me off",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -2092,8 +2092,8 @@ class BackgroundService : Service() {
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Fetching Artists' Releases")
-            .setContentText("Fetching and displaying artists' latest releases in the background.")
+            .setContentTitle("Notification-Setup")
+            .setContentText("Tap on me to initialize notifications. Then you can hide me by a long click.")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true) // Set the notification as ongoing
