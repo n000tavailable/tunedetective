@@ -488,15 +488,17 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showArtistDiscography(artistId: String) {
+    private fun showArtistDiscography(artistName: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://api.deezer.com/artist/$artistId")
+            .url("https://api.deezer.com/search/artist?q=$artistName")
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
         progressDialog.show()
+
+        this.artistName = artistName
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -511,13 +513,26 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
-                    val artistId = jsonResponse.getString("id")
+                    val artistArray = jsonResponse.getJSONArray("data")
 
-                    // Start a new activity to display the artist discography
-                    val intent =
-                        Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
-                    intent.putExtra("artistId", artistId)
-                    startActivity(intent)
+                    if (artistArray.length() > 0) {
+                        val artist = artistArray.getJSONObject(0)
+                        val artistId = artist.getString("id")
+
+                        // Start a new activity to display the artist discography
+                        val intent =
+                            Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                        intent.putExtra("artistId", artistId)
+                        startActivity(intent)
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "No artist found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 } else {
                     runOnUiThread {
                         Toast.makeText(
@@ -530,6 +545,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
     private fun showFeedbackDialog() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
