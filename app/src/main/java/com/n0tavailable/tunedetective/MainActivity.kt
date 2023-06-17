@@ -806,6 +806,7 @@ class MainActivity : AppCompatActivity() {
             val artistName = selectedArtist.first
             val artistId = artistMap.keys.find { key -> artistMap[key]?.first == artistName }
             if (artistId != null) {
+                saveSelectedArtist(artistId, artistName) // Save the selected artist to the database
                 searchArtistById(artistId)
             } else {
                 Toast.makeText(
@@ -815,12 +816,17 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        closeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
         dialog.show()
     }
 
-    private fun saveSelectedArtist(artistName: String) {
-        if (!searchHistoryDatabaseHelper.isSearchQueryExists(artistName)) {
-            searchHistoryDatabaseHelper.insertSearchQuery(artistName)
+    private fun saveSelectedArtist(artistId: String, artistName: String) {
+        val query = "$artistName"
+        if (!searchHistoryDatabaseHelper.isSearchQueryExists(query)) {
+            searchHistoryDatabaseHelper.insertSearchQuery(query)
         }
     }
 
