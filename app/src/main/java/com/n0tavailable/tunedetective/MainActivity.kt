@@ -1586,6 +1586,9 @@ class ReleasesActivity : AppCompatActivity() {
     private val delayBetweenArtists = 1 * 1000L // 1 seconds
     private var notificationId = 1 // Initial notification ID
     private val shownNotifications = HashSet<String>()
+    private lateinit var nothingHereTextView: TextView
+    private lateinit var frognothinghere: ImageView
+
     private val fetchRunnable = object : Runnable {
 
         override fun run() {
@@ -1598,6 +1601,8 @@ class ReleasesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_releases)
 
+        nothingHereTextView = findViewById(R.id.nothingHereTextView)
+        frognothinghere = findViewById(R.id.frognothinghere)
         releaseContainer = findViewById(R.id.releaseContainer)
         notificationManager = NotificationManagerCompat.from(this)
 
@@ -1665,12 +1670,25 @@ class ReleasesActivity : AppCompatActivity() {
     }
 
     private fun resetLayout() {
+        if (releaseContainer.childCount == 0) {
+            nothingHereTextView.visibility = View.VISIBLE
+            frognothinghere.visibility = View.VISIBLE
+        } else {
+            nothingHereTextView.visibility = View.GONE
+            frognothinghere.visibility = View.GONE
+        }
         releaseContainer.removeAllViews()
     }
 
 
     private fun fetchAndDisplayReleases() {
         val artists = fetchArtistsFromDatabase()
+
+        if (artists.isEmpty()) {
+            nothingHereTextView.visibility = View.VISIBLE
+            frognothinghere.visibility = View.VISIBLE
+            return
+        }
 
         coroutineScope.launch {
             for (artist in artists) {
