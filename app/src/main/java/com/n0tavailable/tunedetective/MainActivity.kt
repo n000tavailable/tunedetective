@@ -1723,18 +1723,25 @@ class ReleasesActivity : AppCompatActivity() {
 
 
     private fun fetchArtistsFromDatabase(): List<String> {
-        // Use your existing database helper class to fetch the artists from the database
         val dbHelper = SearchHistoryDatabaseHelper(this)
-        return dbHelper.getLatestSearchQueries(limit = 10) // Adjust the limit as needed
+        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
+        val artistIds = latestSearchQueries.map { query ->
+            query.substringAfter(",").trim()
+        }
+        return artistIds
     }
 
-    private fun fetchLatestRelease(artistName: String) {
+    private fun fetchLatestRelease(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .url("https://api.deezer.com/artist/$artistId")
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
+
+        // Show toast message with artist information
+        val artistToastMessage = "Fetching latest release for artist with ID: $artistId"
+        Toast.makeText(applicationContext, artistToastMessage, Toast.LENGTH_SHORT).show()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -1749,24 +1756,16 @@ class ReleasesActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
-                    val artistArray = jsonResponse.getJSONArray("data")
-
-                    if (artistArray.length() > 0) {
-                        val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getString("id")
-                        val artistImageUrl = artist.getString("picture_big")
-                        fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
-                    } else {
-                        runOnUiThread {
-                            // Handle case when no artist is found
-                        }
-                    }
+                    val artistName = jsonResponse.getString("name")
+                    val artistImageUrl = jsonResponse.getString("picture_big")
+                    fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
                 } else {
                     println("Error: ${response.code} ${response.message}")
                 }
             }
         })
     }
+
 
     private fun fetchArtistLatestAlbum(
         artistId: String,
