@@ -2177,7 +2177,7 @@ class HistoryAdapter(context: Context, resource: Int, objects: List<String>) :
 
         if (commaIndex != -1) {
             val textColorSpan =
-                ForegroundColorSpan(Color.DKGRAY) // Change text color here as per your choice
+                ForegroundColorSpan(Color.GRAY) // Change text color here as per your choice
             if (selectedQuery != null) {
                 spannableString.setSpan(
                     textColorSpan,
