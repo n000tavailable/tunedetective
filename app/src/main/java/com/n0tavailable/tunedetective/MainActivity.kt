@@ -106,7 +106,6 @@ class MainActivity : AppCompatActivity() {
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
 
 
-
     override fun onDestroy() {
         super.onDestroy()
         stopPlayback()
@@ -186,7 +185,8 @@ class MainActivity : AppCompatActivity() {
 
         if (::dialog.isInitialized && dialog.isShowing) {
             dialog.dismiss()
-            val adapter = (dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView).adapter as? TrackListAdapter)
+            val adapter =
+                (dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView).adapter as? TrackListAdapter)
             adapter?.stopPlayback()
         }
     }
@@ -383,24 +383,6 @@ class MainActivity : AppCompatActivity() {
             searchSimilarArtists(artistName)
         }
 
-        discographyButton.setOnClickListener {
-            val artistName = artistEditText.text.toString().trim()
-
-            val selected = selectedArtist // Assign the value of selectedArtist to a local variable
-
-            if (artistName.isNotEmpty()) {
-                showArtistDiscography(artistName)
-            } else if (selected != null) {
-                showArtistDiscography(selected) // Use the selected artist
-            } else {
-                Toast.makeText(
-                    this,
-                    "Please enter an artist name or select from search history",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
             if (drawable != null) {
@@ -488,17 +470,15 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showArtistDiscography(artistName: String) {
+    private fun showArtistDiscography(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://api.deezer.com/search/artist?q=$artistName")
+            .url("https://api.deezer.com/artist/$artistId") // Use artist ID in the API URL
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
         progressDialog.show()
-
-        this.artistName = artistName
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -513,31 +493,17 @@ class MainActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
-                    val artistArray = jsonResponse.getJSONArray("data")
+                    val artistId = jsonResponse.getString("id")
 
-                    if (artistArray.length() > 0) {
-                        val artist = artistArray.getJSONObject(0)
-                        val artistId = artist.getString("id")
-
-                        // Start a new activity to display the artist discography
-                        val intent =
-                            Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
-                        intent.putExtra("artistId", artistId)
-                        startActivity(intent)
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "No artist found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+                    // Start a new activity to display the artist discography
+                    val intent = Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                    intent.putExtra("artistId", artistId)
+                    startActivity(intent)
                 } else {
                     runOnUiThread {
                         Toast.makeText(
                             this@MainActivity,
-                            "Error: ${response.code} ${response.message}",
+                            "No artist found",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -805,8 +771,23 @@ class MainActivity : AppCompatActivity() {
             val selectedArtist = artists[position]
             val artistName = selectedArtist.first
             val artistId = artistMap.keys.find { key -> artistMap[key]?.first == artistName }
+
+            discographyButton.setOnClickListener {
+                if (artistId != null) {
+                    showArtistDiscography(artistId) // Pass the selected artist ID
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Please enter an artist name or select from search history",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
             if (artistId != null) {
-                saveSelectedArtist(artistId, artistName) // Save the selected artist name to the database
+                saveSelectedArtist(
+                    artistId,
+                    artistName
+                ) // Save the selected artist name to the database
                 searchArtistById(artistId)
             } else {
                 Toast.makeText(
@@ -1440,7 +1421,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 val dialog = Dialog(context)
                 dialog.setContentView(R.layout.dialog_tracklist)
 
-                val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+                val trackListRecyclerView =
+                    dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
                 val closeButton = dialog.findViewById<Button>(R.id.closeButton)
 
                 val layoutManager = LinearLayoutManager(context)
@@ -1612,6 +1594,7 @@ class ReleasesActivity : AppCompatActivity() {
 
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_releases)
@@ -1663,7 +1646,8 @@ class ReleasesActivity : AppCompatActivity() {
         val channelId = "FetchFailureChannel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = "Fetch Failure Channel"
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -1677,7 +1661,8 @@ class ReleasesActivity : AppCompatActivity() {
             .build()
 
         // Modify the notification attributes to make it silent and prevent vibration
-        notification.flags = notification.flags or NotificationCompat.FLAG_ONLY_ALERT_ONCE or NotificationCompat.FLAG_AUTO_CANCEL
+        notification.flags =
+            notification.flags or NotificationCompat.FLAG_ONLY_ALERT_ONCE or NotificationCompat.FLAG_AUTO_CANCEL
 
         notificationManager.notify(notificationId, notification)
 
@@ -1869,7 +1854,11 @@ class ReleasesActivity : AppCompatActivity() {
         val releaseKey = "$artistName-${album.title}"
         if (releaseKey !in shownNotifications) {
             if (releaseDate != null && currentDate.time - releaseDate.time <= 1 * 24 * 60 * 60 * 1000) {
-                showNotification(artistName, album.title, album.coverUrl) // Pass the album cover URL
+                showNotification(
+                    artistName,
+                    album.title,
+                    album.coverUrl
+                ) // Pass the album cover URL
                 shownNotifications.add(releaseKey)
             }
         }
@@ -1897,7 +1886,8 @@ class ReleasesActivity : AppCompatActivity() {
     }
 
     private fun showNotification(artistName: String, albumTitle: String, albumCoverUrl: String) {
-        val notificationId = generateNotificationId(artistName, albumTitle) // Generate unique notification ID
+        val notificationId =
+            generateNotificationId(artistName, albumTitle) // Generate unique notification ID
 
         val intent = Intent(this, ReleasesActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
@@ -1937,9 +1927,15 @@ class ReleasesActivity : AppCompatActivity() {
                 }
                 val notificationManager: NotificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(notificationId, notification) // Use the unique notification ID
+                notificationManager.notify(
+                    notificationId,
+                    notification
+                ) // Use the unique notification ID
 
-                handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+                handler.postDelayed(
+                    fetchRunnable,
+                    60 * 60 * 1000
+                ); // Start periodic execution after 1 hour
             }
         }
     }
@@ -2105,7 +2101,8 @@ class BackgroundService : Service() {
                 "Turn me off",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
