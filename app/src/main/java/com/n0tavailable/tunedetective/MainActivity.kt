@@ -34,6 +34,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
@@ -2176,11 +2177,16 @@ class HistoryAdapter(context: Context, resource: Int, objects: List<String>) :
         val commaIndex = selectedQuery?.indexOf(",") ?: -1
 
         if (commaIndex != -1) {
-            val textColorSpan =
-                ForegroundColorSpan(Color.GRAY) // Change text color here as per your choice
+            spannableString.setSpan(
+                AbsoluteSizeSpan(0), // Set the text size to 0 to hide the comma visually
+                commaIndex,
+                commaIndex + 1,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
             if (selectedQuery != null) {
                 spannableString.setSpan(
-                    textColorSpan,
+                    ForegroundColorSpan(Color.GRAY), // Change text color here as per your choice
                     commaIndex + 1,
                     selectedQuery.length,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
