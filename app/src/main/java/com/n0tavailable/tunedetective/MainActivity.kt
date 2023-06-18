@@ -34,6 +34,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -275,15 +276,18 @@ class MainActivity : AppCompatActivity() {
 
             alertDialog.show()
 
+            val adapter = HistoryAdapter(this, R.layout.item_history, searchHistory)
+            historyListView.adapter = adapter
+
             historyListView.setOnItemClickListener { parent, view, position, id ->
                 val selectedQuery = searchHistory[position]
                 val artistId = selectedQuery.substringAfter(",").trim() // Extract and trim the artist ID from the query
+                val artistName = selectedQuery.substringBefore(",") // Extract the artist name before the comma
 
-                val selectedArtistId = artistId // Create a local variable for selected artist ID
-
+                val selectedArtistId = artistId // Create a local variable for the selected artist ID
 
                 discographyButton.setOnClickListener {
-                    if (artistId != null) {
+                    if (artistId.isNotEmpty()) {
                         showArtistDiscography(artistId) // Pass the selected artist ID
                     } else {
                         Toast.makeText(
@@ -296,7 +300,6 @@ class MainActivity : AppCompatActivity() {
 
                 searchArtistById(selectedArtistId)
                 alertDialog.dismiss()
-
 
                 alertDialog.setOnDismissListener {
                 }
@@ -2152,5 +2155,41 @@ class BackgroundService : Service() {
 
     private fun startReleasesActivity() {
         releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+}
+class HistoryAdapter(context: Context, resource: Int, objects: List<String>) :
+    ArrayAdapter<String>(context, resource, objects) {
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val inflater = LayoutInflater.from(context)
+        val view = convertView ?: inflater.inflate(R.layout.item_history, parent, false)
+
+        val selectedQuery = getItem(position)
+        val artistName = selectedQuery?.substringBefore(",")
+        val artistId = selectedQuery?.substringAfter(",")?.trim()
+
+        val selectedArtistId = artistId // Create a local variable for the selected artist ID
+
+        val textView = view.findViewById<TextView>(R.id.historyItemTextView)
+
+        val spannableString = SpannableString(selectedQuery)
+        val commaIndex = selectedQuery?.indexOf(",") ?: -1
+
+        if (commaIndex != -1) {
+            val textColorSpan =
+                ForegroundColorSpan(Color.DKGRAY) // Change text color here as per your choice
+            if (selectedQuery != null) {
+                spannableString.setSpan(
+                    textColorSpan,
+                    commaIndex + 1,
+                    selectedQuery.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
+
+        textView.text = spannableString
+
+        return view
     }
 }
