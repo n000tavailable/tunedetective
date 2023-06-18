@@ -276,11 +276,14 @@ class MainActivity : AppCompatActivity() {
             alertDialog.show()
 
             historyListView.setOnItemClickListener { parent, view, position, id ->
-                selectedArtist = searchHistory[position] // Update the selected artist
-                selectedArtist?.let { artist ->
-                    searchArtist(artist)
-                    alertDialog.dismiss()
-                }
+                val selectedQuery = searchHistory[position]
+                val artistId = selectedQuery.substringAfter(",").trim() // Extract and trim the artist ID from the query
+
+                val selectedArtistId = artistId // Create a local variable for selected artist ID
+
+                searchArtistById(selectedArtistId)
+                alertDialog.dismiss()
+
 
                 alertDialog.setOnDismissListener {
                 }
@@ -805,7 +808,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveSelectedArtist(artistId: String, artistName: String) {
-        val query = "$artistName"
+        val query = "$artistName, $artistId"
         if (!searchHistoryDatabaseHelper.isSearchQueryExists(query)) {
             searchHistoryDatabaseHelper.insertSearchQuery(query)
         }
