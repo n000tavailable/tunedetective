@@ -19,7 +19,7 @@
             android:textColor="#FFFFFF"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:text="Nothing here"
+            android:text="Nothing here, yet."
             android:visibility="gone"/>
 
         <ImageView
