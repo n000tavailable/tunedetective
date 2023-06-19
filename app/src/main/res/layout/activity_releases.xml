@@ -1,37 +1,94 @@
-<ScrollView android:layout_width="match_parent"
+<ScrollView
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
-        android:id="@+id/releaseContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/nothingHereTextView"
+        <LinearLayout
+            android:id="@+id/navigationBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:text="Nothing here, yet."
-            android:visibility="gone"/>
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <ImageView
-            android:id="@+id/frognothinghere"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center"
-            android:src="@drawable/frog"
-            android:visibility="gone"/>
+            <ImageButton
+                android:id="@+id/homeButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="#121212"
+                android:src="@drawable/ic_search"
+                android:layout_marginEnd="30dp"
+                app:tint="@color/material_dynamic_primary99" />
 
-        <!-- Release items will be dynamically added here -->
+            <ImageButton
+                android:id="@+id/releasesButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="#121212"
+                android:src="@drawable/ic_releases"
+                android:layout_marginEnd="30dp"
+                app:tint="@color/material_dynamic_neutral50" />
+
+            <ImageButton
+                android:id="@+id/settingsButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="#121212"
+                android:src="@drawable/ic_settings"
+                android:layout_marginEnd="30dp"
+                app:tint="@color/material_dynamic_primary99" />
+
+            <ImageButton
+                android:id="@+id/infoButton"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="#121212"
+                android:src="@drawable/ic_info"
+                app:tint="@color/material_dynamic_primary99" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
+        <LinearLayout
+            android:id="@+id/releaseContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/nothingHereTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:text="Nothing here, yet."
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/frognothinghere"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:src="@drawable/frog"
+                android:visibility="gone"/>
+
+            <!-- Release items will be dynamically added here -->
+
+        </LinearLayout>
 
     </LinearLayout>
-
 </ScrollView>

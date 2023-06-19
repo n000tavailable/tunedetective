@@ -44,6 +44,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
@@ -356,34 +357,30 @@ class MainActivity : AppCompatActivity() {
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
 
-        val dropdownMenu = findViewById<Spinner>(R.id.dropdownMenu)
-        val dropdownMenuItems = resources.getStringArray(R.array.dropdown_menu_items)
 
-        dropdownMenu.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>, view: View?, position: Int, id: Long
-            ) {
-                val selectedItem = dropdownMenuItems[position]
-                when (selectedItem) {
-                    "About" -> {
-                        val intent = Intent(this@MainActivity, AboutActivity::class.java)
-                        startActivity(intent)
-                        // Reset the spinner selection
-                        dropdownMenu.setSelection(0)
-                    }
+        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
+        val homeButton = findViewById<ImageButton>(R.id.homeButton)
+        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
+        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
 
-                    "Settings" -> {
-                        val intent = Intent(this@MainActivity, SettingsActivity::class.java)
-                        startActivity(intent)
-                        // Reset the spinner selection
-                        dropdownMenu.setSelection(0)
-                    }
-                }
-            }
+        homeButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, MainActivity::class.java)
+            startActivity(intent)
+        }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // Handle nothing selected if needed
-            }
+        aboutButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, AboutActivity::class.java)
+            startActivity(intent)
+        }
+
+        releasesButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, ReleasesActivity::class.java)
+            startActivity(intent)
+        }
+
+        settingsButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            startActivity(intent)
         }
 
 
@@ -1621,7 +1618,6 @@ class ReleasesActivity : AppCompatActivity() {
         override fun run() {
             fetchAndDisplayReleases()
             handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
-
         }
     }
 
@@ -1639,6 +1635,35 @@ class ReleasesActivity : AppCompatActivity() {
 
         fetchAndDisplayReleases()
         handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+
+
+        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
+        val homeButton = findViewById<ImageButton>(R.id.homeButton)
+        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
+        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+
+        homeButton.setOnClickListener {
+            val intent = Intent(this@ReleasesActivity, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        aboutButton.setOnClickListener {
+            val intent = Intent(this@ReleasesActivity, AboutActivity::class.java)
+            startActivity(intent)
+        }
+
+        releasesButton.setOnClickListener {
+            val intent = Intent(this@ReleasesActivity, ReleasesActivity::class.java)
+            startActivity(intent)
+        }
+
+        settingsButton.setOnClickListener {
+            val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+
+
     }
 
     override fun onBackPressed() {

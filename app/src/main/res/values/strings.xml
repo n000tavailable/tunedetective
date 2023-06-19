@@ -4,6 +4,7 @@
     <string-array name="dropdown_menu_items">
         <item>Home</item>
         <item>About</item>
+        <item>Releases</item>
         <item>Settings</item>
         <!-- Add more items if needed -->
     </string-array>

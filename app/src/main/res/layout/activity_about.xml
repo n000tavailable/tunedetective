@@ -2,9 +2,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
     tools:context=".MainActivity">
+
+
+
+    <LinearLayout
+        android:id="@+id/navigationBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/homeButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#121212"
+            android:src="@drawable/ic_search"
+            android:layout_marginEnd="30dp"
+            app:tint="@color/material_dynamic_primary99" />
+
+        <ImageButton
+            android:id="@+id/releasesButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#121212"
+            android:src="@drawable/ic_releases"
+            android:layout_marginEnd="30dp"
+            app:tint="@color/material_dynamic_primary99" />
+
+        <ImageButton
+            android:id="@+id/settingsButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#121212"
+            android:src="@drawable/ic_settings"
+            android:layout_marginEnd="30dp"
+            app:tint="@color/material_dynamic_primary99" />
+
+        <ImageButton
+            android:id="@+id/infoButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#121212"
+            android:src="@drawable/ic_info"
+            app:tint="@color/material_dynamic_neutral50" />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
 
     <TextView
         android:layout_width="wrap_content"
