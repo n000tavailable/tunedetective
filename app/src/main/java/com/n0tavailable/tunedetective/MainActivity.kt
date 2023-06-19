@@ -2152,7 +2152,7 @@ class BackgroundService : Service() {
         // Get the PendingIntent from the TaskStackBuilder
         val pendingIntent = taskStackBuilder.getPendingIntent(
             0,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
