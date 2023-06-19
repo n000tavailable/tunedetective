@@ -20,15 +20,24 @@ class AboutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
 
-    //    val profileImageView: ImageView = findViewById(R.id.profile)
-            //    Glide.with(this)
-            //         .load(R.drawable.profile)
-            //        .apply(RequestOptions.circleCropTransform())
+        //    val profileImageView: ImageView = findViewById(R.id.profile)
+        //    Glide.with(this)
+        //         .load(R.drawable.profile)
+        //        .apply(RequestOptions.circleCropTransform())
         //        .into(profileImageView)
 
         val joinMatrixButton: Button = findViewById(R.id.joinMatrix)
         joinMatrixButton.setOnClickListener {
-            val uri = Uri.parse("https://matrix.to/#/#tunedetective:matrix.org") // Replace with your actual URL
+            val uri =
+                Uri.parse("https://matrix.to/#/#tunedetective:matrix.org") // Replace with your actual URL
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        }
+
+        val githubPage: Button = findViewById(R.id.githubPage)
+        githubPage.setOnClickListener {
+            val uri =
+                Uri.parse("https://github.com/n000tavailable/tunedetective") // Replace with your actual URL
             val intent = Intent(Intent.ACTION_VIEW, uri)
             startActivity(intent)
         }

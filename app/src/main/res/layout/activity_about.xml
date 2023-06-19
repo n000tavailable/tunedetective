@@ -50,14 +50,28 @@
         android:layout_height="wrap_content"
         android:padding="20dp" />
 
-    <Button
-        android:id="@+id/joinMatrix"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:text="Join the Matrix-Server"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:textStyle="bold" />
+        android:layout_gravity="center">
+
+        <Button
+            android:id="@+id/joinMatrix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Matrix-Server"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/githubPage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Github Page"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp" />
+
+    </LinearLayout>
 
 </LinearLayout>
