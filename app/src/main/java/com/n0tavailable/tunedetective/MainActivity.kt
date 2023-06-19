@@ -980,8 +980,14 @@ class MainActivity : AppCompatActivity() {
 
                         // Set the artist name
 
-                        // Set the album title
-                        trackTitleTextView.text = albumTitle
+                        // Set the album title with truncation if necessary
+                        val maxTitleLength = 25
+                        val truncatedAlbumTitle = if (albumTitle.length <= maxTitleLength) {
+                            albumTitle
+                        } else {
+                            albumTitle.substring(0, maxTitleLength) + "..."
+                        }
+                        trackTitleTextView.text = truncatedAlbumTitle
 
                         // Load the album cover image
                         loadAlbumCoverImage(albumCoverUrl)
