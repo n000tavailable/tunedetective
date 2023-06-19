@@ -1399,40 +1399,53 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             private fun fetchTrackList(albumId: String, callback: (List<Track>) -> Unit) {
                 val apiKey = APIKeys.DEEZER_API_KEY
                 val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://api.deezer.com/album/$albumId/tracks")
-                    .addHeader("Authorization", "Bearer $apiKey")
-                    .build()
+                val trackList = mutableListOf<Track>()
 
-                client.newCall(request).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        e.printStackTrace()
-                    }
+                fun fetchTracks(url: String) {
+                    val request = Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer $apiKey")
+                        .build()
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val responseData = response.body?.string()
-
-                        if (response.isSuccessful && responseData != null) {
-                            val jsonResponse = JSONObject(responseData)
-                            val trackArray = jsonResponse.getJSONArray("data")
-
-                            val trackList = mutableListOf<Track>()
-
-                            for (i in 0 until trackArray.length()) {
-                                val track = trackArray.getJSONObject(i)
-                                val trackTitle = track.getString("title")
-                                val previewUrl = track.getString("preview")
-                                val trackItem = Track(trackTitle, previewUrl)
-                                trackList.add(trackItem)
-                            }
-
-                            callback(trackList)
-                        } else {
-                            println("Error: ${response.code} ${response.message}")
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            e.printStackTrace()
                         }
-                    }
-                })
+
+                        override fun onResponse(call: Call, response: Response) {
+                            val responseData = response.body?.string()
+
+                            if (response.isSuccessful && responseData != null) {
+                                val jsonResponse = JSONObject(responseData)
+                                val tracksArray = jsonResponse.getJSONArray("data")
+
+                                for (i in 0 until tracksArray.length()) {
+                                    val track = tracksArray.getJSONObject(i)
+                                    val trackTitle = track.getString("title")
+                                    val previewUrl = track.getString("preview")
+                                    trackList.add(Track(trackTitle, previewUrl))
+                                }
+
+                                val nextPageUrl = jsonResponse.optString("next")
+
+                                if (!nextPageUrl.isNullOrEmpty()) {
+                                    // Fetch next page of tracks recursively
+                                    fetchTracks(nextPageUrl)
+                                } else {
+                                    // All tracks fetched, invoke the callback with the tracklist
+                                    callback(trackList)
+                                }
+                            } else {
+                                println("Error: ${response.code} ${response.message}")
+                            }
+                        }
+                    })
+                }
+
+                val initialUrl = "https://api.deezer.com/album/$albumId/tracks?limit=100"
+                fetchTracks(initialUrl)
             }
+
 
             private fun showTrackListDialog(context: Context, trackList: List<Track>) {
                 val dialog = Dialog(context)
@@ -2021,46 +2034,51 @@ class ReleasesActivity : AppCompatActivity() {
         val client = OkHttpClient()
         val trackList = mutableListOf<Track>()
 
-        val url = "https://api.deezer.com/album/$albumId/tracks"
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
+        fun fetchTracks(url: String) {
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $apiKey")
+                .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val tracksArray = jsonResponse.getJSONArray("data")
-
-                    for (i in 0 until tracksArray.length()) {
-                        val track = tracksArray.getJSONObject(i)
-                        val trackTitle = track.getString("title")
-                        val previewUrl = track.getString("preview")
-                        trackList.add(Track(trackTitle, previewUrl))
-                    }
-
-                    val nextPageUrl = jsonResponse.optString("next")
-
-                    if (!nextPageUrl.isNullOrEmpty()) {
-                        // Fetch next page of tracks recursively
-                        fetchTrackList(nextPageUrl, callback)
-                    } else {
-                        // All tracks fetched, invoke the callback with the tracklist
-                        callback(trackList)
-                    }
-                } else {
-                    println("Error: ${response.code} ${response.message}")
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    e.printStackTrace()
                 }
-            }
-        })
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseData = response.body?.string()
+
+                    if (response.isSuccessful && responseData != null) {
+                        val jsonResponse = JSONObject(responseData)
+                        val tracksArray = jsonResponse.getJSONArray("data")
+
+                        for (i in 0 until tracksArray.length()) {
+                            val track = tracksArray.getJSONObject(i)
+                            val trackTitle = track.getString("title")
+                            val previewUrl = track.getString("preview")
+                            trackList.add(Track(trackTitle, previewUrl))
+                        }
+
+                        val nextPageUrl = jsonResponse.optString("next")
+
+                        if (!nextPageUrl.isNullOrEmpty()) {
+                            // Fetch next page of tracks recursively
+                            fetchTracks(nextPageUrl)
+                        } else {
+                            // All tracks fetched, invoke the callback with the tracklist
+                            callback(trackList)
+                        }
+                    } else {
+                        println("Error: ${response.code} ${response.message}")
+                    }
+                }
+            })
+        }
+
+        val initialUrl = "https://api.deezer.com/album/$albumId/tracks?limit=100"
+        fetchTracks(initialUrl)
     }
+
 
     private fun showTrackListDialog(trackList: List<Track>) {
         val dialog = Dialog(this)
