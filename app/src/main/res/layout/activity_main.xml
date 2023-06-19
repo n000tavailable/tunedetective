@@ -110,8 +110,8 @@
         android:gravity="center_vertical">
 
         <EditText
-            android:id="@+id/artistEditText"
-            android:layout_width="0dp"
+            android:id="@+id/artistEditText" android:layout_width="0dp"
+            android:background="#121212"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:autofillHints=""
