@@ -1739,10 +1739,6 @@ class ReleasesActivity : AppCompatActivity() {
             .addHeader("Authorization", "Bearer $apiKey")
             .build()
 
-        // Show toast message with artist information
-        val artistToastMessage = "Fetching latest release for artist with ID: $artistId"
-        Toast.makeText(applicationContext, artistToastMessage, Toast.LENGTH_SHORT).show()
-
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
