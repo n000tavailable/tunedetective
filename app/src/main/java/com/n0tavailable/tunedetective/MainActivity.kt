@@ -63,6 +63,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -1622,7 +1623,7 @@ class TracklistActivity : AppCompatActivity() {
     }
 }
 
-class ReleasesActivity : AppCompatActivity() {
+class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var releaseContainer: LinearLayout
     private val addedAlbumIds = HashSet<String>()
     private lateinit var notificationManager: NotificationManagerCompat
@@ -1635,6 +1636,8 @@ class ReleasesActivity : AppCompatActivity() {
     private lateinit var frognothinghere: ImageView
     private lateinit var progressBar: ProgressBar
     private lateinit var fetchingTextView: TextView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+
 
 
 
@@ -1656,6 +1659,10 @@ class ReleasesActivity : AppCompatActivity() {
         notificationManager = NotificationManagerCompat.from(this)
         fetchingTextView = findViewById(R.id.fetchingTextView)
         progressBar = findViewById(R.id.progressBar)
+
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        swipeRefreshLayout.setOnRefreshListener(this)
+
 
 
         createNotificationChannel() // Create the notification channel
@@ -1685,6 +1692,7 @@ class ReleasesActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+
         settingsButton.setOnClickListener {
             val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
             startActivity(intent)
@@ -1692,6 +1700,10 @@ class ReleasesActivity : AppCompatActivity() {
 
 
 
+    }
+
+    override fun onRefresh() {
+        fetchAndDisplayReleases()
     }
 
     override fun onBackPressed() {
@@ -1776,6 +1788,9 @@ class ReleasesActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE // Show the progress bar
         progressBar.progress = 0 // Reset the progress to 0
 
+        swipeRefreshLayout.isRefreshing = true // Show the refresh indicator
+
+
         coroutineScope.launch {
             val totalArtists = artists.size
             var fetchedArtists = 0
@@ -1785,9 +1800,12 @@ class ReleasesActivity : AppCompatActivity() {
                     showFetchingProgress(index + 1, totalArtists) // Show the fetching progress
                     fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
+                    swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on success
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                     showFetchFailureNotification()
+                    swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on error2
                     break // Stop fetching further releases on fetch failure
                 } finally {
                     fetchedArtists++
