@@ -81,7 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:text="You're running version 1.7!"
+        android:text="You're running version 1.8!"
         android:textColor="#fff" />
 
     <LinearLayout
