@@ -1634,6 +1634,8 @@ class ReleasesActivity : AppCompatActivity() {
     private lateinit var nothingHereTextView: TextView
     private lateinit var frognothinghere: ImageView
     private lateinit var progressBar: ProgressBar
+    private lateinit var fetchingTextView: TextView
+
 
 
     private val fetchRunnable = object : Runnable {
@@ -1652,6 +1654,7 @@ class ReleasesActivity : AppCompatActivity() {
         frognothinghere = findViewById(R.id.frognothinghere)
         releaseContainer = findViewById(R.id.releaseContainer)
         notificationManager = NotificationManagerCompat.from(this)
+        fetchingTextView = findViewById(R.id.fetchingTextView)
         progressBar = findViewById(R.id.progressBar)
 
 
@@ -1777,8 +1780,9 @@ class ReleasesActivity : AppCompatActivity() {
             val totalArtists = artists.size
             var fetchedArtists = 0
 
-            for (artist in artists) {
+            for ((index, artist) in artists.withIndex()) {
                 try {
+                    showFetchingProgress(index + 1, totalArtists) // Show the fetching progress
                     fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
                 } catch (e: Exception) {
@@ -1793,7 +1797,14 @@ class ReleasesActivity : AppCompatActivity() {
             }
 
             progressBar.visibility = View.GONE // Hide the progress bar when done
+            fetchingTextView.visibility = View.GONE // Hide the fetching text view
         }
+    }
+
+    private fun showFetchingProgress(current: Int, total: Int) {
+        val message = "Fetching artist $current out of $total..."
+        fetchingTextView.text = message
+        fetchingTextView.visibility = View.VISIBLE
     }
 
     private fun fetchArtistsFromDatabase(): List<String> {
