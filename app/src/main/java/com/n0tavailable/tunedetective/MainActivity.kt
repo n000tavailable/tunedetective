@@ -35,6 +35,7 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -137,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
+            val serviceIntent = Intent(this, FetchReleasesService::class.java)
             startForegroundService(serviceIntent)
         }
     }
@@ -221,7 +222,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
+            val serviceIntent = Intent(this, FetchReleasesService::class.java)
             startForegroundService(serviceIntent)
         }
 
@@ -1629,7 +1630,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var notificationManager: NotificationManagerCompat
     private val handler = Handler(Looper.getMainLooper())
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private val delayBetweenArtists = 1 * 1000L // 1 seconds
+    private val delayBetweenArtists = 250L // 0.25 seconds
     private var notificationId = 1 // Initial notification ID
     private val shownNotifications = HashSet<String>()
     private lateinit var nothingHereTextView: TextView
@@ -1645,10 +1646,15 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 60 * 60 * 1000); // Schedule the next execution after 1 hour
+            handler.postDelayed(this, 15 * 60 * 1000L) // Schedule the next execution after 15 minutes
         }
     }
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_releases)
@@ -1663,13 +1669,16 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener(this)
 
+        val serviceIntent = Intent(this, FetchReleasesService::class.java)
+        startForegroundService(serviceIntent)
+
 
 
         createNotificationChannel() // Create the notification channel
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L) // Start periodic execution after 15 minutes
 
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
@@ -1790,7 +1799,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         notificationManager.notify(notificationId, notification)
 
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L) // Start periodic execution after 15 minutes
     }
 
     private fun resetLayout() {
@@ -1830,8 +1839,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
                     swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on success
-                    showFetchSuccessNotification() // Show fetch success notification
-
                 } catch (e: Exception) {
                     e.printStackTrace()
                     showFetchFailureNotification()
@@ -1841,6 +1848,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     fetchedArtists++
                     val progress = (fetchedArtists.toFloat() / totalArtists.toFloat() * 100).toInt()
                     progressBar.progress = progress // Update the progress bar
+                    showFetchSuccessNotification() // Show fetch success notification
+
                 }
             }
 
@@ -2079,7 +2088,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
                 handler.postDelayed(
                     fetchRunnable,
-                    60 * 60 * 1000
+                    15 * 60 * 1000
                 ); // Start periodic execution after 1 hour
             }
         }
@@ -2228,63 +2237,78 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
 }
 
-class BackgroundService : Service() {
-    private lateinit var releasesActivityIntent: Intent
-    private val NOTIFICATION_CHANNEL_ID = "ReleasesNotificationChannel"
+class FetchReleasesService : Service() {
+    private val TAG = "FetchReleasesService"
     private val NOTIFICATION_ID = 1
+    private val CHANNEL_ID = "FetchReleasesChannel"
+    private val DELAY_BETWEEN_FETCHES = 15 * 60 * 1000L // 15 minutes
 
-    override fun onBind(intent: Intent): IBinder? {
-        return null
+    private lateinit var handler: Handler
+    private lateinit var notificationManager: NotificationManager
+
+    private val fetchRunnable = object : Runnable {
+        override fun run() {
+            fetchAndDisplayReleases()
+            handler.postDelayed(this, DELAY_BETWEEN_FETCHES)
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
+        handler = Handler(Looper.getMainLooper())
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    private fun startForegroundService() {
-        releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "Service started")
 
+        createNotificationChannel()
+        startForeground(NOTIFICATION_ID, createForegroundNotification())
+
+        handler.post(fetchRunnable)
+
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(fetchRunnable)
+        Log.d(TAG, "Service destroyed")
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    private fun fetchAndDisplayReleases() {
+        // Fetch and display releases logic
+    }
+
+    private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                "Turn me off",
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Fetch Releases Channel",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(notificationChannel)
+            notificationManager.createNotificationChannel(channel)
         }
-
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        startReleasesActivity()
     }
 
-    @SuppressLint("LaunchActivityFromNotification")
-    private fun createNotification(): Notification {
-        val releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
+    private fun createForegroundNotification(): Notification? {
+        val intent = Intent(this, ReleasesActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        // Create a TaskStackBuilder to handle the intent
-        val taskStackBuilder = TaskStackBuilder.create(this)
-            .addNextIntentWithParentStack(releasesActivityIntent)
-
-        // Get the PendingIntent from the TaskStackBuilder
-        val pendingIntent = taskStackBuilder.getPendingIntent(
-            0,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Notification-Setup")
-            .setContentText("Tap on me to initialize notifications. Then you can hide me by a long click.")
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.notification_icon)
+            .setContentTitle("Fetching Releases")
+            .setContentText("Fetching releases in the background.")
             .setContentIntent(pendingIntent)
-            .setOngoing(true) // Set the notification as ongoing
+            .setAutoCancel(false)
+            .setOngoing(true)
             .build()
-    }
 
-    private fun startReleasesActivity() {
-        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return notification
     }
 }
+
