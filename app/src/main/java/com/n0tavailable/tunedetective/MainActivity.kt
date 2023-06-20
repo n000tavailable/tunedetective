@@ -1790,18 +1790,21 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         swipeRefreshLayout.isRefreshing = true // Show the refresh indicator
 
-
         coroutineScope.launch {
             val totalArtists = artists.size
             var fetchedArtists = 0
+            var newReleaseFound = false // Flag to track if any new release is found
 
             for ((index, artist) in artists.withIndex()) {
                 try {
                     showFetchingProgress(index + 1, totalArtists) // Show the fetching progress
-                    fetchLatestRelease(artist)
+                    val releaseFound = fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
                     swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on success
 
+                    if (releaseFound) {
+                        newReleaseFound = true
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     showFetchFailureNotification()
@@ -1816,6 +1819,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
             progressBar.visibility = View.GONE // Hide the progress bar when done
             fetchingTextView.visibility = View.GONE // Hide the fetching text view
+
+            if (!newReleaseFound) {
+                // No new release found, show "You're up to date" notification
+                showUpToDateNotification()
+            }
         }
     }
 
@@ -1834,7 +1842,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         return artistIds
     }
 
-    private fun fetchLatestRelease(artistId: String) {
+    private fun fetchLatestRelease(artistId: String): Boolean {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request = Request.Builder()
@@ -1857,12 +1865,44 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     val jsonResponse = JSONObject(responseData)
                     val artistName = jsonResponse.getString("name")
                     val artistImageUrl = jsonResponse.getString("picture_big")
-                    fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
+                    val releaseFound = fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
+                    return releaseFound // Return if a new release was found or not
                 } else {
                     println("Error: ${response.code} ${response.message}")
                 }
             }
         })
+
+        return false // Return false if the response is not successful or responseData is null
+    }
+
+    private fun showUpToDateNotification() {
+        val notificationId = generateNotificationId("UpToDate", "")
+
+        val intent = Intent(this, ReleasesActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create the notification channel
+        val channelId = "UpToDateChannel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = "Up To Date Channel"
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Build the notification
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("You're Up to Date")
+            .setContentText("No new releases found.")
+            .setSmallIcon(R.drawable.round_music_note_24)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        // Show the notification
+        notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
 
