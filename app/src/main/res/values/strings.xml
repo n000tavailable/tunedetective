@@ -8,4 +8,5 @@
         <item>Settings</item>
         <!-- Add more items if needed -->
     </string-array>
+    <string name="artist_indicator">%1\$d from %2\$d artists - %3\$s</string>
 </resources>

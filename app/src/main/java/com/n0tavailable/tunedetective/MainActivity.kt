@@ -48,6 +48,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
@@ -1632,6 +1633,8 @@ class ReleasesActivity : AppCompatActivity() {
     private val shownNotifications = HashSet<String>()
     private lateinit var nothingHereTextView: TextView
     private lateinit var frognothinghere: ImageView
+    private lateinit var progressBar: ProgressBar
+
 
     private val fetchRunnable = object : Runnable {
 
@@ -1649,6 +1652,8 @@ class ReleasesActivity : AppCompatActivity() {
         frognothinghere = findViewById(R.id.frognothinghere)
         releaseContainer = findViewById(R.id.releaseContainer)
         notificationManager = NotificationManagerCompat.from(this)
+        progressBar = findViewById(R.id.progressBar)
+
 
         createNotificationChannel() // Create the notification channel
 
@@ -1765,7 +1770,13 @@ class ReleasesActivity : AppCompatActivity() {
             return
         }
 
+        progressBar.visibility = View.VISIBLE // Show the progress bar
+        progressBar.progress = 0 // Reset the progress to 0
+
         coroutineScope.launch {
+            val totalArtists = artists.size
+            var fetchedArtists = 0
+
             for (artist in artists) {
                 try {
                     fetchLatestRelease(artist)
@@ -1774,11 +1785,16 @@ class ReleasesActivity : AppCompatActivity() {
                     e.printStackTrace()
                     showFetchFailureNotification()
                     break // Stop fetching further releases on fetch failure
+                } finally {
+                    fetchedArtists++
+                    val progress = (fetchedArtists.toFloat() / totalArtists.toFloat() * 100).toInt()
+                    progressBar.progress = progress // Update the progress bar
                 }
             }
+
+            progressBar.visibility = View.GONE // Hide the progress bar when done
         }
     }
-
 
     private fun fetchArtistsFromDatabase(): List<String> {
         val dbHelper = SearchHistoryDatabaseHelper(this)
