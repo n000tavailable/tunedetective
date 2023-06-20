@@ -48,6 +48,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
+import androidx.appcompat.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -86,10 +87,9 @@ import java.util.Locale
 import java.util.Random
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var searchButton: Button
     private lateinit var displayTracks: Button
     private lateinit var discographyButton: Button
-    private lateinit var artistEditText: EditText
+    private lateinit var searchBar: SearchView
     private lateinit var trackTitleTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
@@ -239,7 +239,6 @@ class MainActivity : AppCompatActivity() {
         // Initialize the SharedPreferences instance
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        val showSearchHistoryButton: Button = findViewById(R.id.showSearchHistoryButton)
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_history, null)
 
 
@@ -252,7 +251,10 @@ class MainActivity : AppCompatActivity() {
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        showSearchHistoryButton.setOnClickListener {
+        val searchHistoryButton = findViewById<ImageButton>(R.id.searchHistoryButton)
+
+
+        searchHistoryButton.setOnClickListener {
 
             hideKeyboard()
 
@@ -340,9 +342,8 @@ class MainActivity : AppCompatActivity() {
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        searchButton = findViewById(R.id.searchButton)
         displayTracks = findViewById(R.id.displayTracks)
-        artistEditText = findViewById(R.id.artistEditText)
+        searchBar = findViewById(R.id.searchBar)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
@@ -385,17 +386,30 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        searchButton.setOnClickListener {
-            val artistName = artistEditText.text.toString().trim()
-            if (artistName.isEmpty()) {
-                Toast.makeText(this, "Please enter an artist name", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                val artistName = query.trim()
+                if (artistName.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "Please enter an artist name", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+
+                Toast.makeText(this@MainActivity, "Searching for data...", Toast.LENGTH_SHORT).show()
+                hideKeyboard()
+                searchSimilarArtists(artistName)
+
+                // Clear focus to prevent the keyboard from reopening
+                searchBar.clearFocus()
+
+                // Return true only when the search is successful
+                return true
             }
 
-            Toast.makeText(this, "Searching for data...", Toast.LENGTH_SHORT).show()
-            hideKeyboard()
-            searchSimilarArtists(artistName)
-        }
+            override fun onQueryTextChange(newText: String): Boolean {
+                // Handle any text changes if needed
+                return false
+            }
+        })
 
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable

@@ -72,6 +72,33 @@
         android:layout_height="20dp" />
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <androidx.appcompat.widget.SearchView
+            style="@style/Widget.Material3.SearchView"
+            android:id="@+id/searchBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:iconifiedByDefault="false"
+            android:queryHint="Enter artist name"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#78909C" />
+
+        <ImageButton
+            android:id="@+id/searchHistoryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="@color/material_dynamic_neutral50"
+            android:background="#121212"
+            android:src="@drawable/round_history_24"
+            android:contentDescription="Search History"
+            android:scaleType="fitCenter" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/albumCoverLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -142,48 +169,4 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="20dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical">
-
-        <EditText
-            android:id="@+id/artistEditText" android:layout_width="0dp"
-            android:background="#121212"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:autofillHints=""
-            android:hint="Enter artist name"
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            android:maxLines="1"
-            android:minHeight="48dp"
-            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#78909C" />
-
-        <Button
-            android:id="@+id/searchButton"
-            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Search"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/showSearchHistoryButton"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="16dp"
-        android:text="Show Search History"
-        android:textStyle="bold" />
-
 </LinearLayout>
