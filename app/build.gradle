@@ -11,8 +11,8 @@ android {
         applicationId "com.n0tavailable.tunedetective"
         minSdk 24
         targetSdk 33
-        versionCode 18
-        versionName "18"
+        versionCode 19
+        versionName "19"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
