@@ -1051,6 +1051,7 @@ class MainActivity : AppCompatActivity() {
                         releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
+                            Toast.makeText(applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
                             getTrackList(tracklistUrl, albumCoverUrl)
                         }
                     }
@@ -1451,6 +1452,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
 
             override fun onClick(view: View) {
                 val context = itemView.context
+
+                Toast.makeText(view.context.applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
 
                 // Fetch the tracklist for the album with the given ID
                 fetchTrackList(album.albumId) { trackList ->
@@ -2132,6 +2135,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         // Add a click listener to the album cover image
         releaseCoverImageView.setOnClickListener {
+            Toast.makeText(applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
             openTracklist(album) // Pass the album object to the function to open the tracklist
         }
 
