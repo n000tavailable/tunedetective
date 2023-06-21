@@ -1516,7 +1516,7 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 Glide.with(context.applicationContext) // Pass the application context instead of the dialog context
                     .load(albumCoverUrl)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .transform(CenterCrop(), RoundedCorners(50)) // Apply rounded corners transformation
+                    .transform(RoundedCorners(50)) // Apply rounded corners transformation
                     .into(albumCoverImageView)
 
 
