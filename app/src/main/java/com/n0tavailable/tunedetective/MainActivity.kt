@@ -1126,6 +1126,10 @@ class MainActivity : AppCompatActivity() {
             adapter.stopPlayback()
         }
 
+        albumCoverImageView.setOnClickListener {
+            showFullscreenImage(albumCoverImageView.drawable)
+        }
+
         dialog.show()
     }
 
@@ -1140,6 +1144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showFullscreenImage(drawable: Drawable) {
+        val fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         val imageView = ImageView(this)
         imageView.setImageDrawable(drawable)
 
@@ -1451,7 +1456,11 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 fetchTrackList(album.albumId) { trackList ->
                     // Display the tracklist in a dialog
                     (context as? Activity)?.runOnUiThread {
-                        showTrackListDialog(context, trackList, album.coverUrl) // Pass the album cover URL to the dialog
+                        showTrackListDialog(
+                            context,
+                            trackList,
+                            album.coverUrl
+                        ) // Pass the album cover URL to the dialog
                     }
                 }
             }
@@ -1507,18 +1516,25 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             }
 
 
-            private fun showTrackListDialog(context: Context, trackList: List<Track>, albumCoverUrl: String) {
+            private fun showTrackListDialog(
+                context: Context,
+                trackList: List<Track>,
+                albumCoverUrl: String
+            ) {
                 val dialog = Dialog(context)
                 dialog.setContentView(R.layout.dialog_tracklist)
 
                 // Set the album cover image at the top of the dialog
                 val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
-                Glide.with(context.applicationContext) // Pass the application context instead of the dialog context
+                Glide.with(context.applicationContext)
                     .load(albumCoverUrl)
                     .transition(DrawableTransitionOptions.withCrossFade())
-                    .transform(RoundedCorners(50)) // Apply rounded corners transformation
+                    .transform(RoundedCorners(50))
                     .into(albumCoverImageView)
 
+                albumCoverImageView.setOnClickListener {
+                    showFullscreenImage(albumCoverImageView.drawable, context)
+                }
 
                 val trackListRecyclerView =
                     dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
@@ -1541,6 +1557,20 @@ class ArtistDiscographyActivity : AppCompatActivity() {
 
                 dialog.show()
             }
+
+            private fun showFullscreenImage(drawable: Drawable, context: Context) {
+                val fullscreenDialog =
+                    Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+                val imageView = ImageView(context)
+                imageView.setImageDrawable(drawable)
+                imageView.setOnClickListener {
+                    fullscreenDialog.dismiss()
+                }
+
+                fullscreenDialog.setContentView(imageView)
+                fullscreenDialog.show()
+            }
+
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -2278,7 +2308,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
 
-    private fun showTrackListDialog(albumTitle: String, albumCoverUrl: String, trackList: List<Track>) {
+    private fun showTrackListDialog(
+        albumTitle: String,
+        albumCoverUrl: String,
+        trackList: List<Track>
+    ) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
 
@@ -2292,6 +2326,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             .load(albumCoverUrl)
             .apply(requestOptions)
             .into(albumCoverImageView)
+
+        // Add click listener to the album cover image
+        albumCoverImageView.setOnClickListener {
+            showFullscreenImage(albumCoverImageView.drawable)
+        }
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
@@ -2312,6 +2351,15 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         }
 
         dialog.show()
+    }
+
+    private fun showFullscreenImage(drawable: Drawable) {
+        val fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val imageView = ImageView(this)
+        imageView.setImageDrawable(drawable)
+
+        fullscreenDialog.setContentView(imageView)
+        fullscreenDialog.show()
     }
 
 
