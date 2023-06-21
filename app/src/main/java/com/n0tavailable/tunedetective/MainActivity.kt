@@ -284,7 +284,8 @@ class MainActivity : AppCompatActivity() {
 
             historyListView.setOnItemClickListener { parent, view, position, id ->
                 val selectedQuery = searchHistory[position]
-                val artistId = selectedQuery.substringAfter(",").trim() // Extract and trim the artist ID from the query
+                val artistId = selectedQuery.substringAfter(",")
+                    .trim() // Extract and trim the artist ID from the query
 
                 val selectedArtistId = artistId // Create a local variable for selected artist ID
 
@@ -362,6 +363,14 @@ class MainActivity : AppCompatActivity() {
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
 
 
+        val searchView = findViewById<SearchView>(R.id.searchBar)
+
+        // Set the query hint and text color
+        searchView.queryHint = "Enter artist name"
+
+        // Expand the SearchView
+        searchView.isIconified = false
+
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
         val homeButton = findViewById<ImageButton>(R.id.homeButton)
@@ -394,11 +403,16 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextSubmit(query: String): Boolean {
                 val artistName = query.trim()
                 if (artistName.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "Please enter an artist name", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Please enter an artist name",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return false
                 }
 
-                Toast.makeText(this@MainActivity, "Searching for data...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Searching for data...", Toast.LENGTH_SHORT)
+                    .show()
                 hideKeyboard()
                 searchSimilarArtists(artistName)
 
@@ -1644,7 +1658,10 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private val fetchRunnable = object : Runnable {
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 15 * 60 * 1000) // Schedule the next execution after 15 minutes
+            handler.postDelayed(
+                this,
+                15 * 60 * 1000
+            ) // Schedule the next execution after 15 minutes
         }
     }
 
@@ -1663,7 +1680,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener(this)
 
-        val clickedIntentFilter = IntentFilter("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
+        val clickedIntentFilter =
+            IntentFilter("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
         registerReceiver(NotificationReceiver(), clickedIntentFilter)
 
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -1706,7 +1724,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
             startActivity(intent)
         }
-
 
 
     }
@@ -1755,7 +1772,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val channelId = "FetchSuccessChannel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = "Fetch Success Channel"
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
             notificationManager.createNotificationChannel(channel)
         }
 
