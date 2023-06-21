@@ -67,6 +67,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -1037,7 +1038,7 @@ class MainActivity : AppCompatActivity() {
                         trackTitleTextView.text = truncatedAlbumTitle
 
                         // Load the album cover image
-                        loadAlbumCoverImage(albumCoverUrl)
+                        loadAlbumCoverImage(albumCoverUrl, albumCoverImageView)
 
                         // Create a SpannableString and apply formatting to the release date
                         val spannableString = SpannableString("Release Date: $formattedReleaseDate")
@@ -1050,7 +1051,7 @@ class MainActivity : AppCompatActivity() {
                         releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
-                            getTrackList(tracklistUrl)
+                            getTrackList(tracklistUrl, albumCoverUrl)
                         }
                     }
                 } else {
@@ -1060,7 +1061,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getTrackList(tracklistUrl: String) {
+    private fun getTrackList(tracklistUrl: String, albumCoverUrl: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
         val request =
@@ -1090,7 +1091,7 @@ class MainActivity : AppCompatActivity() {
 
 
                     runOnUiThread {
-                        showTrackListDialog(trackList)
+                        showTrackListDialog(trackList, albumCoverUrl)
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
@@ -1099,12 +1100,16 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showTrackListDialog(trackList: List<Track>) {
+    private fun showTrackListDialog(trackList: List<Track>, albumCoverUrl: String) {
         dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+        val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+
+        // Load the album cover image
+        loadAlbumCoverImage(albumCoverUrl, albumCoverImageView)
 
         val layoutManager = LinearLayoutManager(this)
         val adapter = TrackListAdapter(trackList)
@@ -1124,9 +1129,14 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun loadAlbumCoverImage(url: String) {
-        Glide.with(this).load(url).apply(RequestOptions().transform(RoundedCorners(50)))
-            .into(albumCoverImageView)
+
+    private fun loadAlbumCoverImage(url: String, imageView: ImageView) {
+        Glide.with(this)
+            .load(url)
+            .transform(RoundedCorners(50))
+            .placeholder(R.drawable.round_music_note_24) // Placeholder image while loading
+            .error(R.drawable.round_music_note_24) // Error image if loading fails
+            .into(imageView)
     }
 
     private fun showFullscreenImage(drawable: Drawable) {
@@ -1441,7 +1451,7 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 fetchTrackList(album.albumId) { trackList ->
                     // Display the tracklist in a dialog
                     (context as? Activity)?.runOnUiThread {
-                        showTrackListDialog(context, trackList)
+                        showTrackListDialog(context, trackList, album.coverUrl) // Pass the album cover URL to the dialog
                     }
                 }
             }
@@ -1497,9 +1507,18 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             }
 
 
-            private fun showTrackListDialog(context: Context, trackList: List<Track>) {
+            private fun showTrackListDialog(context: Context, trackList: List<Track>, albumCoverUrl: String) {
                 val dialog = Dialog(context)
                 dialog.setContentView(R.layout.dialog_tracklist)
+
+                // Set the album cover image at the top of the dialog
+                val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+                Glide.with(context.applicationContext) // Pass the application context instead of the dialog context
+                    .load(albumCoverUrl)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .transform(CenterCrop(), RoundedCorners(50)) // Apply rounded corners transformation
+                    .into(albumCoverImageView)
+
 
                 val trackListRecyclerView =
                     dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
@@ -2083,7 +2102,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         // Add a click listener to the album cover image
         releaseCoverImageView.setOnClickListener {
-            openTracklist(album.albumId) // Pass the album ID to the function to open the tracklist
+            openTracklist(album) // Pass the album object to the function to open the tracklist
         }
 
         releaseContainer.addView(releaseItemView)
@@ -2198,12 +2217,12 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
 
-    private fun openTracklist(albumId: String) {
-        // Fetch the tracklist for the album with the given ID
-        fetchTrackList(albumId) { trackList ->
+    private fun openTracklist(album: ArtistDiscographyActivity.Album) {
+        // Fetch the tracklist for the album
+        fetchTrackList(album.albumId) { trackList ->
             // Display the tracklist in a dialog
             runOnUiThread {
-                showTrackListDialog(trackList)
+                showTrackListDialog(album.title, album.coverUrl, trackList)
             }
         }
     }
@@ -2259,9 +2278,20 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
 
-    private fun showTrackListDialog(trackList: List<Track>) {
+    private fun showTrackListDialog(albumTitle: String, albumCoverUrl: String, trackList: List<Track>) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
+
+        val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+
+        // Load the album cover image using Glide
+        val requestOptions = RequestOptions()
+            .transform(RoundedCorners(50))
+
+        Glide.with(this)
+            .load(albumCoverUrl)
+            .apply(requestOptions)
+            .into(albumCoverImageView)
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)

@@ -1,36 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-
-    <TextView
+    <ImageView
+        android:id="@+id/albumCoverImageView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/trackCountTextView"
-        />
+        android:layout_height="200dp"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"
+        android:maxHeight="200dp" />
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/trackListRecyclerView2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:maxHeight="500dp">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/trackListRecyclerView2"
-            android:layout_width="match_parent"
-            android:divider="#2C2C2C"
-            android:dividerHeight="1dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            tools:ignore="MissingConstraints" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="#2C2C2C"
+        android:dividerHeight="1dp"
+        android:textAlignment="center" />
 
     <Button
         android:id="@+id/closeButton"
@@ -45,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="15dp"
-        android:text="!Tracklist is scrollable!"
+        android:text="!Tracklist is scrollable!\nTap on any track to play and re-tap to pause."
         android:textAlignment="center"
         android:textColor="#FFF" />
 
