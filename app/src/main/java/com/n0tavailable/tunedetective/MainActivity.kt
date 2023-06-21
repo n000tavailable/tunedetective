@@ -111,6 +111,13 @@ class MainActivity : AppCompatActivity() {
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
 
 
+    override fun onBackPressed() {
+        val intent = Intent(this@MainActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         stopPlayback()
@@ -379,22 +386,30 @@ class MainActivity : AppCompatActivity() {
 
         homeButton.setOnClickListener {
             val intent = Intent(this@MainActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         aboutButton.setOnClickListener {
             val intent = Intent(this@MainActivity, AboutActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         releasesButton.setOnClickListener {
             val intent = Intent(this@MainActivity, ReleasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         settingsButton.setOnClickListener {
             val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
 
@@ -1706,23 +1721,30 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         homeButton.setOnClickListener {
             val intent = Intent(this@ReleasesActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         aboutButton.setOnClickListener {
             val intent = Intent(this@ReleasesActivity, AboutActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         releasesButton.setOnClickListener {
             val intent = Intent(this@ReleasesActivity, ReleasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
-
 
         settingsButton.setOnClickListener {
             val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
 
@@ -1738,8 +1760,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
+        val intent = Intent(this@ReleasesActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
         resetLayout()
+        finish()
     }
 
     class NotificationReceiver : BroadcastReceiver() {

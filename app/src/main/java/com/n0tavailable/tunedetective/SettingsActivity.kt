@@ -17,6 +17,13 @@ import androidx.core.content.ContextCompat
 class SettingsActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
 
+    override fun onBackPressed() {
+        val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
+    }
+
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,22 +46,30 @@ class SettingsActivity : AppCompatActivity() {
 
         homeButton.setOnClickListener {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         aboutButton.setOnClickListener {
             val intent = Intent(this@SettingsActivity, AboutActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         releasesButton.setOnClickListener {
             val intent = Intent(this@SettingsActivity, ReleasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         settingsButton.setOnClickListener {
             val intent = Intent(this@SettingsActivity, SettingsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
     }
 

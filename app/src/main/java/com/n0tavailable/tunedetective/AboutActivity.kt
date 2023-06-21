@@ -17,6 +17,14 @@ import com.bumptech.glide.request.RequestOptions
 
 class AboutActivity : AppCompatActivity() {
 
+
+    override fun onBackPressed() {
+        val intent = Intent(this@AboutActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
@@ -51,22 +59,30 @@ class AboutActivity : AppCompatActivity() {
 
         homeButton.setOnClickListener {
             val intent = Intent(this@AboutActivity, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         aboutButton.setOnClickListener {
             val intent = Intent(this@AboutActivity, AboutActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         releasesButton.setOnClickListener {
             val intent = Intent(this@AboutActivity, ReleasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
 
         settingsButton.setOnClickListener {
             val intent = Intent(this@AboutActivity, SettingsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
     }
 }
