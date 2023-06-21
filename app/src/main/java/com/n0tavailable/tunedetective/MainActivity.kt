@@ -16,6 +16,7 @@ import android.content.BroadcastReceiver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
@@ -32,6 +33,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
@@ -1629,7 +1631,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var notificationManager: NotificationManagerCompat
     private val handler = Handler(Looper.getMainLooper())
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private val delayBetweenArtists = 100L // 0.10 seconds
+    private val delayBetweenArtists = 50L
     private var notificationId = 1 // Initial notification ID
     private val shownNotifications = HashSet<String>()
     private lateinit var nothingHereTextView: TextView
@@ -1637,18 +1639,16 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var progressBar: ProgressBar
     private lateinit var fetchingTextView: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-
-
-
+    private lateinit var wakeLock: PowerManager.WakeLock
 
     private val fetchRunnable = object : Runnable {
-
         override fun run() {
             fetchAndDisplayReleases()
-            handler.postDelayed(this, 15 * 60 * 1000); // Schedule the next execution after 1 hour
+            handler.postDelayed(this, 15 * 60 * 1000) // Schedule the next execution after 15 minutes
         }
     }
 
+    @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_releases)
@@ -1663,6 +1663,15 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener(this)
 
+        val clickedIntentFilter = IntentFilter("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
+        registerReceiver(NotificationReceiver(), clickedIntentFilter)
+
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "MyApp::MyWakelockTag"
+        )
+        wakeLock.acquire()
 
 
         createNotificationChannel() // Create the notification channel
@@ -1702,6 +1711,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        wakeLock.release()
+    }
+
     override fun onRefresh() {
         fetchAndDisplayReleases()
     }
@@ -1725,6 +1739,9 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                 // The ReleasesActivity is not running, so start it
                 context.startActivity(activityIntent)
             }
+
+            val clickedIntent = Intent("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
+            context.sendBroadcast(clickedIntent)
         }
     }
 
@@ -1744,8 +1761,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle("Fetch Successful")
-            .setContentText("Successfully fetched releases in the background.")
+            .setContentTitle("Fetch successfully started")
+            .setContentText("Successfully started fetching releases in the background.")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -1819,7 +1836,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         swipeRefreshLayout.isRefreshing = true // Show the refresh indicator
 
-
         coroutineScope.launch {
             val totalArtists = artists.size
             var fetchedArtists = 0
@@ -1830,16 +1846,16 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
                     swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on success
+                    showFetchSuccessNotification() // Show fetch success notification
                 } catch (e: Exception) {
                     e.printStackTrace()
                     showFetchFailureNotification()
-                    swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on error2
+                    swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on error
                     break // Stop fetching further releases on fetch failure
                 } finally {
                     fetchedArtists++
                     val progress = (fetchedArtists.toFloat() / totalArtists.toFloat() * 100).toInt()
                     progressBar.progress = progress // Update the progress bar
-                    showFetchSuccessNotification() // Show fetch success notification
                 }
             }
 
@@ -1847,6 +1863,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             fetchingTextView.visibility = View.GONE // Hide the fetching text view
         }
     }
+
 
     private fun showFetchingProgress(current: Int, total: Int) {
         val message = "Fetching artist $current out of $total..."
