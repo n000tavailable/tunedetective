@@ -70,16 +70,13 @@
         <receiver
             android:name=".FetchReleasesReceiver"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.n0tavailable.tunedetective.FETCH_RELEASES_ACTION" />
-            </intent-filter>
-        </receiver>
+            android:exported="false" />
 
         <activity
             android:name=".NotificationsActivity"
             android:label="Notifications"
             />
+
 
 
     </application>
