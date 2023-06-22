@@ -67,6 +67,11 @@ import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -91,6 +96,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.Random
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var displayTracks: Button
@@ -1761,22 +1767,10 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Schedule the initial execution of fetch releases
-        val initialDelay =  15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
-        val interval = 15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
-        alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + initialDelay,
-            interval,
-            fetchReleasesPendingIntent
-        )
-
-
-        createNotificationChannel() // Create the notification channel
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 15 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L); // Start periodic execution after 1 hour
 
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
@@ -1890,7 +1884,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         notificationManager.notify(notificationId, notification)
 
-        handler.postDelayed(fetchRunnable, 15 * 60 * 1000); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L); // Start periodic execution after 1 hour
     }
 
     private fun resetLayout() {
@@ -1905,7 +1899,16 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
 
+    private var isFetching = false
+
     private fun fetchAndDisplayReleases() {
+
+        if (isFetching) {
+            return
+        }
+
+        isFetching = true
+
         val artists = fetchArtistsFromDatabase()
 
         if (artists.isEmpty()) {
@@ -1944,6 +1947,17 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
             progressBar.visibility = View.GONE // Hide the progress bar when done
             fetchingTextView.visibility = View.GONE // Hide the fetching text view
+
+
+            isFetching = false
+
+            val handler = Handler()
+            val fetchRunnable = Runnable {
+                fetchAndDisplayReleases()
+            }
+
+            // Schedule the periodic execution of fetch releases
+            handler.postDelayed(fetchRunnable, 15 * 60 * 1000)
         }
     }
 
@@ -2179,7 +2193,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
                 handler.postDelayed(
                     fetchRunnable,
-                    15 * 60 * 1000
+                    15 * 60 * 1000L
                 ); // Start periodic execution after 1 hour
             }
         }
