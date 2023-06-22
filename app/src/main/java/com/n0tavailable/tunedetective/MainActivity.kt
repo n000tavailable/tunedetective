@@ -2377,7 +2377,7 @@ class BackgroundService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Turn me off",
+                "Background Service - Can be turned off",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             val notificationManager =

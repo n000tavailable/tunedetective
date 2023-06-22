@@ -71,5 +71,17 @@
         android:layout_gravity="center_vertical"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
+    <Button
+        android:id="@+id/notificationsButton"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Configure Notification Settings"
+        android:textStyle="bold" />
+
 
 </LinearLayout>

@@ -3,14 +3,17 @@ package com.n0tavailable.tunedetective
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.ToggleButton
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 
@@ -43,6 +46,8 @@ class SettingsActivity : AppCompatActivity() {
         val homeButton = findViewById<ImageButton>(R.id.homeButton)
         val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
         val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+        val notificationsButton = findViewById<Button>(R.id.notificationsButton)
+
 
         homeButton.setOnClickListener {
             val intent = Intent(this@SettingsActivity, MainActivity::class.java)
@@ -70,6 +75,12 @@ class SettingsActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
+        }
+
+        notificationsButton.setOnClickListener {
+            // Launch the app notifications configuration activity
+            val intent = Intent(this@SettingsActivity, NotificationsActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -106,5 +117,20 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(mainIntent)
             Runtime.getRuntime().exit(0)
         }
+    }
+}
+
+class NotificationsActivity : AppCompatActivity() {
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Open the notification settings for the app
+        val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+        intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+        startActivity(intent)
+
+        finish() // Close the NotificationsActivity after opening the notification settings
     }
 }

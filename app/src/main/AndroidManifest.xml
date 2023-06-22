@@ -76,6 +76,11 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".NotificationsActivity"
+            android:label="Notifications"
+            />
+
 
     </application>
 
