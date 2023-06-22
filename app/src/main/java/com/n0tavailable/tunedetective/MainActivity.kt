@@ -1738,8 +1738,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             fetchAndDisplayReleases()
             handler.postDelayed(
                 this,
-                15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
-            ) // Schedule the next execution after 15 minutes
+                60 * 60 * 1000L // 60 minutes (15 * 60 * 1000)
+            ) // Schedule the next execution after 60 minutes
         }
     }
 
@@ -1770,7 +1770,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
 
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
 
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
@@ -1872,7 +1872,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Fetch Failed")
-            .setContentText("Failed to fetch releases. Retrying in 15 minutes")
+            .setContentText("Failed to fetch releases. Retrying in 60 minutes")
             .setPriority(NotificationCompat.PRIORITY_LOW) // Set the priority to the lowest possible
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -1884,7 +1884,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         notificationManager.notify(notificationId, notification)
 
-        handler.postDelayed(fetchRunnable, 15 * 60 * 1000L); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
     }
 
     private fun resetLayout() {
@@ -1957,7 +1957,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             }
 
             // Schedule the periodic execution of fetch releases
-            handler.postDelayed(fetchRunnable, 15 * 60 * 1000)
+            handler.postDelayed(fetchRunnable, 60 * 60 * 1000)
         }
     }
 
@@ -2193,7 +2193,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
                 handler.postDelayed(
                     fetchRunnable,
-                    15 * 60 * 1000L
+                    60 * 60 * 1000L
                 ); // Start periodic execution after 1 hour
             }
         }
