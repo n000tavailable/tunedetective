@@ -1878,7 +1878,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Fetch Failed")
-            .setContentText("Failed to fetch releases. Retrying in one hour.")
+            .setContentText("Failed to fetch releases. Retrying in 15 minutes")
             .setPriority(NotificationCompat.PRIORITY_LOW) // Set the priority to the lowest possible
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
