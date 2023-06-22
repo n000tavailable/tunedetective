@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
+import android.app.AlarmManager
 import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationChannel
@@ -1720,7 +1721,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var progressBar: ProgressBar
     private lateinit var fetchingTextView: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var wakeLock: PowerManager.WakeLock
+
+    private val alarmManager by lazy {
+        getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    }
+    private lateinit var fetchReleasesPendingIntent: PendingIntent
 
     private val fetchRunnable = object : Runnable {
         override fun run() {
@@ -1747,16 +1752,24 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener(this)
 
-        val clickedIntentFilter =
-            IntentFilter("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
-        registerReceiver(NotificationReceiver(), clickedIntentFilter)
-
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        wakeLock = powerManager.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "MyApp::MyWakelockTag"
+        // Create the PendingIntent for fetch releases
+        val fetchIntent = Intent(this, FetchReleasesReceiver::class.java)
+        fetchReleasesPendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            fetchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
-        wakeLock.acquire()
+
+        // Schedule the initial execution of fetch releases
+        val initialDelay = 15 * 60 * 1000L // 15 minutes
+        val interval = 15 * 60 * 1000L // 15 minutes
+        alarmManager.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + initialDelay,
+            interval,
+            fetchReleasesPendingIntent
+        )
 
 
         createNotificationChannel() // Create the notification channel
@@ -1802,11 +1815,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        wakeLock.release()
-    }
-
     override fun onRefresh() {
         fetchAndDisplayReleases()
     }
@@ -1817,26 +1825,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         startActivity(intent)
         resetLayout()
         finish()
-    }
-
-    class NotificationReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            // Check if the ReleasesActivity is already running
-            val activityIntent = Intent(context, ReleasesActivity::class.java)
-            activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            val isActivityRunning = PendingIntent.getActivity(
-                context, 0, activityIntent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-            ) != null
-
-            if (!isActivityRunning) {
-                // The ReleasesActivity is not running, so start it
-                context.startActivity(activityIntent)
-            }
-
-            val clickedIntent = Intent("com.n0tavailable.tunedetective.NOTIFICATION_CLICKED")
-            context.sendBroadcast(clickedIntent)
-        }
     }
 
     @SuppressLint("MissingPermission")
@@ -2427,5 +2415,13 @@ class BackgroundService : Service() {
 
     private fun startReleasesActivity() {
         releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+}
+
+class FetchReleasesReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val releasesActivityIntent = Intent(context, ReleasesActivity::class.java)
+        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(releasesActivityIntent)
     }
 }

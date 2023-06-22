@@ -68,10 +68,11 @@
             android:exported="false" />
 
         <receiver
-            android:name=".ReleasesActivity$NotificationReceiver"
+            android:name=".FetchReleasesReceiver"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.n0tavailable.tunedetective.NOTIFICATION_CLICKED" />
+                <action android:name="com.n0tavailable.tunedetective.FETCH_RELEASES_ACTION" />
             </intent-filter>
         </receiver>
 
