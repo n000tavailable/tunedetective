@@ -1732,7 +1732,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             fetchAndDisplayReleases()
             handler.postDelayed(
                 this,
-                15 * 60 * 1000
+                15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
             ) // Schedule the next execution after 15 minutes
         }
     }
@@ -1762,8 +1762,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         )
 
         // Schedule the initial execution of fetch releases
-        val initialDelay = 15 * 60 * 1000L // 15 minutes
-        val interval = 15 * 60 * 1000L // 15 minutes
+        val initialDelay =  15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
+        val interval = 15 * 60 * 1000L // 15 minutes (15 * 60 * 1000)
         alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
             System.currentTimeMillis() + initialDelay,
