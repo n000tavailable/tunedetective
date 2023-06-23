@@ -21,7 +21,7 @@
             android:background="#121212"
             android:src="@drawable/ic_search"
             android:layout_marginEnd="30dp"
-            app:tint="@color/material_dynamic_neutral50" />
+            app:tint="#818181" />
 
         <ImageButton
             android:id="@+id/releasesButton"
@@ -30,7 +30,7 @@
             android:background="#121212"
             android:src="@drawable/ic_releases"
             android:layout_marginEnd="30dp"
-            app:tint="@color/material_dynamic_primary99" />
+            app:tint="#FFFFFF" />
 
         <ImageButton
             android:id="@+id/settingsButton"
@@ -39,7 +39,7 @@
             android:background="#121212"
             android:src="@drawable/ic_settings"
             android:layout_marginEnd="30dp"
-            app:tint="@color/material_dynamic_primary99" />
+            app:tint="#FFFFFF" />
 
         <ImageButton
             android:id="@+id/infoButton"
@@ -47,7 +47,7 @@
             android:layout_height="60dp"
             android:background="#121212"
             android:src="@drawable/ic_info"
-            app:tint="@color/material_dynamic_primary99" />
+            app:tint="#FFFFFF" />
 
     </LinearLayout>
 
@@ -91,7 +91,7 @@
             android:id="@+id/searchHistoryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:tint="@color/material_dynamic_neutral50"
+            app:tint="#FF747679"
             android:background="#121212"
             android:src="@drawable/round_history_24"
             android:contentDescription="Search History"
