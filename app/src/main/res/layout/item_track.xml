@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Total Tracks: "
-        android:textAlignment="center"
         android:textColor="#797979"
         android:textSize="16sp"
         android:textStyle="bold" />
@@ -33,7 +32,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingEnd="8dp"
-            android:textAlignment="center"
             android:textColor="#797979"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -43,7 +41,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textAlignment="center"
             android:textColor="#FFF"
             android:textSize="16sp"
             android:textStyle="bold" />
