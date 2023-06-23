@@ -148,24 +148,28 @@
             android:padding="10dp"
             android:gravity="center">
 
-            <Button
-                android:id="@+id/displayTracks"
-                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tracks"
-                android:textStyle="bold" />
-
-            <Space
-                android:layout_width="16dp"
-                android:layout_height="match_parent" />
 
             <Button
                 android:id="@+id/discographyButton"
                 style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Show Discography"
+                android:text="  Discography  "
+                android:drawableLeft="@drawable/round_album_24"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+
+            <Button
+                android:id="@+id/displayTracks"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="   Tracks"
+                android:drawableEnd="@drawable/round_navigate_next_24"
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
