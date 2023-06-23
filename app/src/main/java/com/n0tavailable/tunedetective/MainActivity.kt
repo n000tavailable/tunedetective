@@ -507,97 +507,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchAndShowTracklist(albumId: String) {
-        val apiKey = APIKeys.DEEZER_API_KEY
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://api.deezer.com/album/$albumId/tracks")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseData = response.body?.string()
-
-                if (response.isSuccessful && responseData != null) {
-                    val jsonResponse = JSONObject(responseData)
-                    val tracklistArray = jsonResponse.getJSONArray("data")
-
-                    if (tracklistArray.length() > 0) {
-                        val tracklist = mutableListOf<String>()
-
-                        for (i in 0 until tracklistArray.length()) {
-                            val track = tracklistArray.getJSONObject(i)
-                            val trackTitle = track.getString("title")
-                            tracklist.add(trackTitle)
-                        }
-
-                        runOnUiThread {
-                            // Create a dialog to display the tracklist
-                            val dialogView =
-                                layoutInflater.inflate(R.layout.dialog_tracklist2, null)
-                            val tracklistListView =
-                                dialogView.findViewById<ListView>(R.id.trackListRecyclerView2)
-
-                            val tracklistAdapter = object : ArrayAdapter<String>(
-                                this@MainActivity,
-                                android.R.layout.simple_list_item_1,
-                                tracklist
-                            ) {
-                                override fun getView(
-                                    position: Int,
-                                    convertView: View?,
-                                    parent: ViewGroup
-                                ): View {
-                                    val view = super.getView(position, convertView, parent)
-                                    val textView = view.findViewById<TextView>(android.R.id.text1)
-                                    textView.setTextColor(
-                                        ContextCompat.getColor(
-                                            this@MainActivity,
-                                            R.color.white
-                                        )
-                                    )
-                                    textView.gravity = Gravity.CENTER // Set text gravity to center
-                                    return view
-                                }
-                            }
-
-                            tracklistListView.adapter = tracklistAdapter
-
-                            val tracklistDialog = AlertDialog.Builder(this@MainActivity)
-                                .setTitle("Tracklist")
-                                .setPositiveButton("OK", null)
-                                .setView(dialogView)
-                                .create()
-
-                            tracklistDialog.show()
-                        }
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Tracklist not found",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Error: ${response.code} ${response.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        })
-    }
-
     private fun updateWelcomeMessageVisibility() {
         welcomeMessageTextView.visibility = if (welcomeMessageVisible) View.VISIBLE else View.GONE
     }
@@ -950,8 +859,12 @@ class MainActivity : AppCompatActivity() {
                         releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
-                            Toast.makeText(applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
-                            getTrackList(tracklistUrl, albumCoverUrl)
+                            Toast.makeText(
+                                applicationContext,
+                                "Loading tracks...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            getTrackList(tracklistUrl, albumCoverUrl, formattedReleaseDate)
                         }
                     }
                 } else {
@@ -961,12 +874,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun getTrackList(tracklistUrl: String, albumCoverUrl: String) {
+    private fun getTrackList(tracklistUrl: String, albumCoverUrl: String, releaseDate: String?) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
-        val request =
-            Request.Builder().url(tracklistUrl).addHeader("Authorization", "Bearer $apiKey").build()
-
+        val request = Request.Builder()
+            .url(tracklistUrl)
+            .addHeader("Authorization", "Bearer $apiKey")
+            .build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -988,10 +902,8 @@ class MainActivity : AppCompatActivity() {
                         trackList.add(Track(trackTitle, previewUrl))
                     }
 
-
-
                     runOnUiThread {
-                        showTrackListDialog(trackList, albumCoverUrl)
+                        showTrackListDialog(trackList, albumCoverUrl, releaseDate)
                     }
                 } else {
                     println("Error: ${response.code} ${response.message}")
@@ -1000,13 +912,20 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun showTrackListDialog(trackList: List<Track>, albumCoverUrl: String) {
+
+    private fun showTrackListDialog(
+        trackList: List<Track>,
+        albumCoverUrl: String,
+        releaseDate: String?
+    ) {
         dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_tracklist)
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
         val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+        val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
+        val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
 
         // Load the album cover image
         loadAlbumCoverImage(albumCoverUrl, albumCoverImageView)
@@ -1016,6 +935,9 @@ class MainActivity : AppCompatActivity() {
 
         trackListRecyclerView.layoutManager = layoutManager
         trackListRecyclerView.adapter = adapter
+
+        trackCounterTextView.text = "Total Tracks: ${adapter.itemCount}"
+        releaseDateTextView.text = releaseDate ?: "Release Date: N/A"
 
         closeButton.setOnClickListener {
             dialog.dismiss()
@@ -1032,7 +954,6 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
 
     private fun loadAlbumCoverImage(url: String, imageView: ImageView) {
         Glide.with(this)
@@ -1103,7 +1024,7 @@ class TrackListAdapter(private val trackList: List<Track>) :
             HtmlCompat.fromHtml(trackTitleWithNumber, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
         // Set total tracks indicator
-        holder.totalTracksTextView.text = "Total Tracks: $totalTracks"
+        holder.totalTracksTextView.text = ""
         holder.totalTracksTextView.visibility = if (position == 0) View.VISIBLE else View.GONE
 
         holder.itemView.setOnClickListener {
@@ -1352,7 +1273,11 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             override fun onClick(view: View) {
                 val context = itemView.context
 
-                Toast.makeText(view.context.applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    view.context.applicationContext,
+                    "Loading tracks...",
+                    Toast.LENGTH_SHORT
+                ).show()
 
                 // Fetch the tracklist for the album with the given ID
                 fetchTrackList(album.albumId) { trackList ->
@@ -1361,8 +1286,9 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                         showTrackListDialog(
                             context,
                             trackList,
-                            album.coverUrl
-                        ) // Pass the album cover URL to the dialog
+                            album.coverUrl,
+                            album.releaseDate
+                        ) // Pass the album cover URL and release date to the dialog
                     }
                 }
             }
@@ -1421,7 +1347,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             private fun showTrackListDialog(
                 context: Context,
                 trackList: List<Track>,
-                albumCoverUrl: String
+                albumCoverUrl: String,
+                releaseDate: String?
             ) {
                 val dialog = Dialog(context)
                 dialog.setContentView(R.layout.dialog_tracklist)
@@ -1441,12 +1368,18 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 val trackListRecyclerView =
                     dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
                 val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+                val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
+                val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
 
                 val layoutManager = LinearLayoutManager(context)
                 val adapter = TrackListAdapter(trackList)
 
                 trackListRecyclerView.layoutManager = layoutManager
                 trackListRecyclerView.adapter = adapter
+
+                trackCounterTextView.text = "Total Tracks: ${trackList.size}"
+
+                releaseDateTextView.text = "$releaseDate"
 
                 closeButton.setOnClickListener {
                     dialog.dismiss()
@@ -1884,7 +1817,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
-        val releaseCoverImageView = releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
+        val releaseCoverImageView =
+            releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
 
 
 
@@ -1918,7 +1852,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         fetchTrackList(album.albumId) { trackList ->
             // Display the tracklist in a dialog
             runOnUiThread {
-                showTrackListDialog(album.title, album.coverUrl, trackList)
+                showTrackListDialog(
+                    album.releaseDate,
+                    album.coverUrl,
+                    trackList
+                )
             }
         }
     }
@@ -1983,6 +1921,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         dialog.setContentView(R.layout.dialog_tracklist)
 
         val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+        val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
+        val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
 
         // Load the album cover image using Glide
         val requestOptions = RequestOptions()
@@ -1997,6 +1937,9 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         albumCoverImageView.setOnClickListener {
             showFullscreenImage(albumCoverImageView.drawable)
         }
+
+        trackCounterTextView.text = "Total Tracks: ${trackList.size}"
+        releaseDateTextView.text = albumTitle // Set the release date text
 
         val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
         val closeButton = dialog.findViewById<Button>(R.id.closeButton)
