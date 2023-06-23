@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
@@ -44,6 +46,11 @@ class SettingsActivity : AppCompatActivity() {
         // Add click listener to the saveButton
         saveButton.setOnClickListener {
             saveIntervalTime()
+        }
+
+        val batterySettingsButton = findViewById<Button>(R.id.batterySettingsButton)
+        batterySettingsButton.setOnClickListener {
+            openBatterySettings()
         }
 
         val savedInterval = sharedPreferences.getLong("intervalTime", 60)
@@ -103,6 +110,21 @@ class SettingsActivity : AppCompatActivity() {
             // Launch the app notifications configuration activity
             val intent = Intent(this@SettingsActivity, NotificationsActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun openBatterySettings() {
+        val packageName = "com.n0tavailable.tunedetective" // Replace with the actual package name
+
+        val intent = Intent().apply {
+            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            data = Uri.fromParts("package", packageName, null)
+        }
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "No settings activity found", Toast.LENGTH_SHORT).show()
         }
     }
 
