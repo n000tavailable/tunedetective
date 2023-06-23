@@ -81,7 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:text="You're running version 2.0!"
+        android:text="You're running version 2.1!"
         android:textColor="#fff" />
 
     <LinearLayout
