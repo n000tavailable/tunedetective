@@ -41,13 +41,14 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Screenshots
 
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/3f6c3670-b946-49c1-8ffd-0f80e0e73ebb" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/066ebcb8-9dad-476b-ac79-35dc94121e79" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/0357dacd-4ada-4baf-8b1c-753d371aa389" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/0178a8a3-7c5a-4145-86ce-06c2ae3edad0" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f40e2753-8578-42a1-b024-326c09c4d42f" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/72a11cdd-3a4f-46c8-ab57-87cdc8abeef4" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f37ec03e-e2b1-4ff5-9598-c512b1df9ffc" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/761f4341-23f9-455b-8604-932473feb730" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/9b4c9e3a-d3e0-40c1-bc38-8e04e5ad5955" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/04aad739-1146-4663-8489-c453e70355b1" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8a2eb54f-8c85-426a-8903-0acbec8be565" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/13713f64-95d3-4c7d-b7e5-c33dc79469e9" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/4779c915-fe08-4252-822b-ffc617c83ae7" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/17d4f9b4-0fdd-4528-9703-21ad689ebbb0" width="350">
+
 
 # How to use?
 **Discover the Latest Release of Your Favorite Artist**
@@ -56,13 +57,9 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 **Permission:** You will be prompted to accept the permission request. This permission enables TuneDetective to display new release notifications.
 
-**Homescreen Waiting Period:** After accepting the permission-request, you will briefly wait on the app's homescreen. During this time, TuneDetective works diligently in the background to fetch the latest music releases.
+**Message Dismissal:** You can dismiss the notification. This dismissal option will be available within the notification settings.
 
-**Notification Prompt:** Once the app is done with the background progress, a notification will appear on your device's screen. The notification will prompt you to tap on it to initialize the new release notification.
-
-**Message Dismissal:** After tapping the notification, it will redirect you to the new release information within the app. After a few seconds, you can dismiss the notification. This dismissal option will be labeled as the "Turn Me Off" channel within the notification settings.
-
-**Hourly Updates:** After dismissing the initial notification, TuneDetective will continue to check for new releases every hour. If any new releases are found, they will be displayed as notifications, accompanied by the album cover of the respective release.
+**Hourly Updates:** After the first time the latest releases of the artists in the release page (the second tab, next to the home icon, that with the music note) was loaded successfully (artists must be present) every hour or a little later the newest releases are loaded in the background.
 
 **How to search for artists**
 
