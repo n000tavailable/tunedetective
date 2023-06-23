@@ -1738,8 +1738,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             fetchAndDisplayReleases()
             handler.postDelayed(
                 this,
-                60 * 60 * 1000L // 60 minutes (15 * 60 * 1000)
-            ) // Schedule the next execution after 60 minutes
+                getIntervalTimeInMillis() // Use the interval time from SharedPreferences
+            )
         }
     }
 
@@ -1770,7 +1770,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         createNotificationChannel() // Create the notification channel
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, getIntervalTimeInMillis()); // Start periodic execution after 1 hour
 
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
@@ -1819,6 +1819,12 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         startActivity(intent)
         resetLayout()
         finish()
+    }
+
+    private fun getIntervalTimeInMillis(): Long {
+        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val intervalMinutes = sharedPreferences.getLong("intervalTime", 60L)
+        return intervalMinutes * 60 * 1000L // Convert minutes to milliseconds
     }
 
     @SuppressLint("MissingPermission")
@@ -1884,7 +1890,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         notificationManager.notify(notificationId, notification)
 
-        handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
+        handler.postDelayed(fetchRunnable, getIntervalTimeInMillis()); // Start periodic execution after 1 hour
     }
 
     private fun resetLayout() {
@@ -1957,7 +1963,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             }
 
             // Schedule the periodic execution of fetch releases
-            handler.postDelayed(fetchRunnable, 60 * 60 * 1000)
+            handler.postDelayed(fetchRunnable, getIntervalTimeInMillis())
         }
     }
 
@@ -2193,7 +2199,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
                 handler.postDelayed(
                     fetchRunnable,
-                    60 * 60 * 1000L
+                    getIntervalTimeInMillis()
                 ); // Start periodic execution after 1 hour
             }
         }

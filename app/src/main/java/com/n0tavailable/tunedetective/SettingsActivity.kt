@@ -1,6 +1,7 @@
 package com.n0tavailable.tunedetective
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -9,9 +10,11 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -19,6 +22,8 @@ import androidx.core.content.ContextCompat
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var intervalEditText: EditText
+    private lateinit var saveButton: Button
 
     override fun onBackPressed() {
         val intent = Intent(this@SettingsActivity, MainActivity::class.java)
@@ -32,7 +37,24 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        intervalEditText = findViewById(R.id.intervalEditText)
+        saveButton = findViewById(R.id.saveButton)
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+
+        // Add click listener to the saveButton
+        saveButton.setOnClickListener {
+            saveIntervalTime()
+        }
+
+        val savedInterval = sharedPreferences.getLong("intervalTime", 60)
+        intervalEditText.setText(savedInterval.toString())
+
+        val saveButton = findViewById<Button>(R.id.saveButton)
+        saveButton.setOnClickListener {
+            val interval = intervalEditText.text.toString().toLongOrNull() ?: 60
+            saveIntervalTime(interval)
+            Toast.makeText(this, "Interval time saved", Toast.LENGTH_SHORT).show()
+        }
 
         val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
 
@@ -84,6 +106,24 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun saveIntervalTime() {
+        val intervalString = intervalEditText.text.toString()
+        val intervalMinutes = intervalString.toIntOrNull()
+
+        if (intervalMinutes != null && intervalMinutes > 0) {
+            // Save the interval time to SharedPreferences or any other storage mechanism
+            // You can use SharedPreferences to store the interval time
+            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val editor = sharedPreferences.edit()
+            editor.putInt("intervalTime", intervalMinutes)
+            editor.apply()
+
+            Toast.makeText(this, "Interval time saved", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Invalid interval time", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun showDialogAndRestart() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_restart_app, null)
         val messageTextView = dialogView.findViewById<TextView>(R.id.dialogMessageTextView)
@@ -106,6 +146,12 @@ class SettingsActivity : AppCompatActivity() {
                 restartApp()
             }
         }.start()
+    }
+
+    private fun saveIntervalTime(interval: Long) {
+        val editor = sharedPreferences.edit()
+        editor.putLong("intervalTime", interval)
+        editor.apply()
     }
 
     private fun restartApp() {
