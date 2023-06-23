@@ -1,29 +1,15 @@
 package com.n0tavailable.tunedetective
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.ActivityManager
-import android.app.AlarmManager
 import android.app.Dialog
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.ProgressDialog
-import android.app.Service
-import android.app.TaskStackBuilder
-import android.content.BroadcastReceiver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -31,10 +17,6 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
-import android.os.PowerManager
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
@@ -43,37 +25,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.ProgressBar
-import androidx.appcompat.widget.SearchView
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -81,7 +51,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -90,13 +59,9 @@ import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
-import java.util.Random
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var displayTracks: Button
@@ -130,33 +95,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         stopPlayback()
         resetLayout()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun onStart() {
-        super.onStart()
-
-        // Check if the notification permission is granted
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Request the notification permission
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                101
-            )
-        } else {
-            // Permission already granted, continue with the app initialization
-            initializeApp()
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
-            startForegroundService(serviceIntent)
-        }
     }
 
     override fun onStop() {
@@ -220,31 +158,8 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        // Check if the notification permission is granted
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Request the notification permission
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                101
-            )
-        } else {
-            // Permission already granted, continue with the app initialization
-            initializeApp()
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceIntent = Intent(this, BackgroundService::class.java)
-            startForegroundService(serviceIntent)
-        }
 
         discographyButton = findViewById(R.id.discographyButton)
-
-
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
 
@@ -459,28 +374,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 101) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, continue with the app initialization
-                initializeApp()
-            } else {
-                // Permission denied, handle accordingly (e.g., show a message, disable notification-related functionality)
-            }
-        }
-    }
-
-    private fun initializeApp() {
-        // Perform the remaining initialization steps
-        // ...
-    }
-
 
     private fun fetchAndDisplayReleases() {
         // Fetch the artists from the database (you will need to implement this part)
@@ -1716,32 +1609,13 @@ class TracklistActivity : AppCompatActivity() {
 class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var releaseContainer: LinearLayout
     private val addedAlbumIds = HashSet<String>()
-    private lateinit var notificationManager: NotificationManagerCompat
-    private val handler = Handler(Looper.getMainLooper())
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private val delayBetweenArtists = 50L
-    private var notificationId = 1 // Initial notification ID
-    private val shownNotifications = HashSet<String>()
     private lateinit var nothingHereTextView: TextView
     private lateinit var frognothinghere: ImageView
     private lateinit var progressBar: ProgressBar
     private lateinit var fetchingTextView: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-
-    private val alarmManager by lazy {
-        getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    }
-    private lateinit var fetchReleasesPendingIntent: PendingIntent
-
-    private val fetchRunnable = object : Runnable {
-        override fun run() {
-            fetchAndDisplayReleases()
-            handler.postDelayed(
-                this,
-                getIntervalTimeInMillis() // Use the interval time from SharedPreferences
-            )
-        }
-    }
 
     @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -1751,27 +1625,13 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         nothingHereTextView = findViewById(R.id.nothingHereTextView)
         frognothinghere = findViewById(R.id.frognothinghere)
         releaseContainer = findViewById(R.id.releaseContainer)
-        notificationManager = NotificationManagerCompat.from(this)
         fetchingTextView = findViewById(R.id.fetchingTextView)
         progressBar = findViewById(R.id.progressBar)
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         swipeRefreshLayout.setOnRefreshListener(this)
 
-        // Create the PendingIntent for fetch releases
-        val fetchIntent = Intent(this, FetchReleasesReceiver::class.java)
-        fetchReleasesPendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            fetchIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-
-        createNotificationChannel() // Create the notification channel
         fetchAndDisplayReleases()
-        handler.postDelayed(fetchRunnable, getIntervalTimeInMillis()); // Start periodic execution after 1 hour
-
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
         val homeButton = findViewById<ImageButton>(R.id.homeButton)
@@ -1821,78 +1681,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         finish()
     }
 
-    private fun getIntervalTimeInMillis(): Long {
-        val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val intervalMinutes = sharedPreferences.getLong("intervalTime", 60L)
-        return intervalMinutes * 60 * 1000L // Convert minutes to milliseconds
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun showFetchSuccessNotification() {
-        val notificationId = generateNotificationId("FetchSuccess", "")
-
-        val intent = Intent(this, ReleasesActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        val channelId = "FetchSuccessChannel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Fetch Success Channel"
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle("Fetch successfully started")
-            .setContentText("Successfully started fetching releases in the background.")
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        notification.flags =
-            notification.flags or NotificationCompat.FLAG_ONLY_ALERT_ONCE or NotificationCompat.FLAG_AUTO_CANCEL
-
-        notificationManager.notify(notificationId, notification)
-    }
-
-    private fun showFetchFailureNotification() {
-        val notificationId = generateNotificationId("FetchFailure", "")
-
-        val intent = Intent(this, ReleasesActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Create the notification channel
-        val channelId = "FetchFailureChannel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Fetch Failure Channel"
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle("Fetch Failed")
-            .setContentText("Failed to fetch releases. Retrying in 60 minutes")
-            .setPriority(NotificationCompat.PRIORITY_LOW) // Set the priority to the lowest possible
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .build()
-
-        // Modify the notification attributes to make it silent and prevent vibration
-        notification.flags =
-            notification.flags or NotificationCompat.FLAG_ONLY_ALERT_ONCE or NotificationCompat.FLAG_AUTO_CANCEL
-
-        notificationManager.notify(notificationId, notification)
-
-        handler.postDelayed(fetchRunnable, getIntervalTimeInMillis()); // Start periodic execution after 1 hour
-    }
-
     private fun resetLayout() {
         if (releaseContainer.childCount == 0) {
             nothingHereTextView.visibility = View.VISIBLE
@@ -1938,10 +1726,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     fetchLatestRelease(artist)
                     delay(delayBetweenArtists)
                     swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on success
-                    showFetchSuccessNotification() // Show fetch success notification
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    showFetchFailureNotification()
                     swipeRefreshLayout.isRefreshing = false // Set isRefreshing to false on error
                     break // Stop fetching further releases on fetch failure
                 } finally {
@@ -1956,14 +1742,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
 
             isFetching = false
-
-            val handler = Handler()
-            val fetchRunnable = Runnable {
-                fetchAndDisplayReleases()
-            }
-
-            // Schedule the periodic execution of fetch releases
-            handler.postDelayed(fetchRunnable, getIntervalTimeInMillis())
         }
     }
 
@@ -1995,7 +1773,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 runOnUiThread {
-                    showFetchFailureNotification()
                 }
             }
 
@@ -2031,7 +1808,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 runOnUiThread {
-                    showFetchFailureNotification()
                 }
             }
 
@@ -2109,23 +1885,10 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val artistTextView = releaseItemView.findViewById<TextView>(R.id.artistTextView)
         val releaseTitleTextView = releaseItemView.findViewById<TextView>(R.id.releaseTitleTextView)
         val releaseDateTextView = releaseItemView.findViewById<TextView>(R.id.releaseDateTextView)
-        val releaseCoverImageView =
-            releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val releaseDate = sdf.parse(album.releaseDate)
-        val currentDate = Date()
+        val releaseCoverImageView = releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
 
-        val releaseKey = "$artistName-${album.title}"
-        if (releaseKey !in shownNotifications) {
-            if (releaseDate != null && currentDate.time - releaseDate.time <= 1 * 24 * 60 * 60 * 1000) {
-                showNotification(
-                    artistName,
-                    album.title,
-                    album.coverUrl
-                ) // Pass the album cover URL
-                shownNotifications.add(releaseKey)
-            }
-        }
+
+
 
         artistTextView.text = artistName.toUpperCase() // Convert to uppercase
         releaseTitleTextView.text = album.title
@@ -2148,114 +1911,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         }
 
         releaseContainer.addView(releaseItemView)
-    }
-
-    private fun showNotification(artistName: String, albumTitle: String, albumCoverUrl: String) {
-        val notificationId =
-            generateNotificationId(artistName, albumTitle) // Generate unique notification ID
-
-        val intent = Intent(this, ReleasesActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        // Check if the user is on the ReleasesActivity or item_release screen
-        val isUserOnReleasesActivity = isUserOnActivity(ReleasesActivity::class.java)
-
-        if (isUserOnReleasesActivity) {
-            // User is on one of the screens, don't show the notification
-            return
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val bitmap = getBitmapFromUrl(albumCoverUrl)
-            withContext(Dispatchers.Main) {
-                val notification = NotificationCompat.Builder(this@ReleasesActivity, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notification_icon)
-                    .setContentTitle("New Release")
-                    .setContentText("New release from $artistName: $albumTitle")
-                    .setLargeIcon(bitmap) // Set the retrieved bitmap as a large icon
-                    .setStyle(
-                        NotificationCompat.BigPictureStyle()
-                            .bigPicture(bitmap) // Set the retrieved bitmap as a big picture
-                            .bigLargeIcon(null as Bitmap?) // Explicitly specify the argument type to resolve ambiguity
-                    )
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
-                    .build()
-
-                if (ActivityCompat.checkSelfPermission(
-                        this@ReleasesActivity,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    return@withContext
-                }
-                val notificationManager: NotificationManager =
-                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(
-                    notificationId,
-                    notification
-                ) // Use the unique notification ID
-
-                handler.postDelayed(
-                    fetchRunnable,
-                    getIntervalTimeInMillis()
-                ); // Start periodic execution after 1 hour
-            }
-        }
-    }
-
-    private fun isUserOnActivity(activityClass: Class<*>): Boolean {
-        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        val runningActivities = activityManager.getRunningTasks(1)
-
-        if (runningActivities.isNotEmpty()) {
-            val topActivity = runningActivities[0].topActivity
-            if (topActivity?.className == activityClass.name) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    private suspend fun getBitmapFromUrl(url: String): Bitmap? {
-        return try {
-            withContext(Dispatchers.IO) {
-                val inputStream = URL(url).openStream()
-                BitmapFactory.decodeStream(inputStream)
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    private fun generateNotificationId(artistName: String, albumTitle: String): Int {
-        val artistHash = artistName.hashCode()
-        val albumHash = albumTitle.hashCode()
-        return artistHash xor albumHash
-    }
-
-
-    @SuppressLint("ServiceCast")
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "New Releases"
-            val descriptionText = "Shows notifications for new music releases"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    companion object {
-        private const val CHANNEL_ID = "new_releases_channel"
     }
 
 
@@ -2375,73 +2030,4 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
 
-}
-
-class BackgroundService : Service() {
-    private lateinit var releasesActivityIntent: Intent
-    private val NOTIFICATION_CHANNEL_ID = "ReleasesNotificationChannel"
-    private val NOTIFICATION_ID = 1
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        startForegroundService()
-    }
-
-    private fun startForegroundService() {
-        releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                "Background Service - Can be turned off",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        startReleasesActivity()
-    }
-
-    @SuppressLint("LaunchActivityFromNotification")
-    private fun createNotification(): Notification {
-        val releasesActivityIntent = Intent(this, ReleasesActivity::class.java)
-
-        // Create a TaskStackBuilder to handle the intent
-        val taskStackBuilder = TaskStackBuilder.create(this)
-            .addNextIntentWithParentStack(releasesActivityIntent)
-
-        // Get the PendingIntent from the TaskStackBuilder
-        val pendingIntent = taskStackBuilder.getPendingIntent(
-            0,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Background Service")
-            .setContentText("You can hide me by a long click or by the settings.")
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentIntent(pendingIntent)
-            .setOngoing(true) // Set the notification as ongoing
-            .build()
-    }
-
-    private fun startReleasesActivity() {
-        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-}
-
-class FetchReleasesReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        val releasesActivityIntent = Intent(context, ReleasesActivity::class.java)
-        releasesActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(releasesActivityIntent)
-    }
 }
