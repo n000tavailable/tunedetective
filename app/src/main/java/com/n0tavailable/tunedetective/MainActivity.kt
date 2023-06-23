@@ -1768,7 +1768,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         )
 
 
-
+        createNotificationChannel()
         fetchAndDisplayReleases()
         handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
 
