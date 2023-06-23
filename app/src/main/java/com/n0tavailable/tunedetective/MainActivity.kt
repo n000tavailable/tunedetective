@@ -1768,7 +1768,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         )
 
 
-        createNotificationChannel()
+        createNotificationChannel() // Create the notification channel
         fetchAndDisplayReleases()
         handler.postDelayed(fetchRunnable, 60 * 60 * 1000L); // Start periodic execution after 1 hour
 
@@ -2419,8 +2419,8 @@ class BackgroundService : Service() {
         )
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Notification-Setup")
-            .setContentText("Tap on me to initialize notifications. Then you can hide me by a long click.")
+            .setContentTitle("Background Service")
+            .setContentText("You can hide me by a long click or by the settings.")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentIntent(pendingIntent)
             .setOngoing(true) // Set the notification as ongoing
