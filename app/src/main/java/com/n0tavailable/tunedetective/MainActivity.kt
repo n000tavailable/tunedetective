@@ -1816,9 +1816,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         val releaseCoverImageView =
             releaseItemView.findViewById<ImageView>(R.id.releaseCoverImageView)
 
-
-
-
         artistTextView.text = artistName.toUpperCase() // Convert to uppercase
         releaseTitleTextView.text = album.title
         releaseDateTextView.text = album.releaseDate
@@ -1839,7 +1836,30 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             openTracklist(album) // Pass the album object to the function to open the tracklist
         }
 
-        releaseContainer.addView(releaseItemView)
+        // Find the index to insert the releaseItemView based on release dates
+        val insertIndex = findInsertIndex(album.releaseDate)
+
+        // Add the releaseItemView at the specified index in the releaseContainer
+        releaseContainer.addView(releaseItemView, insertIndex)
+    }
+
+    private fun findInsertIndex(releaseDate: String): Int {
+        val childCount = releaseContainer.childCount
+
+        for (i in 0 until childCount) {
+            val childView = releaseContainer.getChildAt(i)
+            val childReleaseDateTextView = childView.findViewById<TextView>(R.id.releaseDateTextView)
+
+            if (childReleaseDateTextView != null) {
+                val childReleaseDate = childReleaseDateTextView.text.toString()
+
+                if (releaseDate > childReleaseDate) {
+                    return i
+                }
+            }
+        }
+
+        return childCount
     }
 
 
