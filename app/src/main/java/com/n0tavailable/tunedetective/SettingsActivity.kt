@@ -75,10 +75,11 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         settingsButton.setOnClickListener {
-            val intent = Intent(this@SettingsActivity, SettingsActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
+            // Check if the current activity is already SettingsActivity
+            if (!isTaskRoot) {
+                // If not, navigate back to SettingsActivity instead of recreating it
+                onBackPressed()
+            }
         }
     }
 }

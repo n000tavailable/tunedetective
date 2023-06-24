@@ -308,10 +308,11 @@ class MainActivity : AppCompatActivity() {
         val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
 
         homeButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
+            // Check if the current activity is already MainActivity
+            if (!isTaskRoot) {
+                // If not, navigate back to MainActivity instead of recreating it
+                onBackPressed()
+            }
         }
 
         aboutButton.setOnClickListener {
@@ -1581,10 +1582,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         }
 
         releasesButton.setOnClickListener {
-            val intent = Intent(this@ReleasesActivity, ReleasesActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
+                // Check if the current activity is already ReleasesActivity
+                if (!isTaskRoot) {
+                    // If not, navigate back to ReleasesActivity instead of recreating it
+                    onBackPressed()
+                }
         }
 
         settingsButton.setOnClickListener {

@@ -65,10 +65,11 @@ class AboutActivity : AppCompatActivity() {
         }
 
         aboutButton.setOnClickListener {
-            val intent = Intent(this@AboutActivity, AboutActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
+            // Check if the current activity is already AboutActivity
+            if (!isTaskRoot) {
+                // If not, navigate back to AboutActivity instead of recreating it
+                onBackPressed()
+            }
         }
 
         releasesButton.setOnClickListener {
