@@ -1582,11 +1582,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         }
 
         releasesButton.setOnClickListener {
-                // Check if the current activity is already ReleasesActivity
-                if (!isTaskRoot) {
-                    // If not, navigate back to ReleasesActivity instead of recreating it
-                    onBackPressed()
-                }
+            // Check if the current activity is already ReleasesActivity
+            if (!isTaskRoot) {
+                // If not, navigate back to ReleasesActivity instead of recreating it
+                onBackPressed()
+            }
         }
 
         settingsButton.setOnClickListener {
