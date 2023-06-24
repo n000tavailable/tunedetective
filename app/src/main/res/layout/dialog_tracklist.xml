@@ -3,29 +3,29 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/albumCoverImageView"
-            android:layout_width="0dp"
+            android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_weight="1"
             android:scaleType="centerInside"
             android:adjustViewBounds="true"
-            android:maxHeight="200dp" />
+            android:maxHeight="200dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Space
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                />
+            android:orientation="vertical"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/albumCoverImageView"
+            android:layout_marginStart="10dp">
 
             <TextView
                 android:id="@+id/trackCounterTextView"
@@ -33,9 +33,9 @@
                 android:layout_height="wrap_content"
                 android:textColor="#797979"
                 android:textStyle="bold"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="16dp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
+                android:textAlignment="center"
                 android:textSize="16sp" />
 
             <TextView
@@ -44,16 +44,17 @@
                 android:layout_height="wrap_content"
                 android:textColor="#797979"
                 android:textStyle="bold"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"
+                android:textAlignment="center" />
 
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="5dp" />
+        android:layout_height="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/trackListRecyclerView"
@@ -61,8 +62,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#2C2C2C"
-        android:dividerHeight="1dp"
-        android:gravity="left" />
+        android:dividerHeight="1dp" />
 
     <Button
         android:id="@+id/closeButton"
