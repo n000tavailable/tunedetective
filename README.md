@@ -20,7 +20,6 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Features:
 
-- Get notified about new releases
 - Fetch multiple artists at once
 - Display the entire Discography of an artist
 - Search for music artists and view their similar artists
@@ -45,21 +44,11 @@ https://matrix.to/#/#tunedetective:matrix.org
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/9b4c9e3a-d3e0-40c1-bc38-8e04e5ad5955" width="350">
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/04aad739-1146-4663-8489-c453e70355b1" width="350">
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8a2eb54f-8c85-426a-8903-0acbec8be565" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/13713f64-95d3-4c7d-b7e5-c33dc79469e9" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/4779c915-fe08-4252-822b-ffc617c83ae7" width="350">
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/17d4f9b4-0fdd-4528-9703-21ad689ebbb0" width="350">
 
 
 # How to use?
 **Discover the Latest Release of Your Favorite Artist**
-
-**Setup Notifications**
-
-**Permission:** You will be prompted to accept the permission request. This permission enables TuneDetective to display new release notifications.
-
-**Message Dismissal:** You can dismiss the notification. This dismissal option will be available within the notification settings.
-
-**Hourly Updates:** After the first time the latest releases of the artists in the release page (the second tab, next to the home icon, that with the music note) was loaded successfully (artists must be present) every hour or a little later the newest releases are loaded in the background.
 
 **How to search for artists**
 
@@ -82,11 +71,7 @@ Unveil the music you love with a simple search and easy-to-use controls!
 
 # Permissions
 - uses-permission android:name="android.permission.INTERNET"
-- uses-permission android:name="android.permission.POST_NOTIFICATIONS"
 - uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-- uses-permission android:name="android.permission.WAKE_LOCK"
-- uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
-- uses-permission android:name="android.permission.FOREGROUND_SERVICE"
 - uses-permission android:name="android.permission.VIBRATE"
 
 
