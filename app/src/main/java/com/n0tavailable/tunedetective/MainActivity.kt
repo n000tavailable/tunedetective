@@ -22,6 +22,7 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -295,6 +296,10 @@ class MainActivity : AppCompatActivity() {
 
         // Expand the SearchView
         searchView.isIconified = false
+
+        // Prevent the keyboard from opening automatically
+        searchBar.clearFocus()
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
 
         val aboutButton = findViewById<ImageButton>(R.id.infoButton)
