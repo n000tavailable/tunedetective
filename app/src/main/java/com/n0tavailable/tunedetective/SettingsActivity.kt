@@ -21,9 +21,17 @@ import android.widget.ToggleButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var setRepeatInterval: EditText
+
+
+    companion object {
+        const val PREF_REPEAT_INTERVAL = "repeatInterval"
+        const val DEFAULT_REPEAT_INTERVAL = 60 // Default interval in minutes
+    }
 
     override fun onBackPressed() {
         val intent = Intent(this@SettingsActivity, MainActivity::class.java)
@@ -37,7 +45,26 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        setRepeatInterval = findViewById(R.id.setRepeatInterval)
+        val btnSave = findViewById<Button>(R.id.btnSave)
+
         sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+
+
+        // Load the saved interval and display it in the EditText
+        val savedInterval = sharedPreferences.getInt(PREF_REPEAT_INTERVAL, DEFAULT_REPEAT_INTERVAL)
+        setRepeatInterval.setText(savedInterval.toString())
+
+        btnSave.setOnClickListener {
+            val interval = setRepeatInterval.text.toString().toIntOrNull() ?: DEFAULT_REPEAT_INTERVAL
+            saveRepeatInterval(interval)
+            Toast.makeText(this, "Interval saved!", Toast.LENGTH_SHORT).show()
+        }
+
+        val notificationSettingsButton = findViewById<Button>(R.id.notificationSettingsButton)
+        notificationSettingsButton.setOnClickListener {
+            openNotificationSettings()
+        }
 
 
         val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
@@ -81,5 +108,24 @@ class SettingsActivity : AppCompatActivity() {
                 onBackPressed()
             }
         }
+    }
+
+    private fun saveRepeatInterval(interval: Int) {
+        val editor = sharedPreferences.edit()
+        editor.putInt(PREF_REPEAT_INTERVAL, interval)
+        editor.apply()
+    }
+
+    private fun openNotificationSettings() {
+        val intent = Intent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        } else {
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.data = Uri.parse("package:$packageName")
+        }
+        startActivity(intent)
     }
 }

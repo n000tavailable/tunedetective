@@ -75,5 +75,43 @@
         android:layout_gravity="center_vertical"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
+
+    <Button
+        android:id="@+id/notificationSettingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notification Settings"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:textStyle="bold" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="60dp" />
+
+    <TextView
+        android:id="@+id/tvRepeatInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Repeat Interval (minutes):" />
+
+    <EditText
+        android:id="@+id/setRepeatInterval"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Enter interval" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:textStyle="bold" />
+
+
 
 </LinearLayout>

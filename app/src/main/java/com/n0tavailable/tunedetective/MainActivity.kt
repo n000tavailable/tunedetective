@@ -3,11 +3,14 @@ package com.n0tavailable.tunedetective
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Color
@@ -15,10 +18,14 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,16 +43,33 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.Call
@@ -59,6 +83,11 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.concurrent.TimeUnit
+import android.Manifest
+import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var displayTracks: Button
@@ -79,6 +108,8 @@ class MainActivity : AppCompatActivity() {
     private var artistName: String? = null
     private var selectedArtist: String? = null
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
+    private var feedbackDialog: Dialog? = null
+
 
 
     override fun onBackPressed() {
@@ -92,6 +123,8 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         stopPlayback()
         resetLayout()
+        feedbackDialog?.dismiss()
+        feedbackDialog = null
     }
 
     override fun onStop() {
@@ -106,6 +139,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+    }
+
+    // Handle the result of the permission request
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101 && grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            // Permission granted, launch the work
+            launchWork()
+        }
     }
 
     override fun onResume() {
@@ -146,6 +194,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progressDialog = ProgressDialog(this)
@@ -154,6 +203,22 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+// Check if the notification permission is granted
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request the notification permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                101
+            )
+        } else {
+            // Permission is already granted
+            launchWork()
+        }
 
         discographyButton = findViewById(R.id.discographyButton)
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -376,6 +441,42 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun launchWork() {
+        GlobalScope.launch {
+            scheduleReleasesFetchWork()
+        }
+    }
+
+    private fun scheduleReleasesFetchWork() {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val repeatInterval = sharedPreferences.getInt(SettingsActivity.PREF_REPEAT_INTERVAL, SettingsActivity.DEFAULT_REPEAT_INTERVAL)
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED) // Require network connection
+            .build()
+
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<FetchReleasesWorker>(
+            repeatInterval.toLong(),
+            TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.LINEAR,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            ) // Add backoff criteria for retrying work
+            .build()
+
+        val workManager = WorkManager.getInstance(applicationContext)
+        val uniqueWorkName = "FetchReleasesWork"
+
+        workManager.enqueueUniquePeriodicWork(
+            uniqueWorkName,
+            ExistingPeriodicWorkPolicy.REPLACE, // Update existing work with the new one
+            periodicWorkRequest
+        )
+    }
+
     private fun fetchAndDisplayReleases() {
         // Fetch the artists from the database (you will need to implement this part)
         val artists = fetchArtistsFromDatabase()
@@ -391,9 +492,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fetchArtistsFromDatabase(): List<String> {
-        // Use your existing database helper class to fetch the artists from the database
-        val dbHelper = SearchHistoryDatabaseHelper(this)
-        return dbHelper.getLatestSearchQueries(limit = 10) // Adjust the limit as needed
+        val dbHelper = SearchHistoryDatabaseHelper(applicationContext)
+        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
+        val artistIds = latestSearchQueries.map { query ->
+            query.substringAfter(",").trim()
+        }.distinct() // Use the distinct() function to get only unique artist IDs
+        return artistIds
     }
 
     private fun fetchLatestRelease(artistName: String) {
@@ -479,24 +583,24 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
 
-        if (showDialog) {
-            val dialog = Dialog(this)
-            dialog.setContentView(R.layout.dialog_feedback)
+        if (showDialog && !isFinishing) {
+            feedbackDialog = Dialog(this)
+            feedbackDialog?.setContentView(R.layout.dialog_feedback)
 
-            val yesButton = dialog.findViewById<Button>(R.id.yesButton)
-            val noThanksButton = dialog.findViewById<Button>(R.id.noThanksButton)
+            val yesButton = feedbackDialog?.findViewById<Button>(R.id.yesButton)
+            val noThanksButton = feedbackDialog?.findViewById<Button>(R.id.noThanksButton)
 
-            yesButton.setOnClickListener {
+            yesButton?.setOnClickListener {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5")
                 )
                 startActivity(intent)
-                dialog.dismiss()
+                feedbackDialog?.dismiss()
             }
 
-            noThanksButton.setOnClickListener {
-                dialog.dismiss()
+            noThanksButton?.setOnClickListener {
+                feedbackDialog?.dismiss()
 
                 // Save the preference to not show the dialog again
                 sharedPreferences.edit().apply {
@@ -505,7 +609,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            dialog.show()
+            feedbackDialog?.show()
         }
     }
 
@@ -1539,7 +1643,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var releaseContainer: LinearLayout
     private val addedAlbumIds = HashSet<String>()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private val delayBetweenArtists = 50L
+    private val delayBetweenArtists = 1000L
     private lateinit var nothingHereTextView: TextView
     private lateinit var frognothinghere: ImageView
     private lateinit var progressBar: ProgressBar
@@ -1610,6 +1714,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         resetLayout()
         finish()
     }
+
 
     private fun resetLayout() {
         if (releaseContainer.childCount == 0) {
@@ -1683,11 +1788,11 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     }
 
     private fun fetchArtistsFromDatabase(): List<String> {
-        val dbHelper = SearchHistoryDatabaseHelper(this)
+        val dbHelper = SearchHistoryDatabaseHelper(applicationContext)
         val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
         val artistIds = latestSearchQueries.map { query ->
             query.substringAfter(",").trim()
-        }
+        }.distinct() // Use the distinct() function to get only unique artist IDs
         return artistIds
     }
 
@@ -1703,6 +1808,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 runOnUiThread {
+                    Log.e("FetchReleases", "Failed to fetch artist details for artistId: $artistId")
                 }
             }
 
@@ -1715,7 +1821,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                     val artistImageUrl = jsonResponse.getString("picture_big")
                     fetchArtistLatestAlbum(artistId, artistImageUrl, artistName)
                 } else {
-                    println("Error: ${response.code} ${response.message}")
+                    Log.e("FetchReleases", "Error: ${response.code} ${response.message}")
                 }
             }
         })
@@ -1738,6 +1844,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
                 runOnUiThread {
+                    Log.e("FetchReleases", "Failed to fetch artist albums for artistId: $artistId")
                 }
             }
 
@@ -1773,15 +1880,17 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                         } else {
                             runOnUiThread {
                                 // Handle case when no album is found
+                                Log.e("FetchReleases", "No album found for artistId: $artistId")
                             }
                         }
                     } else {
                         runOnUiThread {
                             // Handle case when no album is found
+                            Log.e("FetchReleases", "No album found for artistId: $artistId")
                         }
                     }
                 } else {
-                    println("Error: ${response.code} ${response.message}")
+                    Log.e("FetchReleases", "Error: ${response.code} ${response.message}")
                 }
             }
         })
@@ -1850,7 +1959,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         for (i in 0 until childCount) {
             val childView = releaseContainer.getChildAt(i)
-            val childReleaseDateTextView = childView.findViewById<TextView>(R.id.releaseDateTextView)
+            val childReleaseDateTextView =
+                childView.findViewById<TextView>(R.id.releaseDateTextView)
 
             if (childReleaseDateTextView != null) {
                 val childReleaseDate = childReleaseDateTextView.text.toString()
