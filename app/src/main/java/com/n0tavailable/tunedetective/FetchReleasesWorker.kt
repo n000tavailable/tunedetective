@@ -334,14 +334,6 @@ class FetchReleasesWorker(context: Context, workerParams: WorkerParameters) : Wo
         coroutineScope.launch {
             val albumCoverBitmap = getBitmapFromUrl(albumCoverUrl)
             if (albumCoverBitmap != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    // For API level 23 and above, use Icon class
-                    val albumCoverIcon = Icon.createWithBitmap(albumCoverBitmap)
-                    bigPictureStyle.bigLargeIcon(albumCoverIcon)
-                } else {
-                    // For lower API levels, use Bitmap
-                    bigPictureStyle.bigLargeIcon(albumCoverBitmap)
-                }
 
                 bigPictureStyle.bigPicture(albumCoverBitmap)
 
