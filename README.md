@@ -1,6 +1,6 @@
 # tunedetective!
 <p align="center">   
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/ba0daa6c-df51-4f62-ae8b-dfb85f7a0239" width="400">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8e716845-909e-43e2-8b95-74b6c281c976" width="400">
 </p>
 
 # I need your help!
