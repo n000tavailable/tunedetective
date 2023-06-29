@@ -20,6 +20,7 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Features:
 
+- Get notified for new releases of your favorite artists
 - Fetch multiple artists at once
 - Display the entire Discography of an artist
 - Search for music artists and view their similar artists
@@ -71,8 +72,9 @@ Unveil the music you love with a simple search and easy-to-use controls!
 
 # Permissions
 - uses-permission android:name="android.permission.INTERNET"
-- uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+- uses-permission android:name="android.permission.POST_NOTIFICATIONS"
 - uses-permission android:name="android.permission.VIBRATE"
+- uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"
 
 
 
