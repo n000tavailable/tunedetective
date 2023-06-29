@@ -91,7 +91,7 @@
             android:id="@+id/searchHistoryButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:tint="#FF747679"
+            app:tint="#c4c6ce"
             android:background="#121212"
             android:src="@drawable/round_history_24"
             android:contentDescription="Search History"
