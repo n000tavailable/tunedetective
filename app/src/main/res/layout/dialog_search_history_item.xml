@@ -1,0 +1,28 @@
+<!-- dialog_search_history.xml -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    android:paddingStart="20dp">
+
+
+
+    <ImageView
+        android:id="@+id/artistImageView"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/default_profile_image" />
+
+    <TextView
+        android:paddingStart="20dp"
+        android:textStyle="bold"
+        android:id="@+id/artistNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical" />
+
+
+</LinearLayout>

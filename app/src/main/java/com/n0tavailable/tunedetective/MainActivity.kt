@@ -272,11 +272,11 @@ class MainActivity : AppCompatActivity() {
             val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
             val fetchReleasesButton = dialogView.findViewById<Button>(R.id.fetchReleasesButton)
 
-            val historyAdapter =
-                ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
+            val historyAdapter = ArtistImage(this, R.layout.dialog_search_history_item, searchHistory)
             historyListView.adapter = historyAdapter
 
             val alertDialogBuilder = MaterialAlertDialogBuilder(this)
+            alertDialogBuilder.setTitle("SEARCH HISTORY")
             alertDialogBuilder.setView(dialogView)
 
             val alertDialog = alertDialogBuilder.create()
@@ -1099,6 +1099,52 @@ class MainActivity : AppCompatActivity() {
         val currentFocusView = currentFocus
         if (currentFocusView != null) {
             inputMethodManager.hideSoftInputFromWindow(currentFocusView.windowToken, 0)
+        }
+    }
+}
+
+class ArtistImage(context: Context, resource: Int, objects: List<String>) :
+    ArrayAdapter<String>(context, resource, objects) {
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        var view = convertView
+        if (view == null) {
+            view = LayoutInflater.from(context)
+                .inflate(R.layout.dialog_search_history_item, parent, false)
+        }
+
+        val artistImageView = view?.findViewById<ImageView>(R.id.artistImageView)
+        val artistNameTextView = view?.findViewById<TextView>(R.id.artistNameTextView)
+
+        val item = getItem(position)
+        val artistId = item?.substringAfter(",")?.trim() ?: ""
+        val artistName = item?.substringBefore(",") ?: ""
+
+        artistNameTextView?.text = artistName.uppercase()
+
+        // Fetch and load the artist image using Glide or any other image loading library
+        fetchAndLoadArtistImage(artistId, artistImageView)
+
+        return view!!
+    }
+
+    private fun fetchAndLoadArtistImage(artistId: String, imageView: ImageView?) {
+        // Use Deezer API to fetch artist image using the artistId
+        // For example, you can construct the URL like this:
+        val artistImageUrl = "https://api.deezer.com/artist/$artistId/image"
+
+        // Apply circular transformation using Glide
+        val requestOptions = RequestOptions.circleCropTransform()
+
+        // Load the image into the ImageView using Glide or any other image loading library
+        if (imageView != null) {
+            // Load the image into the ImageView using Glide or any other image loading library
+            Glide.with(context)
+                .load(artistImageUrl)
+                .apply(requestOptions)
+                .placeholder(R.drawable.default_profile_image) // Placeholder image while loading
+                .error(R.drawable.default_profile_image) // Error image if loading fails
+                .into(imageView)
         }
     }
 }
