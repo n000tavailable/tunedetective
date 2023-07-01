@@ -85,8 +85,13 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import android.Manifest
+import android.os.Environment
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -1163,7 +1168,7 @@ class SearchHistoryDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
-        private const val DATABASE_NAME = "search_history.db"
+        const val DATABASE_NAME = "search_history.db"
         private const val DATABASE_VERSION = 1
         private const val TABLE_NAME = "search_history"
         private const val COLUMN_ID = "id"
@@ -1229,6 +1234,49 @@ class SearchHistoryDatabaseHelper(context: Context) :
         val db = writableDatabase
         db.delete(TABLE_NAME, "$COLUMN_QUERY=?", arrayOf(formattedQuery))
         db.close()
+    }
+
+    fun exportDatabase(context: Context, fileName: String) {
+        val dbPath = context.getDatabasePath(DATABASE_NAME).absolutePath
+        val exportDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val exportFile = File(exportDir, fileName)
+
+        try {
+            val fileChannelSource = FileInputStream(dbPath).channel
+            val fileChannelDestination = FileOutputStream(exportFile).channel
+            fileChannelDestination.transferFrom(fileChannelSource, 0, fileChannelSource.size())
+            fileChannelSource.close()
+            fileChannelDestination.close()
+            Toast.makeText(context, "Database exported successfully", Toast.LENGTH_SHORT).show()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(context, "Failed to export database", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun importDatabase(context: Context, uri: Uri): Boolean {
+        val dbPath = context.getDatabasePath(DATABASE_NAME).absolutePath
+
+        try {
+            val contentResolver = context.contentResolver
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val buffer = ByteArray(1024)
+                val outputFile = File(dbPath)
+                val outputStream = FileOutputStream(outputFile)
+                var bytesRead = inputStream.read(buffer)
+                while (bytesRead != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                    bytesRead = inputStream.read(buffer)
+                }
+                outputStream.close()
+                inputStream.close()
+                return true
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return false
     }
 
 }

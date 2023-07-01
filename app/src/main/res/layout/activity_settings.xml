@@ -112,6 +112,25 @@
         style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:textStyle="bold" />
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
+
+    <Button
+        android:id="@+id/exportButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Export Database"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/importButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Import Database"
+        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+        android:textStyle="bold" />
+
 
 
 </LinearLayout>
