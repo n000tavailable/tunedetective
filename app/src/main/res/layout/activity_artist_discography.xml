@@ -37,7 +37,7 @@
         android:id="@+id/releasesTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Releases:"
+        android:text="Discography:"
         android:paddingLeft="10dp"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@id/artistNameTextView"
