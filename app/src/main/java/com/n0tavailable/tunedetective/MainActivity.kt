@@ -91,6 +91,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.ConfigurationCompat
 import androidx.preference.PreferenceManager
 import androidx.work.Configuration
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.io.FileInputStream
@@ -576,11 +577,16 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful && responseData != null) {
                     val jsonResponse = JSONObject(responseData)
                     val artistId = jsonResponse.getString("id")
+                    val artistName = jsonResponse.getString("name")
+                    val artistProfilePicture = jsonResponse.getString("picture_big")
 
                     // Start a new activity to display the artist discography
-                    val intent = Intent(this@MainActivity, ArtistDiscographyActivity::class.java)
+                    val intent = Intent(applicationContext, ArtistDiscographyActivity::class.java)
                     intent.putExtra("artistId", artistId)
-                    startActivity(intent)
+                    intent.putExtra("artistName", artistName)
+                    intent.putExtra("artistProfilePicture", artistProfilePicture)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this line to set the flag
+                    applicationContext.startActivity(intent)
                 } else {
                     runOnUiThread {
                         Toast.makeText(
@@ -1308,17 +1314,32 @@ class ArtistAdapter(context: Context, artists: List<Pair<String, String>>) :
 
 class ArtistDiscographyActivity : AppCompatActivity() {
     private lateinit var artistId: String
+    private lateinit var artistName: String
+    private lateinit var artistProfilePicture: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_artist_discography)
 
-        // Retrieve the artist ID from the intent
+        // Retrieve the artist ID, name, and profile picture from the intent
         artistId = intent.getStringExtra("artistId") ?: ""
+        artistName = intent.getStringExtra("artistName") ?: ""
+        artistProfilePicture = intent.getStringExtra("artistProfilePicture") ?: ""
 
-        // Set the title "Discography"
-        title = "Discography"
+        // Set the title to the artist name
+        title = artistName
 
+        // Set the artist name and profile picture
+        val artistNameTextView = findViewById<TextView>(R.id.artistNameTextView)
+        val artistProfileImageView = findViewById<ImageView>(R.id.artistProfileImageView)
+
+        artistNameTextView.text = artistName
+
+        Glide.with(this)
+            .load(artistProfilePicture)
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .transform(CircleCrop())
+            .into(artistProfileImageView)
 
         // Call a function to retrieve the full artist discography
         getFullArtistDiscography(artistId)
