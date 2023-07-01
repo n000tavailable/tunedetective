@@ -8,10 +8,10 @@
     <ListView
         android:id="@+id/artistListView"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:divider="#2C2C2C"
-        android:dividerHeight="1dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        />
 
     <Button
         android:visibility="gone"

@@ -87,7 +87,11 @@ import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.os.Environment
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.ConfigurationCompat
 import androidx.preference.PreferenceManager
+import androidx.work.Configuration
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -202,6 +206,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enforceDarkMode()
         progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Loading data...")
         progressDialog.setCancelable(false)
@@ -270,7 +275,7 @@ class MainActivity : AppCompatActivity() {
                 ArrayAdapter(this, android.R.layout.simple_list_item_1, searchHistory)
             historyListView.adapter = historyAdapter
 
-            val alertDialogBuilder = AlertDialog.Builder(this)
+            val alertDialogBuilder = MaterialAlertDialogBuilder(this)
             alertDialogBuilder.setView(dialogView)
 
             val alertDialog = alertDialogBuilder.create()
@@ -308,7 +313,7 @@ class MainActivity : AppCompatActivity() {
 
             historyListView.setOnItemLongClickListener { parent, view, position, id ->
                 val selectedArtist = searchHistory[position]
-                val alertDialogBuilder = AlertDialog.Builder(this)
+                val alertDialogBuilder = MaterialAlertDialogBuilder(this)
                 alertDialogBuilder.setTitle("Confirmation")
                 alertDialogBuilder.setMessage("Do you really want to delete \"$selectedArtist\"?")
 
@@ -452,6 +457,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun scheduleReleasesFetchWork() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val repeatInterval = sharedPreferences.getInt(SettingsActivity.PREF_REPEAT_INTERVAL, SettingsActivity.DEFAULT_REPEAT_INTERVAL)
@@ -480,6 +486,10 @@ class MainActivity : AppCompatActivity() {
             ExistingPeriodicWorkPolicy.REPLACE, // Update existing work with the new one
             periodicWorkRequest
         )
+    }
+
+    private fun enforceDarkMode() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
     }
 
     private fun fetchAndDisplayReleases() {
@@ -589,32 +599,22 @@ class MainActivity : AppCompatActivity() {
         val showDialog = sharedPreferences.getBoolean("ShowFeedbackDialog", true)
 
         if (showDialog && !isFinishing) {
-            feedbackDialog = Dialog(this)
-            feedbackDialog?.setContentView(R.layout.dialog_feedback)
-
-            val yesButton = feedbackDialog?.findViewById<Button>(R.id.yesButton)
-            val noThanksButton = feedbackDialog?.findViewById<Button>(R.id.noThanksButton)
-
-            yesButton?.setOnClickListener {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5")
-                )
-                startActivity(intent)
-                feedbackDialog?.dismiss()
-            }
-
-            noThanksButton?.setOnClickListener {
-                feedbackDialog?.dismiss()
-
-                // Save the preference to not show the dialog again
-                sharedPreferences.edit().apply {
-                    putBoolean("ShowFeedbackDialog", false)
-                    apply()
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Feedback")
+                .setMessage("Would you like to provide feedback?")
+                .setPositiveButton("Yes") { _, _ ->
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/n000tavailable/tunedetective/issues/5")
+                    )
+                    startActivity(intent)
                 }
-            }
-
-            feedbackDialog?.show()
+                .setNegativeButton("No, Thanks") { _, _ ->
+                    // Save the preference to not show the dialog again
+                    sharedPreferences.edit().putBoolean("ShowFeedbackDialog", false).apply()
+                }
+                .setCancelable(false)
+                .show()
         }
     }
 
@@ -739,16 +739,23 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun showArtistSelectionDialog(artists: List<Pair<String, String>>) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_artist_selection)
+        val builder = MaterialAlertDialogBuilder(this)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_artist_selection, null)
 
-        val artistListView = dialog.findViewById<ListView>(R.id.artistListView)
-        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+        val artistListView = dialogView.findViewById<ListView>(R.id.artistListView)
 
         val artistAdapter = ArtistAdapter(this, artists)
         artistListView.adapter = artistAdapter
 
-        artistListView.setOnItemClickListener { parent, view, position, id ->
+        val dialog = builder
+            .setTitle("Select an Artist")
+            .setView(dialogView)
+            .setNegativeButton("Close") { _, _ ->
+                // Handle close button click
+            }
+            .create()
+
+        artistListView.setOnItemClickListener { _, _, position, _ ->
             val selectedArtist = artists[position]
             val artistName = selectedArtist.first
             val artistId = artistMap.keys.find { key -> artistMap[key]?.first == artistName }
@@ -764,21 +771,14 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
             }
+
             if (artistId != null) {
-                saveSelectedArtist(
-                    artistId,
-                    artistName
-                ) // Save the selected artist name to the database
+                saveSelectedArtist(artistId, artistName) // Save the selected artist name to the database
                 searchArtistById(artistId)
             } else {
-                Toast.makeText(
-                    this@MainActivity, "Error: Artist ID not found", Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, "Error: Artist ID not found", Toast.LENGTH_SHORT).show()
             }
-            dialog.dismiss()
-        }
 
-        closeButton.setOnClickListener {
             dialog.dismiss()
         }
 
@@ -1029,14 +1029,14 @@ class MainActivity : AppCompatActivity() {
         albumCoverUrl: String,
         releaseDate: String?
     ) {
-        dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_tracklist)
+        val builder = MaterialAlertDialogBuilder(this)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_tracklist, null)
 
-        val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
-        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
-        val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
-        val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
-        val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
+        val trackListRecyclerView = dialogView.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+        val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+        val albumCoverImageView = dialogView.findViewById<ImageView>(R.id.albumCoverImageView)
+        val trackCounterTextView = dialogView.findViewById<TextView>(R.id.trackCounterTextView)
+        val releaseDateTextView = dialogView.findViewById<TextView>(R.id.releaseDateTextView)
 
         // Load the album cover image
         loadAlbumCoverImage(albumCoverUrl, albumCoverImageView)
@@ -1049,6 +1049,10 @@ class MainActivity : AppCompatActivity() {
 
         trackCounterTextView.text = "Total Tracks: ${adapter.itemCount}"
         releaseDateTextView.text = releaseDate ?: "Release Date: N/A"
+
+        val dialog = builder
+            .setView(dialogView)
+            .create()
 
         closeButton.setOnClickListener {
             dialog.dismiss()
@@ -1499,11 +1503,11 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 albumCoverUrl: String,
                 releaseDate: String?
             ) {
-                val dialog = Dialog(context)
-                dialog.setContentView(R.layout.dialog_tracklist)
+                val dialogBuilder = MaterialAlertDialogBuilder(context)
+                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_tracklist, null)
 
                 // Set the album cover image at the top of the dialog
-                val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
+                val albumCoverImageView = dialogView.findViewById<ImageView>(R.id.albumCoverImageView)
                 Glide.with(context.applicationContext)
                     .load(albumCoverUrl)
                     .transition(DrawableTransitionOptions.withCrossFade())
@@ -1514,11 +1518,10 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                     showFullscreenImage(albumCoverImageView.drawable, context)
                 }
 
-                val trackListRecyclerView =
-                    dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
-                val closeButton = dialog.findViewById<Button>(R.id.closeButton)
-                val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
-                val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
+                val trackListRecyclerView = dialogView.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+                val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+                val trackCounterTextView = dialogView.findViewById<TextView>(R.id.trackCounterTextView)
+                val releaseDateTextView = dialogView.findViewById<TextView>(R.id.releaseDateTextView)
 
                 val layoutManager = LinearLayoutManager(context)
                 val adapter = TrackListAdapter(trackList)
@@ -1527,21 +1530,22 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                 trackListRecyclerView.adapter = adapter
 
                 trackCounterTextView.text = "Total Tracks: ${trackList.size}"
+                releaseDateTextView.text = releaseDate ?: ""
 
-                releaseDateTextView.text = "$releaseDate"
-
-                closeButton.setOnClickListener {
-                    dialog.dismiss()
-                    adapter.stopPlayback()
-                }
-
-                dialog.setOnDismissListener {
-                    adapter.stopPlayback()
-                }
-
-                dialog.show()
+                dialogBuilder
+                    .setView(dialogView)
+                    .setOnDismissListener {
+                        adapter.stopPlayback()
+                    }
+                    .create()
+                    .apply {
+                        closeButton.setOnClickListener {
+                            dismiss()
+                            adapter.stopPlayback()
+                        }
+                        show()
+                    }
             }
-
             private fun showFullscreenImage(drawable: Drawable, context: Context) {
                 val fullscreenDialog =
                     Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
@@ -2093,12 +2097,12 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         albumCoverUrl: String,
         trackList: List<Track>
     ) {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_tracklist)
+        val dialogBuilder = MaterialAlertDialogBuilder(this)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_tracklist, null)
 
-        val albumCoverImageView = dialog.findViewById<ImageView>(R.id.albumCoverImageView)
-        val trackCounterTextView = dialog.findViewById<TextView>(R.id.trackCounterTextView)
-        val releaseDateTextView = dialog.findViewById<TextView>(R.id.releaseDateTextView)
+        val albumCoverImageView = dialogView.findViewById<ImageView>(R.id.albumCoverImageView)
+        val trackCounterTextView = dialogView.findViewById<TextView>(R.id.trackCounterTextView)
+        val releaseDateTextView = dialogView.findViewById<TextView>(R.id.releaseDateTextView)
 
         // Load the album cover image using Glide
         val requestOptions = RequestOptions()
@@ -2117,8 +2121,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         trackCounterTextView.text = "Total Tracks: ${trackList.size}"
         releaseDateTextView.text = albumTitle // Set the release date text
 
-        val trackListRecyclerView = dialog.findViewById<RecyclerView>(R.id.trackListRecyclerView)
-        val closeButton = dialog.findViewById<Button>(R.id.closeButton)
+        val trackListRecyclerView = dialogView.findViewById<RecyclerView>(R.id.trackListRecyclerView)
+        val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
 
         val layoutManager = LinearLayoutManager(this)
         val adapter = TrackListAdapter(trackList)
@@ -2126,16 +2130,19 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         trackListRecyclerView.layoutManager = layoutManager
         trackListRecyclerView.adapter = adapter
 
-        closeButton.setOnClickListener {
-            dialog.dismiss()
-            adapter.stopPlayback()
-        }
-
-        dialog.setOnDismissListener {
-            adapter.stopPlayback()
-        }
-
-        dialog.show()
+        dialogBuilder
+            .setView(dialogView)
+            .setOnDismissListener {
+                adapter.stopPlayback()
+            }
+            .create()
+            .apply {
+                closeButton.setOnClickListener {
+                    dismiss()
+                    adapter.stopPlayback()
+                }
+                show()
+            }
     }
 
     private fun showFullscreenImage(drawable: Drawable) {

@@ -19,7 +19,7 @@
             android:id="@+id/homeButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_search"
             android:layout_marginEnd="30dp"
             app:tint="#FFFFFF" />
@@ -28,7 +28,7 @@
             android:id="@+id/releasesButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_releases"
             android:layout_marginEnd="30dp"
             app:tint="#FFFFFF" />
@@ -37,7 +37,7 @@
             android:id="@+id/settingsButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_settings"
             android:layout_marginEnd="30dp"
             app:tint="#818181" />
@@ -46,7 +46,7 @@
             android:id="@+id/infoButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_info"
             app:tint="#FFFFFF" />
 
@@ -57,39 +57,17 @@
         android:layout_width="match_parent"
         android:layout_height="20dp" />
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toggle Welcome-Message"
+        android:text="Configure"
+        android:textColor="@color/secondary_text_color"
         android:textSize="18sp"
         android:layout_gravity="center_vertical"/>
 
-    <Switch
-        style="@style/Preference.SwitchPreferenceCompat"
-        android:id="@+id/welcomeMessageToggleButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:checked="true"
-        android:layout_marginStart="16dp"
-        android:layout_gravity="center_vertical"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
-
     <Space
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
-
-    <Button
-        android:id="@+id/notificationSettingsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Notification Settings"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:textStyle="bold" />
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="60dp" />
+        android:layout_height="10dp" />
 
     <TextView
         android:id="@+id/tvRepeatInterval"
@@ -114,22 +92,104 @@
 
     <Space
         android:layout_width="match_parent"
-        android:layout_height="40dp" />
+        android:layout_height="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Visual Settings"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_gravity="center_vertical"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toggle Welcome-Message"
+        android:textSize="18sp"
+        android:layout_gravity="center_vertical"/>
+
+    <Switch
+        style="@style/Preference.SwitchPreferenceCompat"
+        android:id="@+id/welcomeMessageToggleButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:checked="true"
+        android:layout_marginStart="16dp"
+        android:layout_gravity="center_vertical"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Annoyance"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_gravity="center_vertical"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
 
     <Button
-        android:id="@+id/exportButton"
+        android:id="@+id/notificationSettingsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Export Database"
+        android:text="Notification Settings"
         style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
         android:textStyle="bold" />
-    <Button
-        android:id="@+id/importButton"
+
+
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Import Database"
-        style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:textStyle="bold" />
+        android:text="Database"
+        android:textSize="18sp"
+        android:textColor="@color/secondary_text_color"
+        android:layout_gravity="center_vertical"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/exportButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Export Database"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/importButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Import Database"
+            style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 
 

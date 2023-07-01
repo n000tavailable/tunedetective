@@ -20,7 +20,7 @@
             android:id="@+id/homeButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_search"
             android:layout_marginEnd="30dp"
             app:tint="#FFFFFF" />
@@ -29,7 +29,7 @@
             android:id="@+id/releasesButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_releases"
             android:layout_marginEnd="30dp"
             app:tint="#FFFFFF" />
@@ -38,7 +38,7 @@
             android:id="@+id/settingsButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_settings"
             android:layout_marginEnd="30dp"
             app:tint="#FFFFFF" />
@@ -47,7 +47,7 @@
             android:id="@+id/infoButton"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="#121212"
+            android:background="#00121212"
             android:src="@drawable/ic_info"
             app:tint="#818181" />
 
