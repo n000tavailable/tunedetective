@@ -55,7 +55,7 @@
         <activity
             android:name=".ReleasesActivity"
             android:launchMode="singleTop"
-            android:label="ReleasesActivity" />
+            android:label="Releases" />
 
 
 

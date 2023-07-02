@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:statusBarColor">#00121212</item>
         <item name="android:fontFamily">@font/dmsansregular</item>
 
