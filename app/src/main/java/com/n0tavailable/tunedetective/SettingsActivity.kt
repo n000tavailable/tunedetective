@@ -118,15 +118,6 @@ class SettingsActivity : AppCompatActivity() {
             openNotificationSettings()
         }
 
-
-        val welcomeMessageToggleButton = findViewById<Switch>(R.id.welcomeMessageToggleButton)
-
-        welcomeMessageToggleButton.isChecked =
-            sharedPreferences.getBoolean("welcomeMessageVisible", true)
-        welcomeMessageToggleButton.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("welcomeMessageVisible", isChecked).apply()
-        }
-
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
         bottomNavigation.setOnNavigationItemSelectedListener { item ->

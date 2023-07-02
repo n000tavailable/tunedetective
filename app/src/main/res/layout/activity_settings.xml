@@ -63,39 +63,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Visual Settings"
-                android:textSize="18sp"
-                android:textColor="@color/secondary_text_color"
-                android:layout_gravity="center_vertical"/>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Toggle Welcome-Message"
-                android:textSize="18sp"
-                android:layout_gravity="center_vertical"/>
-
-            <Switch
-                style="@style/Preference.SwitchPreferenceCompat"
-                android:id="@+id/welcomeMessageToggleButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:checked="true"
-                android:layout_marginStart="16dp"
-                android:layout_gravity="center_vertical"
-                tools:ignore="UseSwitchCompatOrMaterialXml" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="20dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Annoyance"
                 android:textSize="18sp"
                 android:textColor="@color/secondary_text_color"

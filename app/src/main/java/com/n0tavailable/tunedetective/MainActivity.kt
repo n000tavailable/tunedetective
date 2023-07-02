@@ -101,9 +101,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressDialog: AlertDialog
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var welcomeMessageTextView: TextView
     private lateinit var dialog: Dialog
-    private var welcomeMessageVisible = true
     private var mediaPlayer: MediaPlayer? = null
     private var artistName: String? = null
     private var selectedArtist: String? = null
@@ -150,30 +148,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
-
-        // Retrieve the toggle state from SharedPreferences
-        welcomeMessageVisible = sharedPreferences.getBoolean("welcomeMessageVisible", true)
-
-        updateWelcomeMessageVisibility()
-
-        updateWelcomeMessageWithTime()
-
-    }
-
-    private fun updateWelcomeMessageWithTime() {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val welcomeMessageWithTime = when (currentHour) {
-            in 0..4 -> "It's late at night."
-            in 5..8 -> "Enjoy the early morning!"
-            in 9..11 -> "Have a productive day!"
-            in 12..14 -> "It's lunchtime!"
-            in 15..17 -> "Keep up the good work!"
-            in 18..20 -> "Relax in the evening."
-            else -> "Have a pleasant night!"
-        }
-
-        welcomeMessageTextView.text = welcomeMessageWithTime
     }
 
     private fun resetLayout() {
@@ -230,9 +204,6 @@ class MainActivity : AppCompatActivity() {
         showFeedbackDialog()
 
         val discographyButton = findViewById<Button>(R.id.discographyButton)
-
-        // Initialize the welcomeMessageTextView
-        welcomeMessageTextView = findViewById(R.id.welcomeMessageTextView)
 
         // Initialize the SharedPreferences instance
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -661,11 +632,6 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
     }
-
-    private fun updateWelcomeMessageVisibility() {
-        welcomeMessageTextView.visibility = if (welcomeMessageVisible) View.VISIBLE else View.GONE
-    }
-
     private fun searchArtistById(artistId: String) {
         val apiKey = APIKeys.DEEZER_API_KEY
         val client = OkHttpClient()
