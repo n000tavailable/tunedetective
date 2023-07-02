@@ -13,17 +13,10 @@ import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class AboutActivity : AppCompatActivity() {
-
-
-    override fun onBackPressed() {
-        val intent = Intent(this@AboutActivity, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        startActivity(intent)
-        finish()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,38 +45,43 @@ class AboutActivity : AppCompatActivity() {
         }
 
 
-        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
-        val homeButton = findViewById<ImageButton>(R.id.homeButton)
-        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
-        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
-        homeButton.setOnClickListener {
-            val intent = Intent(this@AboutActivity, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        aboutButton.setOnClickListener {
-            // Check if the current activity is already AboutActivity
-            if (!isTaskRoot) {
-                // If not, navigate back to AboutActivity instead of recreating it
-                onBackPressed()
+        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    // Handle home button click
+                    val intent = Intent(this@AboutActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_releases -> {
+                    val intent = Intent(this@AboutActivity, ReleasesActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_settings -> {
+                    // Handle settings button click
+                    val intent = Intent(this@AboutActivity, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_info -> {
+                    // Handle info button click
+                    val intent = Intent(this@AboutActivity, AboutActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    true // Return true to indicate that the event is handled
+                }
+                else -> false // Return false for unhandled menu items
             }
         }
 
-        releasesButton.setOnClickListener {
-            val intent = Intent(this@AboutActivity, ReleasesActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        settingsButton.setOnClickListener {
-            val intent = Intent(this@AboutActivity, SettingsActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
+        bottomNavigation.selectedItemId = R.id.menu_info
     }
 }

@@ -1,130 +1,97 @@
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/swipeRefreshLayout"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
 
-    <ScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:layout_height="match_parent">
 
-    <LinearLayout
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp" />
+
+                <LinearLayout
+                    android:id="@+id/releaseContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/fetchingTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="18sp"
+                        android:visibility="gone" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="16dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/textArtistIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:textColor="#FFF"
+                        android:textSize="16sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/nothingHereTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:text="Nothing here, yet."
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
+                        android:textColor="#FFFFFF"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/frognothinghere"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/frog"
+                        android:visibility="gone" />
+
+                    <!-- Release items will be dynamically added here -->
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:layout_gravity="bottom"
+        app:menu="@menu/bottom_nav_menu" />
 
-        <LinearLayout
-            android:id="@+id/navigationBarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-
-            <ImageButton
-                android:id="@+id/homeButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:background="#00121212"
-                android:src="@drawable/ic_search"
-                android:layout_marginEnd="30dp"
-                app:tint="#FFFFFF" />
-
-            <ImageButton
-                android:id="@+id/releasesButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:background="#00121212"
-                android:src="@drawable/ic_releases"
-                android:layout_marginEnd="30dp"
-                app:tint="#818181" />
-
-            <ImageButton
-                android:id="@+id/settingsButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:background="#00121212"
-                android:src="@drawable/ic_settings"
-                android:layout_marginEnd="30dp"
-                app:tint="#FFFFFF" />
-
-            <ImageButton
-                android:id="@+id/infoButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:background="#00121212"
-                android:src="@drawable/ic_info"
-                app:tint="#FFFFFF" />
-
-        </LinearLayout>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="20dp" />
-
-        <LinearLayout
-            android:id="@+id/releaseContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/fetchingTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:visibility="gone" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_margin="16dp"
-                android:max="100"
-                android:progress="0" />
-
-            <TextView
-                android:id="@+id/textArtistIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/nothingHereTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.Material3.DisplaySmall"
-                android:textColor="#FFFFFF"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:text="Nothing here, yet."
-                android:visibility="gone"/>
-
-            <ImageView
-                android:id="@+id/frognothinghere"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="center"
-                android:src="@drawable/frog"
-                android:visibility="gone"/>
-
-            <!-- Release items will be dynamically added here -->
-
-        </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

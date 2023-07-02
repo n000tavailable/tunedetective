@@ -63,6 +63,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -109,15 +110,6 @@ class MainActivity : AppCompatActivity() {
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
     private var feedbackDialog: Dialog? = null
 
-
-
-
-    override fun onBackPressed() {
-        val intent = Intent(this@MainActivity, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        startActivity(intent)
-        finish()
-    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -416,39 +408,47 @@ class MainActivity : AppCompatActivity() {
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
 
-        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
-        val homeButton = findViewById<ImageButton>(R.id.homeButton)
-        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
-        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
-        homeButton.setOnClickListener {
-            // Check if the current activity is already MainActivity
-            if (!isTaskRoot) {
-                // If not, navigate back to MainActivity instead of recreating it
-                onBackPressed()
+        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    // Handle home button click
+                    val intent = Intent(this@MainActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    true
+                }
+                R.id.menu_releases -> {
+                    // Handle releases button click
+                    val intent = Intent(this@MainActivity, ReleasesActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true
+                }
+                R.id.menu_settings -> {
+                    // Handle settings button click
+                    val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true
+                }
+                R.id.menu_info -> {
+                    // Handle info button click
+                    val intent = Intent(this@MainActivity, AboutActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true
+                }
+                else -> false
             }
         }
 
-        aboutButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, AboutActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
+        bottomNavigation.selectedItemId = R.id.menu_home
 
-        releasesButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, ReleasesActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        settingsButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
 
 
 
@@ -1854,6 +1854,48 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         setContentView(R.layout.activity_releases)
 
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+
+        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    // Handle home button click
+                    val intent = Intent(this@ReleasesActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_releases -> {
+                    val intent = Intent(this@ReleasesActivity, ReleasesActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_settings -> {
+                    // Handle settings button click
+                    val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_info -> {
+                    // Handle info button click
+                    val intent = Intent(this@ReleasesActivity, AboutActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                else -> false // Return false for unhandled menu items
+            }
+        }
+
+        bottomNavigation.selectedItemId = R.id.menu_releases
+
+
+
         nothingHereTextView = findViewById(R.id.nothingHereTextView)
         frognothinghere = findViewById(R.id.frognothinghere)
         releaseContainer = findViewById(R.id.releaseContainer)
@@ -1864,41 +1906,6 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
         swipeRefreshLayout.setOnRefreshListener(this)
 
         fetchAndDisplayReleases()
-
-        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
-        val homeButton = findViewById<ImageButton>(R.id.homeButton)
-        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
-        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
-
-        homeButton.setOnClickListener {
-            val intent = Intent(this@ReleasesActivity, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        aboutButton.setOnClickListener {
-            val intent = Intent(this@ReleasesActivity, AboutActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        releasesButton.setOnClickListener {
-            // Check if the current activity is already ReleasesActivity
-            if (!isTaskRoot) {
-                // If not, navigate back to ReleasesActivity instead of recreating it
-                onBackPressed()
-            }
-        }
-
-        settingsButton.setOnClickListener {
-            val intent = Intent(this@ReleasesActivity, SettingsActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
 
     }
 

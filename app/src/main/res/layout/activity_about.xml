@@ -1,57 +1,13 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".MainActivity">
-
-
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/navigationBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <ImageButton
-            android:id="@+id/homeButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="#00121212"
-            android:src="@drawable/ic_search"
-            android:layout_marginEnd="30dp"
-            app:tint="#FFFFFF" />
-
-        <ImageButton
-            android:id="@+id/releasesButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="#00121212"
-            android:src="@drawable/ic_releases"
-            android:layout_marginEnd="30dp"
-            app:tint="#FFFFFF" />
-
-        <ImageButton
-            android:id="@+id/settingsButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="#00121212"
-            android:src="@drawable/ic_settings"
-            android:layout_marginEnd="30dp"
-            app:tint="#FFFFFF" />
-
-        <ImageButton
-            android:id="@+id/infoButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="#00121212"
-            android:src="@drawable/ic_info"
-            app:tint="#818181" />
-
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
 
     <Space
         android:layout_width="match_parent"
@@ -97,7 +53,7 @@
         android:textColor="#fff" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20dp" />
 
@@ -126,3 +82,12 @@
     </LinearLayout>
 
 </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

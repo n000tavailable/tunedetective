@@ -23,6 +23,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
@@ -81,13 +82,6 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        startActivity(intent)
-        finish()
-    }
-
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,39 +127,48 @@ class SettingsActivity : AppCompatActivity() {
             sharedPreferences.edit().putBoolean("welcomeMessageVisible", isChecked).apply()
         }
 
-        val aboutButton = findViewById<ImageButton>(R.id.infoButton)
-        val homeButton = findViewById<ImageButton>(R.id.homeButton)
-        val releasesButton = findViewById<ImageButton>(R.id.releasesButton)
-        val settingsButton = findViewById<ImageButton>(R.id.settingsButton)
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
-        homeButton.setOnClickListener {
-            val intent = Intent(this@SettingsActivity, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        aboutButton.setOnClickListener {
-            val intent = Intent(this@SettingsActivity, AboutActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        releasesButton.setOnClickListener {
-            val intent = Intent(this@SettingsActivity, ReleasesActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        settingsButton.setOnClickListener {
-            // Check if the current activity is already SettingsActivity
-            if (!isTaskRoot) {
-                // If not, navigate back to SettingsActivity instead of recreating it
-                onBackPressed()
+        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    // Handle home button click
+                    val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_releases -> {
+                    // Handle settings button click
+                    val intent = Intent(this@SettingsActivity, ReleasesActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_settings -> {
+                    // Handle settings button click
+                    val intent = Intent(this@SettingsActivity, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    true // Return true to indicate that the event is handled
+                }
+                R.id.menu_info -> {
+                    // Handle info button click
+                    val intent = Intent(this@SettingsActivity, AboutActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                    finish()
+                    true // Return true to indicate that the event is handled
+                }
+                else -> false // Return false for unhandled menu items
             }
         }
+
+        bottomNavigation.selectedItemId = R.id.menu_settings
+
+
     }
 
     private fun saveRepeatInterval(interval: Int) {
