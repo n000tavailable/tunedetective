@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Tunedetective" parent="Theme.Material3.DayNight">
         <item name="android:statusBarColor">#00121212</item>
-
+        <item name="android:navigationBarColor">#00FFFFFF</item>
         <item name="android:fontFamily">@font/dmsansregular</item>
 
     </style>
