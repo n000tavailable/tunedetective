@@ -38,14 +38,4 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tapping on a search history element will open it.\nHolding it will delete it."
-        android:textStyle="bold"
-        android:textColor="#FFF"
-        android:textAlignment="center"
-        android:padding="16dp"
-        tools:ignore="HardcodedText" />
-
 </LinearLayout>
