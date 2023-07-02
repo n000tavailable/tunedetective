@@ -7,8 +7,8 @@
 
     <ListView
         android:textColor="#FFF"
-        android:divider="#2C2C2C"
-        android:dividerHeight="1dp"
+        android:divider="#002C2C2C"
+        android:dividerHeight="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/historyListView" />

@@ -5,4 +5,7 @@
 
     <dimen name="album_item_margin">8dp</dimen>
 
+    <dimen name="swipe_threshold">100dp</dimen>
+
+
 </resources>

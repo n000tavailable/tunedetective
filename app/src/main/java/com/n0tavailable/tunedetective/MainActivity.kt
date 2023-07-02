@@ -86,10 +86,13 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import android.Manifest
 import android.os.Environment
+import android.view.MotionEvent
+import android.view.animation.AccelerateInterpolator
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.ConfigurationCompat
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.work.Configuration
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -97,6 +100,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.lang.Math.abs
 
 
 class MainActivity : AppCompatActivity() {
@@ -274,6 +278,44 @@ class MainActivity : AppCompatActivity() {
 
             val historyAdapter = ArtistImage(this, R.layout.dialog_search_history_item, searchHistory)
             historyListView.adapter = historyAdapter
+
+            var initialX = 0f
+            var initialY = 0f
+            val swipeThreshold = resources.getDimensionPixelSize(R.dimen.swipe_threshold)
+            val slideDuration = 200L
+            val historyListViewTouchListener = object : View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                    when (event?.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            initialX = event.x
+                            initialY = event.y
+                        }
+                        MotionEvent.ACTION_UP -> {
+                            val deltaX = event.x - initialX
+                            val deltaY = event.y - initialY
+                            if (abs(deltaX) > swipeThreshold && abs(deltaY) < swipeThreshold) {
+                                val position = historyListView.pointToPosition(initialX.toInt(), initialY.toInt())
+                                val selectedArtist = historyAdapter.getItem(position)
+                                if (selectedArtist != null) {
+                                    // Perform the slide animation
+                                    val itemView = historyListView.getChildAt(position - historyListView.firstVisiblePosition)
+                                    itemView?.animate()?.translationXBy(deltaX)?.setDuration(slideDuration)?.interpolator =
+                                        AccelerateInterpolator()
+                                    itemView?.animate()?.alpha(0f)?.setDuration(slideDuration)?.withEndAction {
+                                        searchHistoryDatabaseHelper.deleteSearchQuery(selectedArtist)
+                                        historyAdapter.remove(selectedArtist)
+                                        historyAdapter.notifyDataSetChanged()
+                                        itemView.translationX = 0f
+                                        itemView.alpha = 1f
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false
+                }
+            }
+            historyListView.setOnTouchListener(historyListViewTouchListener)
 
             val alertDialogBuilder = MaterialAlertDialogBuilder(this)
             alertDialogBuilder.setTitle("SEARCH HISTORY")
