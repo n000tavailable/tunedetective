@@ -1,11 +1,9 @@
 package com.n0tavailable.tunedetective
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -20,16 +18,17 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.Environment
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -40,16 +39,15 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
-import androidx.lifecycle.MutableLiveData
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -57,16 +55,15 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import androidx.work.Worker
-import androidx.work.WorkerParameters
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -79,28 +76,16 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.lang.Math.abs
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import android.Manifest
-import android.os.Environment
-import android.view.MotionEvent
-import android.view.animation.AccelerateInterpolator
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.ConfigurationCompat
-import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.work.Configuration
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.lang.Math.abs
 
 
 class MainActivity : AppCompatActivity() {
@@ -112,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var releaseDateTextView: TextView
     private lateinit var fullscreenDialog: Dialog
     private lateinit var albumCoverLayout: LinearLayout
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressDialog: AlertDialog
     private lateinit var searchHistoryDatabaseHelper: SearchHistoryDatabaseHelper
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var welcomeMessageTextView: TextView
@@ -123,6 +108,7 @@ class MainActivity : AppCompatActivity() {
     private var selectedArtist: String? = null
     private val artistMap = mutableMapOf<String, Pair<String, String>>()
     private var feedbackDialog: Dialog? = null
+
 
 
 
@@ -212,13 +198,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enforceDarkMode()
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Loading data...")
-        progressDialog.setCancelable(false)
+
+        val dialogViewProgress = layoutInflater.inflate(R.layout.dialog_progress, null)
+        val progressBar = dialogViewProgress.findViewById<ProgressBar>(R.id.progressBar)
+        val messageTextView = dialogViewProgress.findViewById<TextView>(R.id.messageTextView)
+
+        progressBar.isIndeterminate = true
+        messageTextView.text = "Loading data..."
+
+        val progressDialogBuilder = MaterialAlertDialogBuilder(this)
+            .setView(dialogViewProgress)
+            .setCancelable(false)
+
+        progressDialog = progressDialogBuilder.create()
 
         setContentView(R.layout.activity_main)
 
-// Check if the notification permission is granted
+        // Check if the notification permission is granted
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -1018,11 +1014,9 @@ class MainActivity : AppCompatActivity() {
                         releaseDateTextView.text = spannableString
 
                         displayTracks.setOnClickListener {
-                            Toast.makeText(
-                                applicationContext,
-                                "Loading tracks...",
-                                Toast.LENGTH_SHORT
-                            ).show()
+
+                            progressDialog.show()
+
                             getTrackList(tracklistUrl, albumCoverUrl, formattedReleaseDate)
                         }
                     }
@@ -1044,12 +1038,16 @@ class MainActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
+                progressDialog.dismiss()
             }
 
             override fun onResponse(call: Call, response: Response) {
                 val responseData = response.body?.string()
 
                 if (response.isSuccessful && responseData != null) {
+
+                    progressDialog.dismiss()
+
                     val jsonResponse = JSONObject(responseData)
                     val tracksArray = jsonResponse.getJSONArray("data")
                     val trackList = mutableListOf<Track>()
@@ -1065,6 +1063,7 @@ class MainActivity : AppCompatActivity() {
                         showTrackListDialog(trackList, albumCoverUrl, releaseDate)
                     }
                 } else {
+                    progressDialog.dismiss()
                     println("Error: ${response.code} ${response.message}")
                 }
             }
@@ -1507,7 +1506,9 @@ class ArtistDiscographyActivity : AppCompatActivity() {
     class AlbumAdapter(private val albums: List<Album>) :
         RecyclerView.Adapter<AlbumAdapter.ViewHolder>() {
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
+        class ViewHolder(itemView: View, private val layoutInflater: LayoutInflater) :
+            RecyclerView.ViewHolder(itemView), View.OnClickListener {
             val albumCoverImageView: ImageView = itemView.findViewById(R.id.albumCoverImageView)
             val albumTitleTextView: TextView = itemView.findViewById(R.id.albumTitleTextView)
             val albumReleaseDateTextView: TextView =
@@ -1515,7 +1516,22 @@ class ArtistDiscographyActivity : AppCompatActivity() {
 
             lateinit var album: Album
 
+            private var progressDialog: AlertDialog
+
+            private val dialogViewProgress = layoutInflater.inflate(R.layout.dialog_progress, null)
+            private val progressBar = dialogViewProgress.findViewById<ProgressBar>(R.id.progressBar)
+            private val messageTextView = dialogViewProgress.findViewById<TextView>(R.id.messageTextView)
+
             init {
+                progressBar.isIndeterminate = true
+                messageTextView.text = "Loading data..."
+
+                val progressDialogBuilder = MaterialAlertDialogBuilder(itemView.context)
+                    .setView(dialogViewProgress)
+                    .setCancelable(false)
+
+                progressDialog = progressDialogBuilder.create()
+
                 itemView.setOnClickListener(this)
             }
 
@@ -1535,11 +1551,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
             override fun onClick(view: View) {
                 val context = itemView.context
 
-                Toast.makeText(
-                    view.context.applicationContext,
-                    "Loading tracks...",
-                    Toast.LENGTH_SHORT
-                ).show()
+                progressDialog.show()
+
 
                 // Fetch the tracklist for the album with the given ID
                 fetchTrackList(album.albumId) { trackList ->
@@ -1569,12 +1582,15 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                     client.newCall(request).enqueue(object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
                             e.printStackTrace()
+                            progressDialog.dismiss()
                         }
 
                         override fun onResponse(call: Call, response: Response) {
                             val responseData = response.body?.string()
 
                             if (response.isSuccessful && responseData != null) {
+                                progressDialog.dismiss()
+
                                 val jsonResponse = JSONObject(responseData)
                                 val tracksArray = jsonResponse.getJSONArray("data")
 
@@ -1596,6 +1612,8 @@ class ArtistDiscographyActivity : AppCompatActivity() {
                                 }
                             } else {
                                 println("Error: ${response.code} ${response.message}")
+                                progressDialog.dismiss()
+
                             }
                         }
                     })
@@ -1671,9 +1689,10 @@ class ArtistDiscographyActivity : AppCompatActivity() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_album, parent, false)
-            return ViewHolder(view)
+            val context = parent.context
+            val layoutInflater = LayoutInflater.from(context)
+            val view = layoutInflater.inflate(R.layout.item_album, parent, false)
+            return ViewHolder(view, layoutInflater)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -1810,10 +1829,29 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var progressBar: ProgressBar
     private lateinit var fetchingTextView: TextView
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var progressDialog: AlertDialog
+
+
 
     @SuppressLint("ServiceCast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val dialogViewProgress = layoutInflater.inflate(R.layout.dialog_progress, null)
+        val progressBar2 = dialogViewProgress.findViewById<ProgressBar>(R.id.progressBar)
+        val messageTextView = dialogViewProgress.findViewById<TextView>(R.id.messageTextView)
+
+        progressBar2.isIndeterminate = true
+        messageTextView.text = "Loading data..."
+
+        val progressDialogBuilder = MaterialAlertDialogBuilder(this)
+            .setView(dialogViewProgress)
+            .setCancelable(false)
+
+        progressDialog = progressDialogBuilder.create()
+
+
+
         setContentView(R.layout.activity_releases)
 
         nothingHereTextView = findViewById(R.id.nothingHereTextView)
@@ -2104,7 +2142,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
         // Add a click listener to the album cover image
         releaseCoverImageView.setOnClickListener {
-            Toast.makeText(applicationContext, "Loading tracks...", Toast.LENGTH_SHORT).show()
+            progressDialog.show()
             openTracklist(album) // Pass the album object to the function to open the tracklist
         }
 
@@ -2164,12 +2202,15 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     e.printStackTrace()
+                    progressDialog.dismiss()
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     val responseData = response.body?.string()
 
                     if (response.isSuccessful && responseData != null) {
+                        progressDialog.dismiss()
+
                         val jsonResponse = JSONObject(responseData)
                         val tracksArray = jsonResponse.getJSONArray("data")
 
@@ -2191,6 +2232,8 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
                         }
                     } else {
                         println("Error: ${response.code} ${response.message}")
+                        progressDialog.dismiss()
+
                     }
                 }
             })
