@@ -18,6 +18,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class AboutActivity : AppCompatActivity() {
 
+    override fun onBackPressed() {
+        val intent = Intent(this@AboutActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)

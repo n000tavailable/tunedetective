@@ -34,6 +34,13 @@ class SettingsActivity : AppCompatActivity() {
     private val EXPORT_REQUEST_CODE = 1
     private val IMPORT_REQUEST_CODE = 2
 
+    override fun onBackPressed() {
+        val intent = Intent(this@SettingsActivity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish()
+    }
+
 
 
     companion object {
