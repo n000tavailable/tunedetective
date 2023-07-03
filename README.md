@@ -3,10 +3,6 @@
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8e716845-909e-43e2-8b95-74b6c281c976" width="400">
 </p>
 
-# I need your help!
-https://github.com/n000tavailable/tunedetective/issues/5
-TL;DR: Share your ideas to improve the app (and maintain privacy.)
-
 # What is TuneDetective
 
 
@@ -41,12 +37,14 @@ https://matrix.to/#/#tunedetective:matrix.org
 
 # Screenshots
 
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/761f4341-23f9-455b-8604-932473feb730" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/9b4c9e3a-d3e0-40c1-bc38-8e04e5ad5955" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/04aad739-1146-4663-8489-c453e70355b1" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8a2eb54f-8c85-426a-8903-0acbec8be565" width="350">
-<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/17d4f9b4-0fdd-4528-9703-21ad689ebbb0" width="350">
-
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/28af33ab-18f9-419b-ab39-5522388fbdea" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/18375557-db31-4bfb-90e3-a6888c6a6879" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/1d97ce12-b6ab-4f3a-9349-bf940bc877a8" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/3aa79646-5bcb-43d1-b901-980f21ee7769" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/f8891ff9-2d06-42a7-98ad-ec8b39caa61f" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8634b42b-3312-4049-9bb2-cf3f5188c31d" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/3e87c7f2-970e-408b-a2e8-16dddfbb9c06" width="350">
+<img src="https://github.com/n000tavailable/tunedetective/assets/135447708/91508913-99cf-4da5-bec6-0ca4a8c5636b" width="350">
 
 # How to use?
 **Discover the Latest Release of Your Favorite Artist**
