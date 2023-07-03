@@ -418,9 +418,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        bottomNavigation.selectedItemId = R.id.menu_home
-
-
 
 
         searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
