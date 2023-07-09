@@ -1,3 +1,7 @@
+#### Support be via a donation:
+#### https://www.paypal.com/paypalme/worstposting
+---
+
 # tunedetective!
 <p align="center">   
 <img src="https://github.com/n000tavailable/tunedetective/assets/135447708/8e716845-909e-43e2-8b95-74b6c281c976" width="400">
