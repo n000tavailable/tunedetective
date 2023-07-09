@@ -71,7 +71,7 @@ class FetchReleasesWorker(context: Context, workerParams: WorkerParameters) : Wo
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val releaseDateTime = dateFormat.parse(releaseDate)
         val currentTime = System.currentTimeMillis()
-        val threeDaysInMillis = 1 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        val threeDaysInMillis = 3 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
 
         return releaseDateTime != null && currentTime - releaseDateTime.time <= threeDaysInMillis
     }
