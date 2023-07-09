@@ -40,7 +40,7 @@ class FetchReleasesWorker(context: Context, workerParams: WorkerParameters) : Wo
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private val mainHandler = Handler(Looper.getMainLooper())
     private val addedAlbumIds = HashSet<String>() // Store unique artistId_albumId combinations
-    private val delayBetweenArtists = 1000L
+    private val delayBetweenArtists = 0L
     private val requestSemaphore = Semaphore(2)
     private val client = OkHttpClient()
     private val fetchedArtistIds = HashSet<String>()

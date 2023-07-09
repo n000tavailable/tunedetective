@@ -1786,7 +1786,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
     private lateinit var releaseContainer: LinearLayout
     private val addedAlbumIds = HashSet<String>()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-    private val delayBetweenArtists = 1000L
+    private val delayBetweenArtists = 0L
     private lateinit var nothingHereTextView: TextView
     private lateinit var frognothinghere: ImageView
     private lateinit var progressBar: ProgressBar
