@@ -1,4 +1,4 @@
-#### Support be via a donation:
+#### Support me via a donation:
 #### https://www.paypal.com/paypalme/worstposting
 ---
 
