@@ -228,7 +228,7 @@ class MainActivity : AppCompatActivity() {
             hideKeyboard()
 
 
-            val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(20)
+            val searchHistory = searchHistoryDatabaseHelper.getLatestSearchQueries(30)
             val historyListView = dialogView.findViewById<ListView>(R.id.historyListView)
             val maxHeight = resources.getDimensionPixelSize(R.dimen.max_listview_height)
             historyListView.layoutParams.height = maxHeight
@@ -515,7 +515,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchArtistsFromDatabase(): List<String> {
         val dbHelper = SearchHistoryDatabaseHelper(applicationContext)
-        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
+        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 30)
         val artistIds = latestSearchQueries.map { query ->
             query.substringAfter(",").trim()
         }.distinct() // Use the distinct() function to get only unique artist IDs
@@ -1958,7 +1958,7 @@ class ReleasesActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListen
 
     private fun fetchArtistsFromDatabase(): List<String> {
         val dbHelper = SearchHistoryDatabaseHelper(applicationContext)
-        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
+        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 30)
         val artistIds = latestSearchQueries.map { query ->
             query.substringAfter(",").trim()
         }.distinct() // Use the distinct() function to get only unique artist IDs

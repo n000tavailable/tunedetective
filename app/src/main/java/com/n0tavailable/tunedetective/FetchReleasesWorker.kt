@@ -270,7 +270,7 @@ class FetchReleasesWorker(context: Context, workerParams: WorkerParameters) : Wo
 
     private fun fetchArtistsFromDatabase(): List<String> {
         val dbHelper = SearchHistoryDatabaseHelper(applicationContext)
-        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 10)
+        val latestSearchQueries = dbHelper.getLatestSearchQueries(limit = 30)
         val artistIds = mutableSetOf<String>() // Use a mutable set to store unique artist IDs
 
         for (query in latestSearchQueries) {
