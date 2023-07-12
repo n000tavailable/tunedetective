@@ -9,8 +9,8 @@
         android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_above="@+id/bottomNavigation">
+        android:layout_above="@+id/bottomNavigation"
+        android:orientation="vertical">
 
         <Space
             android:layout_width="match_parent"
@@ -22,26 +22,34 @@
             android:gravity="center_vertical"
             android:padding="16dp">
 
-            <androidx.appcompat.widget.SearchView
-                style="@style/Widget.Material3.SearchView"
-                android:id="@+id/searchBar"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/searchLayout"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:iconifiedByDefault="false"
-                android:queryHint="Enter artist name"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#78909C" />
+                android:hint="Enter artist name"
+                app:boxCornerRadiusBottomEnd="20dp"
+                app:boxCornerRadiusBottomStart="20dp"
+                app:boxCornerRadiusTopEnd="20dp"
+                app:boxCornerRadiusTopStart="20dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:endIconDrawable="@drawable/round_history_24"
+                app:endIconMode="custom">
 
-            <ImageButton
-                android:id="@+id/searchHistoryButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:tint="#c4c6ce"
-                android:background="#00121212"
-                android:src="@drawable/round_history_24"
-                android:contentDescription="Search History"
-                android:scaleType="fitCenter" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColorHint="#78909C" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -91,16 +99,16 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:gravity="center">
+                android:gravity="center"
+                android:padding="10dp">
 
                 <Button
                     android:id="@+id/discographyButton"
                     style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="  Discography  "
                     android:drawableLeft="@drawable/round_album_24"
+                    android:text="  Discography  "
                     android:textStyle="bold" />
 
                 <Space
@@ -112,8 +120,8 @@
                     style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="   Tracks"
                     android:drawableEnd="@drawable/round_navigate_next_24"
+                    android:text="   Tracks"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

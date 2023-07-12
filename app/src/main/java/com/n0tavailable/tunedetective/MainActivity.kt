@@ -29,6 +29,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -65,6 +66,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -92,7 +95,8 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
     private lateinit var displayTracks: Button
     private lateinit var discographyButton: Button
-    private lateinit var searchBar: SearchView
+    private lateinit var searchBar: TextInputEditText
+    private lateinit var searchLayout: TextInputLayout
     private lateinit var trackTitleTextView: TextView
     private lateinit var albumCoverImageView: ImageView
     private lateinit var releaseDateTextView: TextView
@@ -220,11 +224,10 @@ class MainActivity : AppCompatActivity() {
 
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
-        val searchHistoryButton = findViewById<ImageButton>(R.id.searchHistoryButton)
 
+        val searchLayout = findViewById<TextInputLayout>(R.id.searchLayout)
 
-        searchHistoryButton.setOnClickListener {
-
+        searchLayout.setEndIconOnClickListener {
             hideKeyboard()
 
 
@@ -348,10 +351,11 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+
         searchHistoryDatabaseHelper = SearchHistoryDatabaseHelper(this)
 
         displayTracks = findViewById(R.id.displayTracks)
-        searchBar = findViewById(R.id.searchBar)
+        searchBar = findViewById(R.id.searchEditText)
         trackTitleTextView = findViewById(R.id.trackTitleTextView)
         albumCoverImageView = findViewById(R.id.albumCoverImageView)
         releaseDateTextView = findViewById(R.id.releaseDateTextView)
@@ -364,19 +368,6 @@ class MainActivity : AppCompatActivity() {
         fullscreenDialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
 
         albumCoverImageView.setBackgroundResource(R.drawable.round_album_cover)
-
-
-        val searchView = findViewById<SearchView>(R.id.searchBar)
-
-        // Set the query hint and text color
-        searchView.queryHint = "Enter artist name"
-
-        // Expand the SearchView
-        searchView.isIconified = false
-
-        // Prevent the keyboard from opening automatically
-        searchBar.clearFocus()
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
@@ -420,20 +411,19 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
-                val artistName = query.trim()
+        searchBar.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_NULL) {
+                val artistName = searchBar.text?.trim().toString()
                 if (artistName.isEmpty()) {
                     Toast.makeText(
                         this@MainActivity,
                         "Please enter an artist name",
                         Toast.LENGTH_SHORT
                     ).show()
-                    return false
+                    return@setOnEditorActionListener false
                 }
 
-                Toast.makeText(this@MainActivity, "Searching for data...", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this@MainActivity, "Searching for data...", Toast.LENGTH_SHORT).show()
                 hideKeyboard()
                 searchSimilarArtists(artistName)
 
@@ -441,14 +431,10 @@ class MainActivity : AppCompatActivity() {
                 searchBar.clearFocus()
 
                 // Return true only when the search is successful
-                return true
+                return@setOnEditorActionListener true
             }
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                // Handle any text changes if needed
-                return false
-            }
-        })
+            return@setOnEditorActionListener false
+        }
 
         albumCoverImageView.setOnClickListener {
             val drawable = albumCoverImageView.drawable
