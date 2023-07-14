@@ -29,12 +29,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="Enter artist name"
-                app:boxCornerRadiusBottomEnd="20dp"
-                app:boxCornerRadiusBottomStart="20dp"
-                app:boxCornerRadiusTopEnd="20dp"
-                app:boxCornerRadiusTopStart="20dp"
+                app:boxCornerRadiusBottomEnd="30dp"
+                app:boxCornerRadiusBottomStart="30dp"
+                app:boxCornerRadiusTopEnd="30dp"
+                app:boxCornerRadiusTopStart="30dp"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
+                app:startIconDrawable="@drawable/round_search_24"
                 app:endIconDrawable="@drawable/round_history_24"
                 app:endIconMode="custom">
 
